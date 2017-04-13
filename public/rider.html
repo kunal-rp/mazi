@@ -36,6 +36,10 @@
                         updateCollege();
                         updateParkingLots_request_data()
                     });
+                    
+                    socket.on('get_parkinglot_data',function(data){
+                        
+                    });
                 }
                 
                 function riderRequest(){
@@ -52,15 +56,15 @@
                        selectHTML += "</select>";
                     newDiv.innerHTML = selectHTML;
                     document.getElementById('college_area').appendChild(newDiv);
-                    console.log(college_data.length);
-                    socket.emit('get_college_parkinglots',{});
-                    console.log(college_data);
-                    
                 }
                 
                 function updateParkingLots_request_data(){
                     current_college_id = document.getElementById('select_college').value;
                     socket.emit('get_parkinglot_data', {college_id: current_college_id})
+                }
+                
+                function updateParkingLot_display_data(){
+                    
                 }
                 
                 function onStart(){
@@ -69,8 +73,5 @@
                 }
                 
             </script>
-        </body>
-    
-        
-        
+        </body>  
     </html>
