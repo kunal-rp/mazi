@@ -7,7 +7,7 @@
         </head>
         <body>
             <div id="area">
-                    <div id="school_area"></div>
+                    <div id="college_area"></div>
                     <div id="parkinglot_area"></div>
                 <div id="getRide">
                     <button onclick="riderRequest()">Get Ride</button>
@@ -16,11 +16,10 @@
                 </div>
             </div>
             <script>
-                var school_data;
+                var college_data;
                 var data;
                 var socket;
-                
-                var current_school;
+                var current_college;
                 window.onload = onStart();
                 
                 function connect(){
@@ -31,8 +30,8 @@
                     });
                     
                     socket.on('data', function(data){
-                        school_data = data;
-                        updateSchool();
+                        college_data = data;
+                        updateCollege();
                         updateParkingLots()
                     });
                 }
@@ -41,32 +40,30 @@
                     document.getElementById("output").innerHTML = "RR";
                 }
                 
-                function updateSchool(){
+                function updateCollege(){
                     var newDiv = document.createElement('div');
                         var selectHTML ="";
-                        selectHTML = "<select id=\"select_school\" onchange=\"updateParkingLots()\">";
-                        for(i = 0; i < school_data.length; i++){
-                           selectHTML += "<option value ='"+school_data[i]["college_name"]+"'>"+school_data[i]["college_name"]+" </option>";
+                        selectHTML = "<select id=\"select_college\" onchange=\"updateParkingLots()\">";
+                        for(i = 0; i < college_data.length; i++){
+                           selectHTML += "<option value ='"+college_data[i]["college_name"]+"'>"+college_data[i]["college_name"]+" </option>";
                         } 
                        selectHTML += "</select>";
                     newDiv.innerHTML = selectHTML;
-                    document.getElementById('school_area').appendChild(newDiv);
-                    
-                    
-                    current_school = document.getElementById('select_school').value;
-                    console.log(school_data.length);
-                    socket.emit('get_school_parkinglots',{});
+                    document.getElementById('college_area').appendChild(newDiv);
+                    console.log(college_data.length);
+                    socket.emit('get_college_parkinglots',{});
                     
                 }
                 
                 function updateParkingLots(){
+                    current_college = document.getElementById('select_college').value;
                     console.log("GOOOO")
                     document.getElementById('parkinglot_area').innerHTML = "";
                     var newDiv = document.createElement('div');
                         var selectHTML ="";
                         selectHTML = "<select id=\"select_parkinglot\">";
-                        for(i = 0; i < school_data.length; i++){
-                           selectHTML += "<option value ='"+school_data[i]["college_name"]+"'>"+school_data[i]["college_name"]+" </option>";
+                        for(i = 0; i < college_data.length; i++){
+                           selectHTML += "<option value ='"+college_data[i]["college_name"]+"'>"+college_data[i]["college_name"]+" </option>";
                         } 
                        selectHTML += "</select>";
                     newDiv.innerHTML = selectHTML;
