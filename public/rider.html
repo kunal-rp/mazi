@@ -1,0 +1,84 @@
+<DOCTYPE! html>
+    <html>
+    
+        <head>
+            <script src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+            <script src="http://maps.google.com/maps/api/js?key=AIzaSyAEnQYp7Jn1ApsAd7FTZcwL-VeVS9Kwm78"></script>
+        </head>
+        <body>
+            <div id="area">
+                    <div id="school_area"></div>
+                    <div id="parkinglot_area"></div>
+                <div id="getRide">
+                    <button onclick="riderRequest()">Get Ride</button>
+                    <input type="text" id="input_parking_lot"/>
+                    <div id="output"></div>
+                </div>
+            </div>
+            <script>
+                var school_data;
+                var data;
+                var socket;
+                
+                var current_school;
+                window.onload = onStart();
+                
+                function connect(){
+                    socket= io.connect("http://localhost:3000");
+                    
+                    socket.on('rider_request', function(data){
+                        console.log(data);
+                    });
+                    
+                    socket.on('data', function(data){
+                        school_data = data;
+                        updateSchool();
+                        updateParkingLots()
+                    });
+                }
+                
+                function riderRequest(){
+                    document.getElementById("output").innerHTML = "RR";
+                }
+                
+                function updateSchool(){
+                    var newDiv = document.createElement('div');
+                        var selectHTML ="";
+                        selectHTML = "<select id=\"select_school\" onchange=\"updateParkingLots()\">";
+                        for(i = 0; i < school_data.length; i++){
+                           selectHTML += "<option value ='"+school_data[i]["college_name"]+"'>"+school_data[i]["college_name"]+" </option>";
+                        } 
+                       selectHTML += "</select>";
+                    newDiv.innerHTML = selectHTML;
+                    document.getElementById('school_area').appendChild(newDiv);
+                    
+                    
+                    current_school = document.getElementById('select_school').value;
+                    console.log(school_data.length);
+                    socket.emit('get_school_parkinglots',{});
+                    
+                }
+                
+                function updateParkingLots(){
+                    console.log("GOOOO")
+                    document.getElementById('parkinglot_area').innerHTML = "";
+                    var newDiv = document.createElement('div');
+                        var selectHTML ="";
+                        selectHTML = "<select id=\"select_parkinglot\">";
+                        for(i = 0; i < school_data.length; i++){
+                           selectHTML += "<option value ='"+school_data[i]["college_name"]+"'>"+school_data[i]["college_name"]+" </option>";
+                        } 
+                       selectHTML += "</select>";
+                    newDiv.innerHTML = selectHTML;
+                    document.getElementById('parkinglot_area').appendChild(newDiv);
+                }
+                
+                function onStart(){
+                    connect();
+                    
+                }
+                
+            </script>
+        </body>
+    
+    </html>
