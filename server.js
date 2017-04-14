@@ -37,7 +37,23 @@ function newConnection(socket){
         else{
             socket.emit('data', results);
         }
-    })
+    });
     
+    
+    socket.on('get_parkinglot_data',function(data){
+        var college_id = data.college_id;
+        var query = "Select * from "+college_id+"_parkingLots";
+        connection.query(query, function(err,results){
+            if(err){
+                console.log('Error: '+err);
+            }
+            else{
+                socket.emit('get_parkinglot_data',results);
+            }
+        });
+    });
+    
+}
+function getCollegeData(college_data){
     
 }
