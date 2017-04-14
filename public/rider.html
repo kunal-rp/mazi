@@ -74,7 +74,7 @@
                     var selectHTML ="";
                     selectHTML = "<select id=\"select_parkinglot\">";
                     for(i = 0; i < parkinglot_data[current_college_id].length; i++){
-                       selectHTML += "<option >"+parkinglot_data[current_college_id][i]["parkingLot_name"]+" </option>";
+                       selectHTML += "<option >"+parkinglot_data[current_college_id][i]["parkinglot_name"]+" </option>";
                     } 
                     selectHTML += "</select>";
                     document.getElementById('parkinglot_area').innerHTML = selectHTML;
@@ -82,10 +82,8 @@
                 }
                 
                 function onStart(){
-                    connect();
-                    
+                    connect();   
                 }
-                
             </script>
         </body>  
     </html>
