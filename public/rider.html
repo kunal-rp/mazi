@@ -40,6 +40,7 @@
                     socket.on('get_parkinglot_data',function(data){
                         parkinglot_data[current_college_id] = data;
                         updateParkingLot_display_data();
+                        
                     });
                 }
                 
@@ -61,7 +62,9 @@
                 
                 function updateParkingLots_request_data(){
                     current_college_id = document.getElementById('select_college').value;
-                    socket.emit('get_parkinglot_data', {college_id: current_college_id})
+                    if(parkinglot_data[current_college_id] === undefined){
+                        socket.emit('get_parkinglot_data', {college_id: current_college_id});
+                    }
                 }
                 
                 function updateParkingLot_display_data(){
