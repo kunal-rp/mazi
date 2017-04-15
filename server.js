@@ -47,12 +47,13 @@ function newConnection(socket){
     
     socket.on('get_parkinglot_data',function(data){
         var college_id = data.college_id;
-        var query = "Select * from "+college_id+"_"+table_parkinglot_info;
+        var query = "Select * from "+college_id+table_parkinglot_info;
         connection.query(query, function(err,results){
             if(err){
                 console.log('Error: '+err);
             }
             else{
+                console.log(results);
                 socket.emit('get_parkinglot_data',results);
             }
         });
