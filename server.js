@@ -21,7 +21,7 @@ var connection = mysql.createConnection({
     database: 'parking',
 });
 var table_college_info = 'college_info';
-var table_parkinglot_info = 'parkinglot_info';
+var table_parkinglot_info = '_parkingLots';
 
 var rooms = [];
 var clients = {};
@@ -47,7 +47,7 @@ function newConnection(socket){
     
     socket.on('get_parkinglot_data',function(data){
         var college_id = data.college_id;
-        var query = "Select * from "+table_parkinglot_info+" Where college_id = "+college_id;
+        var query = "Select * from "+college_id+"_"+table_parkinglot_info;
         connection.query(query, function(err,results){
             if(err){
                 console.log('Error: '+err);
