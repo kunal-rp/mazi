@@ -53,7 +53,6 @@ function newConnection(socket){
                 console.log('Error: '+err);
             }
             else{
-                console.log(results);
                 socket.emit('get_parkinglot_data',results);
             }
         });

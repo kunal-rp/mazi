@@ -23,6 +23,7 @@
                 var data;
                 var socket;
                 var current_college_id;
+                var current_parking_id;
                 window.onload = onStart();
                 
                 function connect(){
@@ -39,7 +40,6 @@
                     socket.on('get_parkinglot_data',function(data){
                         parkinglot_data[current_college_id] = data;
                         updateParkingLot_display_data();
-                        
                     });
                 }
                 
@@ -70,6 +70,10 @@
                     if(parkinglot_data[current_college_id] === undefined){
                         socket.emit('get_parkinglot_data', {college_id: current_college_id});
                     }
+                    else{
+                        updateParkingLot_display_data();
+                    }
+                    
                 }
                 
                 function updateParkingLot_display_data(){
@@ -91,27 +95,35 @@
                 function map_initMap() {
                     for(i=0; i < college_data.length; i++){
                         if(college_data[i]['college_id'] == current_college_id){
-                            console.log(college_data[i]['college_coor_lat']);
                             var uluru = { 
                                 lat:college_data[i]['college_coor_lat'], 
                                 lng: college_data[i]['college_coor_lng']
                             };
                             var map = new google.maps.Map(document.getElementById('map'), {
-                                zoom: 18,
+                                zoom: 17,
                                 center: uluru
                             });
+                            for(i = 0; i < parkinglot_data[current_college_id].length; i++){
+                                var location = { 
+                                        lat:parkinglot_data[current_college_id][i]['coor_lat'], 
+                                        lng:parkinglot_data[current_college_id][i]['coor_lng']
+                                    }; 
+                                console.log(location);
+                                   var marker = new google.maps.Marker({
+                                        position:location,
+                                        map: map
+                                    });   
+                            }
                             break;
                         }
                     }
+                   
                 }
                 
                 function map_addMarker(){
-                    var marker = new google.maps.Marker({
-                        position: uluru,
-                        map: map
-                    });
+                    console.log(parkinglot_data);
+                                                      
                 }
-                
             </script>
             <script async defer
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxd3Map2ywV6pBHK1zDSj2CRYVObC6ZVM">
