@@ -43,6 +43,10 @@
                     });
                 }
                 
+                function onStart(){
+                    connect();
+                }
+                
                 function riderRequest(){
                     document.getElementById("output").innerHTML = "RR";
                 }
@@ -79,51 +83,49 @@
                 function updateParkingLot_display_data(){
                     var newDiv = document.createElement('div');
                     var selectHTML ="";
-                    selectHTML = "<select id=\"select_parkinglot\">";
-                    for(i = 0; i < parkinglot_data[current_college_id].length; i++){
-                       selectHTML += "<option >"+parkinglot_data[current_college_id][i]["parkinglot_name"]+" </option>";
+                    console.log(parkinglot_data);
+                    selectHTML = "<select id=\"select_parkinglot\" onchange=\" map_initMap()\">";
+                    var array = parkinglot_data[current_college_id]['ids'];
+                    console.log(array);
+                    for(i = 0; i < array.length; i++){
+                        var temp = array[i];
+                       selectHTML += "<option  value ='"+parkinglot_data[current_college_id][temp]["parkinglot_id"]+"'>"+parkinglot_data[current_college_id][temp]["parkinglot_name"]+" </option>";
                     } 
                     selectHTML += "</select>";
                     document.getElementById('parkinglot_area').innerHTML = selectHTML;
                     map_initMap();
                 }
                 
-                function onStart(){
-                    connect();
-                }
+            
+                
+                
                 
                 function map_initMap() {
-                    for(i=0; i < college_data.length; i++){
-                        if(college_data[i]['college_id'] == current_college_id){
-                            var uluru = { 
-                                lat:college_data[i]['college_coor_lat'], 
-                                lng: college_data[i]['college_coor_lng']
-                            };
-                            var map = new google.maps.Map(document.getElementById('map'), {
-                                zoom: 17,
-                                center: uluru
-                            });
-                            for(i = 0; i < parkinglot_data[current_college_id].length; i++){
-                                var location = { 
-                                        lat:parkinglot_data[current_college_id][i]['coor_lat'], 
-                                        lng:parkinglot_data[current_college_id][i]['coor_lng']
-                                    }; 
-                                console.log(location);
-                                   var marker = new google.maps.Marker({
-                                        position:location,
-                                        map: map
-                                    });   
-                            }
-                            break;
-                        }
+                    
+                    current_parking_id = document.getElementById("select_parkinglot").value;
+                    var center = { 
+                        lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
+                        lng: parkinglot_data[current_college_id][current_parking_id]['coor_lng']
+                    };
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 17,
+                        center: center
+                    });
+                    
+                    for(i = 0; i < parkinglot_data[current_college_id]['ids'].length; i++){
+                        var temp = parkinglot_data[current_college_id]['ids'][i];
+                        var location = { 
+                            lat:parkinglot_data[current_college_id][temp]['coor_lat'],                                 lng:parkinglot_data[current_college_id][temp]['coor_lng']
+                         }; 
+                        
+                       var marker = new google.maps.Marker({
+                        position:location,
+                        map: map
+                    });   
                     }
-                   
+                    
                 }
                 
-                function map_addMarker(){
-                    console.log(parkinglot_data);
-                                                      
-                }
             </script>
             <script async defer
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxd3Map2ywV6pBHK1zDSj2CRYVObC6ZVM">

@@ -21,7 +21,7 @@ var connection = mysql.createConnection({
     database: 'parking',
 });
 var table_college_info = 'college_info';
-var table_parkinglot_info = '_parkingLots';
+var table_parkinglot_info = 'parkinglot_info';
 
 var rooms = [];
 var clients = {};
@@ -47,18 +47,29 @@ function newConnection(socket){
     
     socket.on('get_parkinglot_data',function(data){
         var college_id = data.college_id;
-        var query = "Select * from "+college_id+table_parkinglot_info;
+        var query = "Select * from "+table_parkinglot_info+" where `college_id` = "+college_id;
         connection.query(query, function(err,results){
             if(err){
                 console.log('Error: '+err);
             }
             else{
-                socket.emit('get_parkinglot_data',results);
+                var final = {};
+                var array = [];
+                for(i=0;i < results.length; i++){
+                   array.push(results[i]['parkinglot_id']);
+                    final[results[i]['parkinglot_id']] = 
+                   {parkinglot_name : results[i]['parkinglot_name'],
+                    coor_lat : results[i]['coor_lat'],
+                    coor_lng : results[i]['coor_lng'],
+                   parkinglot_id : results[i]['parkinglot_id']};
+                    
+                }
+                final['ids'] = array;
+                
+                console.log(final.length);
+                socket.emit('get_parkinglot_data',final);
             }
         });
     });
-    
-}
-function getCollegeData(college_data){
     
 }
