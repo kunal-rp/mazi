@@ -10,37 +10,43 @@
             <div id="area">
                 <div id="college_area"></div>
                 <div id="parkinglot_area"></div>
-                <div id="getRide">
+                <div id="placeOrder">
                     <button onclick="riderRequest()">Get Ride</button>
-                    <input type="text" id="input_parking_lot"/>
+                    <button onclick="parkerRequest()">Get Parking Spot</button>
+                    Time:
+                    <input type="text" id = "time"/>
                     <div id="output"></div>
                 </div>
             </div>
             <div id="map"></div>
             <script>
-                var college_data = [];
+                var college_data = {};
                 var parkinglot_data = {};
                 var data;
                 var socket;
                 var current_college_id;
                 var current_parking_id;
+                var map;
                 window.onload = onStart();
                 
                 function connect(){
                     socket= io.connect("http://localhost:3000");
                     
+                    
                     socket.on('rider_request', function(data){
                     });
                     
-                    socket.on('data', function(data){
-                        updateCollege(data);
+                    socket.on('initial_data', function(data){
+                        updateCollege(data, map_initMap);
                         updateParkingLots_request_data();
                     });
                     
                     socket.on('get_parkinglot_data',function(data){
                         parkinglot_data[current_college_id] = data;
-                        updateParkingLot_display_data();
+                        updateParkingLot_display_data(map_initMap);
                     });
+                    
+                    
                 }
                 
                 function onStart(){
@@ -51,25 +57,22 @@
                     document.getElementById("output").innerHTML = "RR";
                 }
                 
-                function updateCollege(data){
+                function updateCollege(data, callback){
+
                     var newDiv = document.createElement('div');
                     var selectHTML ="";
-                    selectHTML = "<select id=\"select_college\" onchange=\"updateParkingLots_request_data()\">";
-                    for(i = 0; i < data.length; i++){
-                        college_data.push(data[i]);
-                        selectHTML += "<option value ='"+college_data[i]["college_id"]+"'>"+college_data[i]["college_name"]+" </option>";
-                        
-                    }
-                    
+                    selectHTML = "<select id=\"select_college\" onchange=\" updateParkingLots_request_data()\">";
+                    var array = data['ids'];
+                    for(i = 0; i < array.length; i++){
+                        var temp = array[i];
+                        college_data[temp] = data[temp];
+                       selectHTML += "<option  value ='"+temp+"'>"+college_data[temp]["college_name"]+" </option>";
+                    } 
                     selectHTML += "</select>";
-                    newDiv.innerHTML = selectHTML;
-                    document.getElementById('college_area').appendChild(newDiv);
-                    updateParkingLots_request_data();
-                    
+                    document.getElementById('college_area').innerHTML = selectHTML;
                 }
                 
                 function updateParkingLots_request_data(){
-
                     current_college_id = document.getElementById("select_college").value;
                     if(parkinglot_data[current_college_id] === undefined){
                         socket.emit('get_parkinglot_data', {college_id: current_college_id});
@@ -78,40 +81,69 @@
                         updateParkingLot_display_data();
                     }
                     
+                    
                 }
                 
                 function updateParkingLot_display_data(){
                     var newDiv = document.createElement('div');
                     var selectHTML ="";
-                    console.log(parkinglot_data);
-                    selectHTML = "<select id=\"select_parkinglot\" onchange=\" map_initMap()\">";
+                    selectHTML = "<select id=\"select_parkinglot\" onchange=\" update_center()\">";
                     var array = parkinglot_data[current_college_id]['ids'];
-                    console.log(array);
                     for(i = 0; i < array.length; i++){
                         var temp = array[i];
                        selectHTML += "<option  value ='"+parkinglot_data[current_college_id][temp]["parkinglot_id"]+"'>"+parkinglot_data[current_college_id][temp]["parkinglot_name"]+" </option>";
                     } 
                     selectHTML += "</select>";
                     document.getElementById('parkinglot_area').innerHTML = selectHTML;
-                    map_initMap();
+                    if(map == undefined){
+                        map_initMap();
+                    }
+                    map_add_markers();
+                    update_center();
                 }
-                
-            
-                
-                
-                
-                function map_initMap() {
+                 
+                function update_center(){
                     
                     current_parking_id = document.getElementById("select_parkinglot").value;
                     var center = { 
                         lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
                         lng: parkinglot_data[current_college_id][current_parking_id]['coor_lng']
                     };
-                    var map = new google.maps.Map(document.getElementById('map'), {
+                    map.panTo(center);
+                }
+                
+                function map_initMap() {
+                    current_parking_id= document.getElementById("select_parkinglot").value;
+                    
+                    var styledMapType = new google.maps.StyledMapType( [
+  {
+    "featureType": "poi.business",
+    "stylers": [
+      {
+        "visibility": "off"
+      }
+    ]
+  }
+],{name: 'Styled Map'});
+                    
+                    var center = { 
+                        lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
+                        lng: parkinglot_data[current_college_id][current_parking_id]['coor_lng']
+                    };
+                    map = new google.maps.Map(document.getElementById('map'), {
                         zoom: 17,
-                        center: center
+                        center: center,
+                        mapTypeControlOptions: {
+                            mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain','styled_map']
+                        }
                     });
                     
+                    map_add_markers();
+                    map.mapTypes.set('styled_map', styledMapType);
+                    map.setMapTypeId('styled_map');   
+                }
+                
+                function map_add_markers(){
                     for(i = 0; i < parkinglot_data[current_college_id]['ids'].length; i++){
                         var temp = parkinglot_data[current_college_id]['ids'][i];
                         var location = { 
@@ -123,7 +155,6 @@
                         map: map
                     });   
                     }
-                    
                 }
                 
             </script>

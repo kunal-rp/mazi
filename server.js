@@ -39,8 +39,21 @@ function newConnection(socket){
             console.log("query : " + query);
             console.log("error  :" + err);
         }
-        else{
-            socket.emit('data', results);
+        else{ 
+            var final = {};
+            var array = [];
+            for(i=0;i < results.length; i++){
+               array.push(results[i]['college_id']);
+                final[results[i]['college_id']] = 
+               {college_name : results[i]['college_name'],
+                college_coor_lat : results[i]['college_coor_lat'],
+                college_coor_lng : results[i]['college_coor_lng']};
+            }
+            final['ids'] = array;
+            
+            console.log(final);
+            socket.emit('initial_data',final);
+            
         }
     });
     
@@ -65,8 +78,8 @@ function newConnection(socket){
                     
                 }
                 final['ids'] = array;
-                
-                console.log(final.length);
+                console.log("Parking Data ---------------")
+                console.log(final);
                 socket.emit('get_parkinglot_data',final);
             }
         });
