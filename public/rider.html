@@ -27,6 +27,8 @@
                 var current_college_id;
                 var current_parking_id;
                 var map;
+                
+                
                 window.onload = onStart();
                 
                 function connect(){
@@ -46,6 +48,12 @@
                         updateParkingLot_display_data(map_initMap);
                     });
                     
+                    socket.on('event', function(data){
+                        console.log("event");
+                        console.log(data);
+                        document.getElementById('output').innerHTML = data.code;
+                    });
+                    
                     
                 }
                 
@@ -54,7 +62,31 @@
                 }
                 
                 function riderRequest(){
-                    document.getElementById("output").innerHTML = "RR";
+                    
+                     var user = {user_id: 1, user_name: 'krp.exeRider'};
+                    
+                    var time = new Date();
+                    socket.emit('register', {
+                       user : user,
+                        college_id : current_college_id,
+                        parkinglot_id : current_parking_id,
+                        time : 0,
+                        type : 'ride'
+                    });
+                }
+                
+                function parkerRequest(){
+                    
+                     var user = {user_id: 2, user_name: 'krp.exeParker'};
+                    
+                    var time = new Date();
+                    socket.emit('register', {
+                        user : user,
+                        college_id : current_college_id,
+                        parkinglot_id : current_parking_id,
+                        time : 0,
+                        type : 'park'
+                    });
                 }
                 
                 function updateCollege(data, callback){
@@ -116,15 +148,15 @@
                     current_parking_id= document.getElementById("select_parkinglot").value;
                     
                     var styledMapType = new google.maps.StyledMapType( [
-  {
-    "featureType": "poi.business",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  }
-],{name: 'Styled Map'});
+                          {
+                            "featureType": "poi.business",
+                            "stylers": [
+                              {
+                                "visibility": "off"
+                              }
+                            ]
+                          }
+                        ],{name: 'Styled Map'});
                     
                     var center = { 
                         lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
