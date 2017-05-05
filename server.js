@@ -52,7 +52,6 @@ app.get('/getCollegeData', function (req, res) {
 
 app.get('/getParkingData', function (req, res) {
     
-    var college_id = req.params.college_id;
         var query = "Select * from "+table_parkinglot_info;
         connection.query(query, function(err,results){
             if(err){
@@ -73,13 +72,8 @@ app.get('/getParkingData', function (req, res) {
                    {parkinglot_name : results[i]['parkinglot_name'],
                     coor_lat : results[i]['coor_lat'],
                     coor_lng : results[i]['coor_lng'],
-                   parkinglot_id : results[i]['parkinglot_id']};
-                    
-                    if(final[ci] == undefined){
-                        final[ci] = {};
-                        
-                    }
-                    final[ci][pi] = temp;
+                   college_id : results[i]['college_id']};
+                    final[pi] = temp;
                     console.log();
                     console.log(final);
                     console.log();
@@ -99,7 +93,13 @@ function newConnection(socket){
     console.log("New Client");
     console.log("ID : " + socket.id);
     
+    var initial_data = {};
     
+    getData(initial_data, function(){
+        console.log('initial_data');
+     console.log(initial_data);
+    socket.emit('data',initial_data);
+    });
     
     socket.on('register', function(data){
         
@@ -195,4 +195,62 @@ function newConnection(socket){
         
     });
     
+}
+
+function getData(initial_data, callback){
+    
+    var query = "Select * From "+ table_college_info;
+    connection.query( query , function(err,results) {
+        if(err){
+            console.log("query : " + query);
+            console.log("error  :" + err);
+        }
+        else{ 
+            var final = {};
+            var array = [];
+            for(i=0;i < results.length; i++){
+               array.push(results[i]['college_id']);
+                final[results[i]['college_id']] = 
+               {college_name : results[i]['college_name'],
+                college_coor_lat : results[i]['college_coor_lat'],
+                college_coor_lng : results[i]['college_coor_lng']};
+            }
+            final['ids'] = array;
+           initial_data['college_data'] = final;
+            console.log(initial_data);
+        }
+    });
+    
+    var query = "Select * from "+table_parkinglot_info;
+        connection.query(query, function(err,results){
+            if(err){
+                console.log("query : " + query);
+                console.log("error  :" + err);
+            }
+            else{
+                var final = {};
+                var array = [];
+                for(i=0;i < results.length; i++){
+                   array.push(results[i]['parkinglot_id']);
+                
+                    var ci = results[i]['college_id'];
+                    var pi = parseInt(results[i]['parkinglot_id']);
+                    
+                    var temp = {};
+                    temp = 
+                   {parkinglot_name : results[i]['parkinglot_name'],
+                    coor_lat : results[i]['coor_lat'],
+                    coor_lng : results[i]['coor_lng'],
+                   college_id : results[i]['college_id']};
+                    final[pi] = temp;
+                }
+                final['ids'] = array;
+                initial_data['parking_data'] = final;
+                 console.log(initial_data);
+            }
+        });
+    
+    
+    callback();
+    console.log(callback)
 }
