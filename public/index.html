@@ -1,37 +1,231 @@
+
 <DOCTYPE! html>
     <html>
     
         <head>
+            <link rel="stylesheet" type="text/css" href="style.css">
             <script src = "https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
-            <script src="http://maps.google.com/maps/api/js?key=AIzaSyAEnQYp7Jn1ApsAd7FTZcwL-VeVS9Kwm78"></script>
         </head>
         <body>
             <div id="area">
-                <div id="text"></div>
+                <div id = "userinfo"></div>
+                <div id="college_area"></div>
+                <div id="parkinglot_area"></div>
+                <div id="placeOrder">
+                    <button onclick="riderRequest()">Get Ride</button>
+                    <button onclick="parkerRequest()">Get Parking Spot</button>
+                    Time:
+                    <input type="text" id = "time"/>
+                    <div id="output"></div>
+                </div>
             </div>
+            <div id="map"></div>
             <script>
+                var college_data = {};
+                var parkinglot_data = {};
                 var data;
                 var socket;
-                window.onload = connect();
+                var current_college_id;
+                var current_parking_id;
+                var map;
+                
+                
+                window.onload = onStart();
                 
                 function connect(){
                     socket= io.connect("http://localhost:3000");
                     
-                    socket.on('data', function(data){
+                    
+                    socket.on('rider_request', function(data){
+                    });
+                    
+                    
+                    
+                    socket.on('event', function(data){
+                        console.log("event");
                         console.log(data);
-                        document.getElementById('text').innerHTML = "";
-                        document.getElementById('text').innerHTML += "<select>";
-                        for(i = 0; i < data.length; i++){
-
-                            
-                            document.getElementById('text').innerHTML += "<option value =\""+data[i]["college_name"]+"\">"+data[i]["college_name"]+" <option>";
-                            
-                        } 
-                        document.getElementById('text').innerHTML += "</select>";
-                    })
+                        if(data.code == 400){
+                            document.getElementById('output').innerHTML = data.message;
+                        }
+                        else{
+                             document.getElementById('output').innerHTML = data.code;
+                        }
+                       
+                    });
+                    
+                    socket.on('match', function(data){
+                        return res.redirect('/connection.html');
+                        
+                    });
+                    
+                    
                 }
+                
+                function onStart(){
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open("GET", "http://localhost:3000/getCollegeData", false);
+                    xhttp.setRequestHeader("Content-type", "application/json");
+                    xhttp.send();
+                    college_data = JSON.parse(xhttp.responseText);
+                    console.log(college_data);
+                    
+                    updateCollege(college_data);
+                    
+                    
+                }
+                
+                function getParkingData(){
+                    current_college_id = document.getElementById("select_college").value;
+                    var xhttp2 = new XMLHttpRequest();
+                    xhttp2.open("GET", "http://localhost:3000/getParkingData", false);
+                    xhttp2.setRequestHeader("Content-type", "application/json");
+                    xhttp2.send();
+                    parkinglot_data = JSON.parse(xhttp2.responseText);
+                    
+                    updateParkingLot_display_data();
+                }
+                
+                
+                function riderRequest(){
+                    
+                     var user = {user_id: 1, user_name: 'krp.exeRider'};
+                    
+                    var time = new Date();
+                    connect();
+                    socket.emit('register', {
+                       user : user,
+                        college_id : current_college_id,
+                        parkinglot_id : current_parking_id,
+                        time : 0,
+                        type : 'ride'
+                    });
+                    document.getElementById('userinfo').innerHTML = user.user_id;
+                }
+                
+                function parkerRequest(){
+                    
+                     var user = {user_id: 2, user_name: 'krp.exeParker'};
+                    
+                    var time = new Date();
+                    socket.emit('register', {
+                        user : user,
+                        college_id : current_college_id,
+                        parkinglot_id : current_parking_id,
+                        time : 0,
+                        type : 'park'
+                    });
+                    document.getElementById('userinfo').innerHTML = user.user_id;
+                }
+                
+                function updateCollege(data){
+
+                    var newDiv = document.createElement('div');
+                    var selectHTML ="";
+                    selectHTML = "<select id=\"select_college\" onchange=\" updateParkingLot_display_data()\">";
+                    var array = data['ids'];
+                    for(i = 0; i < array.length; i++){
+                        var temp = array[i];
+                        college_data[temp] = data[temp];
+                       selectHTML += "<option  value ='"+temp+"'>"+college_data[temp]["college_name"]+" </option>";
+                    } 
+                    selectHTML += "</select>";
+                    document.getElementById('college_area').innerHTML = selectHTML;
+                    updateParkingLot_display_data();
+                }
+                
+                function updateParkingLot_display_data(){
+                    console.log("parking");
+                    console.log(parkinglot_data);
+                    var newDiv = document.createElement('div');
+                    var selectHTML ="";
+                    selectHTML = "<select id=\"select_parkinglot\" onchange=\" update_center()\">";
+                    var array = parkinglot_data['ids'];
+                    for(i = 0; i < array.length; i++){
+                        var temp = array[i];
+                        if(parkinglot_data[current_college_id][temp] != undefined){
+                             selectHTML += "<option  value ='"+parkinglot_data[current_college_id][temp]["parkinglot_id"]+"'>"+parkinglot_data[current_college_id][temp]["parkinglot_name"]+" </option>";
+                        } 
+                    } 
+                    selectHTML += "</select>";
+                    document.getElementById('parkinglot_area').innerHTML = selectHTML;
+                    map_add_markers();
+                    update_center();
+                }
+                 
+                function update_center(){
+                    
+                    current_parking_id = document.getElementById("select_parkinglot").value;
+                    var center = { 
+                        lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
+                        lng: parkinglot_data[current_college_id][current_parking_id]['coor_lng']
+                    };
+                    map.panTo(center);
+                }
+                
+                function map_init() {
+                    current_parking_id= document.getElementById("select_parkinglot").value;
+                    
+                    var styledMapType = new google.maps.StyledMapType( [
+                          {
+                            "featureType": "poi.business",
+                            "stylers": [
+                              {
+                                "visibility": "off"
+                              }
+                            ]
+                          }
+                        ],{name: 'Styled Map'});
+                    
+                    var center = { 
+                        lat:parkinglot_data[current_college_id][current_parking_id]['coor_lat'], 
+                        lng: parkinglot_data[current_college_id][current_parking_id]['coor_lng']
+                    };
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 17,
+                        center: center,
+                        mapTypeControlOptions: {
+                            mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain','styled_map']
+                        }
+                    });
+                    
+                    map_add_markers();
+                    map.mapTypes.set('styled_map', styledMapType);
+                    map.setMapTypeId('styled_map');   
+                }
+                
+                function map_add_markers(){
+                    for(i = 0; i < parkinglot_data[current_college_id]['ids'].length; i++){
+                        var temp = parkinglot_data[current_college_id]['ids'][i];
+                        var location = { 
+                            lat:parkinglot_data[current_college_id][temp]['coor_lat'],                                 lng:parkinglot_data[current_college_id][temp]['coor_lng']
+                         }; 
+                        
+                       var marker = new google.maps.Marker({
+                            position:location,
+                            map: map
+                        });
+                        
+                        var cityCircle = new google.maps.Circle({
+                            strokeColor: '#06AED5',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#19647E',
+                            fillOpacity: 0.10,
+                            map: map,
+                            center: location,
+                            radius: 80 
+                          });
+                        
+                    }
+                }
+                
             </script>
-            
-        </body>
-    
+            <script async defer
+                src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAxd3Map2ywV6pBHK1zDSj2CRYVObC6ZVM&callback=map_init">
+            </script>
+        </body>  
     </html>
+    
+    //blue:#06AED5
+    //orange:#F25309
+    //gray:#5B5B5B
