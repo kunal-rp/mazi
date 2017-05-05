@@ -95,11 +95,59 @@ function newConnection(socket){
     
     var initial_data = {};
     
-    getData(initial_data, function(){
-        console.log('initial_data');
-     console.log(initial_data);
-    socket.emit('data',initial_data);
+    var query = "Select * From "+ table_college_info;
+    connection.query( query , function(err,results) {
+        if(err){
+            console.log("query : " + query);
+            console.log("error  :" + err);
+        }
+        else{ 
+            var final = {};
+            var array = [];
+            for(i=0;i < results.length; i++){
+               array.push(results[i]['college_id']);
+                final[results[i]['college_id']] = 
+               {college_name : results[i]['college_name'],
+                college_coor_lat : results[i]['college_coor_lat'],
+                college_coor_lng : results[i]['college_coor_lng']};
+            }
+            final['ids'] = array;
+           initial_data['college_data'] = final;
+            
+            var query2 = "Select * from "+table_parkinglot_info;
+            connection.query(query2, function(err2,results2){
+            if(err2){
+                console.log("query : " + query2);
+                console.log("error  :" + err2);
+            }
+            else{
+                var final2 = {};
+                var array2 = [];
+                for(i=0;i < results2.length; i++){
+                   array2.push(results2[i]['parkinglot_id']);
+                
+                    var ci = results2[i]['college_id'];
+                    var pi = parseInt(results2[i]['parkinglot_id']);
+                    
+                    var temp2 = {};
+                    temp2 = 
+                   {parkinglot_name : results2[i]['parkinglot_name'],
+                    coor_lat : results2[i]['coor_lat'],
+                    coor_lng : results2[i]['coor_lng'],
+                   college_id : results2[i]['college_id']};
+                    final2[pi] = temp2;
+                }
+                final2['ids'] = array2;
+                initial_data['parking_data'] = final2;
+                console.log('initial_data')    
+                console.log(initial_data);
+                socket.emit('data',initial_data);
+            }
+        });
+            
+        }
     });
+    
     
     socket.on('register', function(data){
         
@@ -197,60 +245,4 @@ function newConnection(socket){
     
 }
 
-function getData(initial_data, callback){
-    
-    var query = "Select * From "+ table_college_info;
-    connection.query( query , function(err,results) {
-        if(err){
-            console.log("query : " + query);
-            console.log("error  :" + err);
-        }
-        else{ 
-            var final = {};
-            var array = [];
-            for(i=0;i < results.length; i++){
-               array.push(results[i]['college_id']);
-                final[results[i]['college_id']] = 
-               {college_name : results[i]['college_name'],
-                college_coor_lat : results[i]['college_coor_lat'],
-                college_coor_lng : results[i]['college_coor_lng']};
-            }
-            final['ids'] = array;
-           initial_data['college_data'] = final;
-            console.log(initial_data);
-        }
-    });
-    
-    var query = "Select * from "+table_parkinglot_info;
-        connection.query(query, function(err,results){
-            if(err){
-                console.log("query : " + query);
-                console.log("error  :" + err);
-            }
-            else{
-                var final = {};
-                var array = [];
-                for(i=0;i < results.length; i++){
-                   array.push(results[i]['parkinglot_id']);
-                
-                    var ci = results[i]['college_id'];
-                    var pi = parseInt(results[i]['parkinglot_id']);
-                    
-                    var temp = {};
-                    temp = 
-                   {parkinglot_name : results[i]['parkinglot_name'],
-                    coor_lat : results[i]['coor_lat'],
-                    coor_lng : results[i]['coor_lng'],
-                   college_id : results[i]['college_id']};
-                    final[pi] = temp;
-                }
-                final['ids'] = array;
-                initial_data['parking_data'] = final;
-                 console.log(initial_data);
-            }
-        });
-    
-    
-    callback();
-    console.log(callback)
-}
+
