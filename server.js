@@ -139,8 +139,6 @@ function newConnection(socket){
                 }
                 final2['ids'] = array2;
                 initial_data['parking_data'] = final2;
-                console.log('initial_data')    
-                console.log(initial_data);
                 socket.emit('data',initial_data);
             }
         });

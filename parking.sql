@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 05, 2017 at 06:55 AM
+-- Generation Time: May 10, 2017 at 01:12 AM
 -- Server version: 10.1.19-MariaDB
 -- PHP Version: 7.0.13
 
@@ -68,8 +68,9 @@ CREATE TABLE `college_info` (
 --
 
 INSERT INTO `college_info` (`college_name`, `college_id`, `college_coor_lng`, `college_coor_lat`) VALUES
-('California Polytechnic State University , SLO', 100011, '-120.6627620000', '35.3051020000'),
-('California Polytechnic State University,Pomona', 100010, '-117.8216050000', '34.0565020000');
+('California Polytechnic State University Pomona', 100010, '-117.8216050000', '34.0565020000'),
+('California Polytechnic State University SLO', 100011, '-120.6627620000', '35.3051020000'),
+('Mt. San Antonio College', 100012, '-117.8447650000', '34.0477240000');
 
 -- --------------------------------------------------------
 
@@ -93,7 +94,24 @@ INSERT INTO `parkinglot_info` (`parkinglot_id`, `college_id`, `parkinglot_name`,
 (2001, 100010, 'Parking Lot J', 34.0574, -117.829),
 (2002, 100010, 'Parking Lot M', 34.0557, -117.83),
 (2003, 100011, 'H12', 35.3048, -120.664),
-(2004, 100011, 'Visitor Parking', 35.3054, -120.663);
+(2004, 100011, 'Visitor Parking', 35.3054, -120.663),
+(2005, 100010, 'Parking Lot L', 34.0554, -117.825),
+(2006, 100010, 'Parking Lot A', 34.0605, -117.825),
+(2007, 100010, 'Parking Lot F1-F4', 34.0617, -117.817),
+(2008, 100010, 'Building 106', 34.0604, -117.817),
+(2009, 100012, 'Parking Lot B', 34.0442, -117.847),
+(2010, 100012, 'Parking Lot D', 34.045, -117.845);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `table_version`
+--
+
+CREATE TABLE `table_version` (
+  `table_name` varchar(20) NOT NULL,
+  `version` varchar(8) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Indexes for dumped tables
@@ -123,6 +141,12 @@ ALTER TABLE `college_info`
 --
 ALTER TABLE `parkinglot_info`
   ADD PRIMARY KEY (`parkinglot_id`);
+
+--
+-- Indexes for table `table_version`
+--
+ALTER TABLE `table_version`
+  ADD PRIMARY KEY (`table_name`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
