@@ -1,4 +1,5 @@
 
+
 <DOCTYPE! html>
     <html>
     
@@ -72,7 +73,6 @@
                 }
                 
                 function updateCollege(){
-
                     var newDiv = document.createElement('div');
                     var selectHTML ="";
                     selectHTML = "<select id=\"select_college\" onchange=\" updateParkingLot_display_data()\">";
@@ -158,12 +158,10 @@
                                 lat:parkinglot_data[temp]['coor_lat'], 
                                lng:parkinglot_data[temp]['coor_lng']
                              }; 
-
                            var marker = new google.maps.Marker({
                                 position:location,
                                 map: map
                             });
-
                             var cityCircle = new google.maps.Circle({
                                 strokeColor: '#06AED5',
                                 strokeOpacity: 0.8,
@@ -218,6 +216,8 @@
         </body>  
     </html>
     
-    //blue:#06AED5
-    //orange:#F25309
+    //blue:#3aa1dd
+    //orange:#ff841f
     //gray:#5B5B5B
+Contact GitHub API Training Shop Blog About
+© 2017 GitHub, Inc. Terms Privacy Security Status Help

@@ -89,13 +89,88 @@ var wss = new WebSocket.Server({ server });
 
 wss.on('connection', function connection(ws) {
   
-    console.log("New Websocket");
+    console.log();
+    console.log("New Client");
+    
+    var initial_data = {};
+    
+    var query = "Select * From "+ table_college_info;
+    connection.query( query , function(err,results) {
+        if(err){
+            console.log("query : " + query);
+            console.log("error  :" + err);
+        }
+        else{ 
+            var final = {};
+            var array = [];
+            for(i=0;i < results.length; i++){
+               array.push(results[i]['college_id']);
+                final[results[i]['college_id']] = 
+               {college_name : results[i]['college_name'],
+                college_coor_lat : results[i]['college_coor_lat'],
+                college_coor_lng : results[i]['college_coor_lng']};
+            }
+            final['ids'] = array;
+           initial_data['college_data'] = final;
+            
+            var query2 = "Select * from "+table_parkinglot_info;
+            connection.query(query2, function(err2,results2){
+            if(err2){
+                console.log("query : " + query2);
+                console.log("error  :" + err2);
+            }
+            else{
+                var final2 = {};
+                var array2 = [];
+                for(i=0;i < results2.length; i++){
+                   array2.push(results2[i]['parkinglot_id']);
+                
+                    var ci = results2[i]['college_id'];
+                    var pi = parseInt(results2[i]['parkinglot_id']);
+                    
+                    var temp2 = {};
+                    temp2 = 
+                   {parkinglot_name : results2[i]['parkinglot_name'],
+                    coor_lat : results2[i]['coor_lat'],
+                    coor_lng : results2[i]['coor_lng'],
+                   college_id : results2[i]['college_id']};
+                    final2[pi] = temp2;
+                }
+                final2['ids'] = array2;
+                initial_data['parking_data'] = final2;
+                initial_data["event"] = "data";
+                ws.send(JSON.stringify(initial_data));
+            }
+        });
+            
+        }
+    });
+    
 
     ws.on('message', function incoming(message) {
         console.log('received: %s', message);
     });
     ws.on('close',function close(){
         console.log("disconnect");
+        
+        if(clients[socket.id] != undefined){
+            var user_id = clients[socket.id]['user'].user_id;
+            var college_id = clients[socket.id].college_id;
+            
+            var query = "Delete from "+college_id+table_area+ " Where user_id = "+user_id;
+            connection.query(query, function(err,results){
+                if(err){
+                    console.log('Error: '+err);
+                    console.log(query);
+                }
+                else{
+                    socket.emit('event',{code:500, results});
+                }   
+            });    
+            socket.leave(college_id);
+            delete clients[socket.id];
+        }
+        
     });
     
     ws.onmessage = function(data){
