@@ -27,6 +27,10 @@ public class MenuActivity extends AppCompatActivity {
     private JSONObject datafile;
     private DB_Helper db_helper;
 
+
+    String bpURL = "http://192.168.0.16:3000";
+    String krpURL = "http://192.168.1.204:3000";
+
     private Spinner mCollegeSpinner;
     private Spinner mParkingSpinner;
     private ArrayList<String> list_college_ids ;
@@ -45,7 +49,7 @@ public class MenuActivity extends AppCompatActivity {
     private Socket mSocket;
     {
         try{
-            mSocket = IO.socket("http://192.168.1.204:3000");
+            mSocket = IO.socket(krpURL);
         } catch (URISyntaxException e) {
             Log.i("Socket", "Invalid URI");
             Toast.makeText(this, "No Connection", Toast.LENGTH_SHORT).show();
@@ -90,8 +94,9 @@ public class MenuActivity extends AppCompatActivity {
         mParkingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                setCoordinates(mParkingSpinner.getSelectedItem().toString(), list_parkinglot_ids.get(i).get(1),list_parkinglot_ids.get(i).get(2));
+                lat = Float.parseFloat(list_parkinglot_ids.get(i).get(1));
+                lng = Float.parseFloat(list_parkinglot_ids.get(i).get(2));
+                parkingLotName = mParkingSpinner.getSelectedItem().toString();
             }
 
             @Override
@@ -99,20 +104,12 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    private void setCoordinates(String lotName, String ilat, String ilng) {
-
-
-            lat = Float.parseFloat(ilat);
-            lng = Float.parseFloat(ilng);
-            parkingLotName = lotName;
-
-    }
-
     private Emitter.Listener onData = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             datafile = (JSONObject) args[0];
-            Toast.makeText(getApplicationContext(),datafile.toString(), Toast.LENGTH_SHORT).show();
+            //Following cannot work. Trying to create toast on ui thread needs to made on separate thread when running inside the emitter
+//            Toast.makeText(getApplicationContext(),datafile.toString(), Toast.LENGTH_SHORT).show();
             new GetCollegeDataTask().execute();
         }
     };

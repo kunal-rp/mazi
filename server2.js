@@ -148,7 +148,7 @@ wss.on('connection', function connection(ws) {
     
 
     ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
+        console.log('received: %s', data);
     });
     ws.on('close',function close(){
         console.log("disconnect");
@@ -173,10 +173,10 @@ wss.on('connection', function connection(ws) {
         
     });
     
-    ws.onmessage = function(data){
-        data = JSON.parse(data.data);
+    // ws.onmessage = function(data){
+    //     data = JSON.parse(data.data);
     
-    }
+    // }
                 
 });
 

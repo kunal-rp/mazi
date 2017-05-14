@@ -80,7 +80,7 @@ public class DB_Helper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public ArrayList getAllColleges() {
+    public ArrayList<ArrayList<String>> getAllColleges() {
 
         ArrayList<ArrayList<String>> allColleges = new ArrayList<>();
 
@@ -151,7 +151,7 @@ public class DB_Helper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public ArrayList getAllParkingLotsFromCollege(String id) {
+    public ArrayList<ArrayList<String>> getAllParkingLotsFromCollege(String id) {
 
         ArrayList<ArrayList<String>> allParkingLots = new ArrayList<>();
 

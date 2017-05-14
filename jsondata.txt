@@ -1,0 +1,36 @@
+helper for reading kunals clumsy json work...jk...seriously helps though
+{
+	"college_data":
+	{
+		"100010":
+			{"college_name":"California Polytechnic State University Pomona","college_coor_lat":34.056502,"college_coor_lng":-117.821605},
+		"100011":
+			{"college_name":"California Polytechnic State University SLO","college_coor_lat":35.305102,"college_coor_lng":-120.662762},
+		"100012":
+			{"college_name":"Mt. San Antonio College","college_coor_lat":34.047724,"college_coor_lng":-117.844765},"ids":[100010,100011,100012]
+	},
+	"parking_data":
+	{
+		"2001":
+			{"parkinglot_name":"Parking Lot J","coor_lat":34.0574,"coor_lng":-117.829,"college_id":100010},
+		"2002":
+			{"parkinglot_name":"Parking Lot M","coor_lat":34.0557,"coor_lng":-117.83,"college_id":100010},
+		"2003":
+			{"parkinglot_name":"H12","coor_lat":35.3048,"coor_lng":-120.664,"college_id":100011},
+		"2004":
+			{"parkinglot_name":"Visitor Parking","coor_lat":35.3054,"coor_lng":-120.663,"college_id":100011},
+		"2005":
+			{"parkinglot_name":"Parking Lot L","coor_lat":34.0554,"coor_lng":-117.825,"college_id":100010},
+		"2006":
+			{"parkinglot_name":"Parking Lot A","coor_lat":34.0605,"coor_lng":-117.825,"college_id":100010},
+		"2007":
+			{"parkinglot_name":"Parking Lot F1-F4","coor_lat":34.0617,"coor_lng":-117.817,"college_id":100010},
+		"2008":
+			{"parkinglot_name":"Building 106","coor_lat":34.0604,"coor_lng":-117.817,"college_id":100010},
+		"2009":
+			{"parkinglot_name":"Parking Lot B","coor_lat":34.0442,"coor_lng":-117.847,"college_id":100012},
+		"2010":
+			{"parkinglot_name":"Parking Lot D","coor_lat":34.045,"coor_lng":-117.845,"college_id":100012},
+		"ids":[2001,2002,2003,2004,2005,2006,2007,2008,2009,2010]
+	}	
+}
