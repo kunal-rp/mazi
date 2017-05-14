@@ -26,10 +26,13 @@ public class MenuActivity extends AppCompatActivity {
     private JSONObject datafile;
     private DB_Helper db_helper;
 
+    String bpURL = "http://192.168.0.16:3000";
+    String krpURL = "http://192.168.1.204:3000";
+
     private Socket mSocket;
     {
         try{
-            mSocket = IO.socket("http://192.168.1.204:3000");
+            mSocket = IO.socket(bpURL);
         } catch (URISyntaxException e) {
             Log.i("Socket", "Invalid URI");
         }
@@ -89,7 +92,6 @@ public class MenuActivity extends AppCompatActivity {
         mParkingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
                 setCoordinates(lots.get(i));
             }
 
@@ -120,7 +122,8 @@ public class MenuActivity extends AppCompatActivity {
         @Override
         public void call(final Object... args) {
             datafile = (JSONObject) args[0];
-            Toast.makeText(getApplicationContext(),datafile.toString(), Toast.LENGTH_SHORT).show();
+            //Following cannot work. Trying to create toast on ui thread needs to made on separate thread when running inside the emitter
+//            Toast.makeText(getApplicationContext(),datafile.toString(), Toast.LENGTH_SHORT).show();
             new GetCollegeDataTask().execute();
         }
     };
