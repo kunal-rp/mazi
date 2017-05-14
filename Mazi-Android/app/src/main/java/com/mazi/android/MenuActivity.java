@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -26,30 +27,30 @@ public class MenuActivity extends AppCompatActivity {
     private JSONObject datafile;
     private DB_Helper db_helper;
 
-    private Socket mSocket;
-    {
-        try{
-            mSocket = IO.socket("http://192.168.1.204:3000");
-        } catch (URISyntaxException e) {
-            Log.i("Socket", "Invalid URI");
-        }
-    }
-
     private Spinner mCollegeSpinner;
     private Spinner mParkingSpinner;
-
-    //arrays for spinner info
-    public ArrayList<String> colleges = new ArrayList<>();
-    public ArrayList<String> lots = new ArrayList<>();
-
-//    public String[] colleges = {"Cal Poly Pomona", "Cal Poly SLO", "Mt. Sac"};
-//    public String[] lots = {"Parking Lot J", "Parking Lot M", "Parking Structure 2"};
+    private ArrayList<String> list_college_ids ;
+    private ArrayList<ArrayList<String>> list_parkinglot_ids ;
 
     public String selected;
 
     public float lat;
     public float lng;
     public String parkingLotName;
+
+    //arrays for spinner info
+    public ArrayList<String> colleges = new ArrayList<>();
+    public ArrayList<String> lots = new ArrayList<>();
+
+    private Socket mSocket;
+    {
+        try{
+            mSocket = IO.socket("http://192.168.1.204:3000");
+        } catch (URISyntaxException e) {
+            Log.i("Socket", "Invalid URI");
+            Toast.makeText(this, "No Connection", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +78,7 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                selected = "10001" + Integer.toString(i);
+                selected = list_college_ids.get(i);
                 Toast.makeText(getApplicationContext(),selected,Toast.LENGTH_SHORT).show();
                 new GetParkingDataTask().execute();
             }
@@ -90,7 +91,7 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                setCoordinates(lots.get(i));
+                setCoordinates(mParkingSpinner.getSelectedItem().toString(), list_parkinglot_ids.get(i).get(1),list_parkinglot_ids.get(i).get(2));
             }
 
             @Override
@@ -98,21 +99,12 @@ public class MenuActivity extends AppCompatActivity {
         });
     }
 
-    private void setCoordinates(String lot) {
-        String slat="", slng="";
-        try {
-            JSONObject subData = datafile.getJSONObject("parking_data");
-            for (int i = 2001; i <= 2010; i++){
-                if (subData.getJSONObject(Integer.toString(i)).getString("parkinglot_name").equals(lot)) {
-                    slat = subData.getJSONObject(Integer.toString(i)).getString("coor_lat");
-                    slng = subData.getJSONObject(Integer.toString(i)).getString("coor_lng");
-                    break;
-                }
-            }
-            lat = Float.parseFloat(slat);
-            lng = Float.parseFloat(slng);
-            parkingLotName = lot;
-        } catch (JSONException e) {}
+    private void setCoordinates(String lotName, String ilat, String ilng) {
+
+
+            lat = Float.parseFloat(ilat);
+            lng = Float.parseFloat(ilng);
+            parkingLotName = lotName;
 
     }
 
@@ -137,6 +129,9 @@ public class MenuActivity extends AppCompatActivity {
         protected Void doInBackground(Object... args) {
 
             colleges = new ArrayList<>();
+            list_college_ids = new ArrayList<>();
+
+
             try {
                 JSONObject college_data = datafile.getJSONObject("college_data");
                 JSONObject parking_data = datafile.getJSONObject("parking_data");
@@ -150,6 +145,12 @@ public class MenuActivity extends AppCompatActivity {
                     }
                 }
 
+                ArrayList<ArrayList<String>> temp= db_helper.getAllColleges();
+                for(int i = 0; i < temp.size(); i++){
+                    list_college_ids.add(temp.get(i).get(0));
+                    colleges.add(temp.get(i).get(1));
+                }
+
                 JSONArray parkinglot_ids = parking_data.getJSONArray("ids");
 
                 for(int i = 0; i < parkinglot_ids.length(); i++){
@@ -159,7 +160,8 @@ public class MenuActivity extends AppCompatActivity {
                     }
                 }
 
-                colleges = db_helper.getAllColleges();
+
+
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -182,8 +184,17 @@ public class MenuActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(JSONObject... object) {
             lots = new ArrayList<>();
+            list_parkinglot_ids = new ArrayList<ArrayList<String>>();
             Log.d("KTag", "Parking LOTS-----");
-            lots = db_helper.getAllParkingLotsFromCollege(selected);
+            ArrayList<ArrayList<String>> temp= db_helper.getAllParkingLotsFromCollege(selected);
+            for(int i = 0; i < temp.size(); i++){
+                ArrayList<String> temp2 = new ArrayList<>();
+                temp2.add(temp.get(i).get(0));//id
+                temp2.add(temp.get(i).get(2));//lat
+                temp2.add(temp.get(i).get(3));//lng
+                list_parkinglot_ids.add(temp2);
+                lots.add(temp.get(i).get(1));
+            }
             return null;
         }
 

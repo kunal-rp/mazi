@@ -82,7 +82,7 @@ public class DB_Helper extends SQLiteOpenHelper {
 
     public ArrayList getAllColleges() {
 
-        ArrayList<String> allColleges = new ArrayList<>();
+        ArrayList<ArrayList<String>> allColleges = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM `" + TABLE_COLLEGE_INFO+"`";
@@ -93,15 +93,15 @@ public class DB_Helper extends SQLiteOpenHelper {
         while (!c.isAfterLast()) {
             if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
 
-
-                String value = c.getString(c.getColumnIndex(COL_COLLEGE_NAME));
-                allColleges.add(value);
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_ID)));
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_NAME)));
+                allColleges.add(temp);
                 c.moveToNext();
 
 
             }
         }
-
 
         db.close();
         return allColleges;
@@ -153,7 +153,7 @@ public class DB_Helper extends SQLiteOpenHelper {
 
     public ArrayList getAllParkingLotsFromCollege(String id) {
 
-        ArrayList<String> allParkingLots = new ArrayList<>();
+        ArrayList<ArrayList<String>> allParkingLots = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM `" + TABLE_PARKINGLOT_INFO+"` where `college_id` = " + id;
@@ -166,11 +166,13 @@ public class DB_Helper extends SQLiteOpenHelper {
         while (!c.isAfterLast()) {
             if (c.getString(c.getColumnIndex(COL_PARKINGLOT_NAME)) != null) {
 
-                String value = c.getString(c.getColumnIndex(COL_PARKINGLOT_NAME));
-                allParkingLots.add(value);
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(c.getString(c.getColumnIndex(COL_PARKINGLOT_ID)));
+                temp.add(c.getString(c.getColumnIndex(COL_PARKINGLOT_NAME)));
+                temp.add(c.getString(c.getColumnIndex(COL_PARKINGLOT_COOR_LAT)));
+                temp.add(c.getString(c.getColumnIndex(COL_PARKINGLOT_COOR_LNG)));
+                allParkingLots.add(temp);
                 c.moveToNext();
-
-                Log.d("KTag","Prkinglot: "+value);
             }
         }
         db.close();
