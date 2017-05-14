@@ -3,21 +3,21 @@
 
     <item
         is-multidex="true"
-        jar="/Users/kunal/Desktop/Programming/Side Projects/Mazi/Mazi-Android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jar="/Users/bpalomino/Projects/mazi/Mazi-Android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
-        sha1="2761d46d3dad856b2e82d7ba3c470c4aa84da0cf">
-        <dex dex="/Users/kunal/Desktop/Programming/Side Projects/Mazi/Mazi-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_2577f1b6ac7793a06d2b1ead969ed833e59f51d1/classes.dex" />
+        sha1="caff8e51a24901cfc9cd7e1cf83d84f4cb0c103b">
+        <dex dex="/Users/bpalomino/Projects/mazi/Mazi-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_680f82f8b7267b8e12b6d857b39429ceb61a2081/classes.dex" />
     </item>
     <item
         is-multidex="true"
-        jar="/Users/kunal/Desktop/Programming/Side Projects/Mazi/Mazi-Android/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jar="/Users/bpalomino/Projects/mazi/Mazi-Android/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.0"
-        sha1="510aa6efc159983dfbffa676a0dae37568c0a46f">
-        <dex dex="/Users/kunal/Desktop/Programming/Side Projects/Mazi/Mazi-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_20bf69cb03fa11064f87d86608d00bcf327033b4/classes.dex" />
+        sha1="b2c95122ac7725b6e817a44f47f4408b4e7da831">
+        <dex dex="/Users/bpalomino/Projects/mazi/Mazi-Android/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_6508b0222c1bf2db681769cdbcf9f15a820d19b8/classes.dex" />
     </item>
 
 </items>
