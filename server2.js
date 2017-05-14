@@ -92,16 +92,16 @@ wss.on('connection', function connection(ws) {
     console.log("New Websocket");
 
     ws.on('message', function incoming(message) {
-        console.log('received: %s', message);
+        console.log('received: %s', data);
     });
     ws.on('close',function close(){
         console.log("disconnect");
     });
     
-    ws.onmessage = function(data){
-        data = JSON.parse(data.data);
+    // ws.onmessage = function(data){
+    //     data = JSON.parse(data.data);
     
-    }
+    // }
                 
 });
 
