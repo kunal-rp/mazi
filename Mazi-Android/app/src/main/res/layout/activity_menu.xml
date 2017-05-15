@@ -11,12 +11,7 @@
     tools:context="com.mazi.android.MenuActivity">
 
 
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/collegeMenu"
-        android:layout_below="@+id/collegeView"
-        android:layout_alignParentStart="true" />
+
 
     <TextView
         android:text="College:"
@@ -28,6 +23,12 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
         android:layout_marginStart="5dp" />
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/collegeMenu"
+        android:layout_below="@+id/collegeView"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:text="Parking Lot:"

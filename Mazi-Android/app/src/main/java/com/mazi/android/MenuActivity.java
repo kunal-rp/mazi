@@ -19,12 +19,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 public class MenuActivity extends AppCompatActivity {
-    private JSONObject datafile;
+    private JSONObject initial_data_from_server;
+
     private DB_Helper db_helper;
 
 
@@ -33,8 +33,13 @@ public class MenuActivity extends AppCompatActivity {
 
     private Spinner mCollegeSpinner;
     private Spinner mParkingSpinner;
-    private ArrayList<String> list_college_ids ;
-    private ArrayList<ArrayList<String>> list_parkinglot_ids ;
+
+    private ArrayList<String> hidden_college;
+    private ArrayList<ArrayList<String>> hidden_parkinglots;
+
+    //arrays for spinner info
+    public ArrayList<String> face_college = new ArrayList<>();
+    public ArrayList<String> face_parkinglots = new ArrayList<>();
 
     public String selected;
 
@@ -42,9 +47,7 @@ public class MenuActivity extends AppCompatActivity {
     public float lng;
     public String parkingLotName;
 
-    //arrays for spinner info
-    public ArrayList<String> colleges = new ArrayList<>();
-    public ArrayList<String> lots = new ArrayList<>();
+
 
     private Socket mSocket;
     {
@@ -70,11 +73,11 @@ public class MenuActivity extends AppCompatActivity {
         mCollegeSpinner = (Spinner) findViewById(R.id.collegeMenu);
         mParkingSpinner = (Spinner) findViewById(R.id.parkinglotMenu);
 
-//        ArrayAdapter<String> collegeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, colleges);
+//        ArrayAdapter<String> collegeAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, face_college);
 //        collegeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //        mCollegeSpinner.setAdapter(collegeAdapter);
 
-//        ArrayAdapter<String> lotAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, lots);
+//        ArrayAdapter<String> lotAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, face_parkinglots);
 //        lotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //        mParkingSpinner.setAdapter(lotAdapter);
 
@@ -82,8 +85,7 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                selected = list_college_ids.get(i);
-                Toast.makeText(getApplicationContext(),selected,Toast.LENGTH_SHORT).show();
+                selected = hidden_college.get(i);
                 new GetParkingDataTask().execute();
             }
 
@@ -94,8 +96,8 @@ public class MenuActivity extends AppCompatActivity {
         mParkingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                lat = Float.parseFloat(list_parkinglot_ids.get(i).get(1));
-                lng = Float.parseFloat(list_parkinglot_ids.get(i).get(2));
+                lat = Float.parseFloat(hidden_parkinglots.get(i).get(1));
+                lng = Float.parseFloat(hidden_parkinglots.get(i).get(2));
                 parkingLotName = mParkingSpinner.getSelectedItem().toString();
             }
 
@@ -107,9 +109,9 @@ public class MenuActivity extends AppCompatActivity {
     private Emitter.Listener onData = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            datafile = (JSONObject) args[0];
+            initial_data_from_server = (JSONObject) args[0];
             //Following cannot work. Trying to create toast on ui thread needs to made on separate thread when running inside the emitter
-//            Toast.makeText(getApplicationContext(),datafile.toString(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(),initial_data_from_server.toString(), Toast.LENGTH_SHORT).show();
             new GetCollegeDataTask().execute();
         }
     };
@@ -125,13 +127,13 @@ public class MenuActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Object... args) {
 
-            colleges = new ArrayList<>();
-            list_college_ids = new ArrayList<>();
+            face_college = new ArrayList<>();
+            hidden_college = new ArrayList<>();
 
 
             try {
-                JSONObject college_data = datafile.getJSONObject("college_data");
-                JSONObject parking_data = datafile.getJSONObject("parking_data");
+                JSONObject college_data = initial_data_from_server.getJSONObject("college_data");
+                JSONObject parking_data = initial_data_from_server.getJSONObject("parking_data");
 
                 JSONArray college_ids = college_data.getJSONArray("ids");
 
@@ -144,8 +146,8 @@ public class MenuActivity extends AppCompatActivity {
 
                 ArrayList<ArrayList<String>> temp= db_helper.getAllColleges();
                 for(int i = 0; i < temp.size(); i++){
-                    list_college_ids.add(temp.get(i).get(0));
-                    colleges.add(temp.get(i).get(1));
+                    hidden_college.add(temp.get(i).get(0));
+                    face_college.add(temp.get(i).get(1));
                 }
 
                 JSONArray parkinglot_ids = parking_data.getJSONArray("ids");
@@ -171,7 +173,7 @@ public class MenuActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            PopulateSpinner(mCollegeSpinner, colleges);
+            PopulateSpinner(mCollegeSpinner, face_college);
         }
     }
 
@@ -180,8 +182,8 @@ public class MenuActivity extends AppCompatActivity {
     private class GetParkingDataTask extends AsyncTask<JSONObject, Void, Void> {
         @Override
         protected Void doInBackground(JSONObject... object) {
-            lots = new ArrayList<>();
-            list_parkinglot_ids = new ArrayList<ArrayList<String>>();
+            face_parkinglots = new ArrayList<>();
+            hidden_parkinglots = new ArrayList<ArrayList<String>>();
             Log.d("KTag", "Parking LOTS-----");
             ArrayList<ArrayList<String>> temp= db_helper.getAllParkingLotsFromCollege(selected);
             for(int i = 0; i < temp.size(); i++){
@@ -189,8 +191,8 @@ public class MenuActivity extends AppCompatActivity {
                 temp2.add(temp.get(i).get(0));//id
                 temp2.add(temp.get(i).get(2));//lat
                 temp2.add(temp.get(i).get(3));//lng
-                list_parkinglot_ids.add(temp2);
-                lots.add(temp.get(i).get(1));
+                hidden_parkinglots.add(temp2);
+                face_parkinglots.add(temp.get(i).get(1));
             }
             return null;
         }
@@ -198,7 +200,7 @@ public class MenuActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            PopulateSpinner(mParkingSpinner, lots);
+            PopulateSpinner(mParkingSpinner, face_parkinglots);
         }
     }
 
@@ -212,6 +214,8 @@ public class MenuActivity extends AppCompatActivity {
         Intent mapIntent = new Intent(this, MapsActivity.class);
         mapIntent.putExtra("lat", lat);
         mapIntent.putExtra("lng", lng);
+        mapIntent.putExtra("hidden_college", hidden_college);
+        mapIntent.putExtra("face_college", face_college);
         mapIntent.putExtra("parkingLotName", parkingLotName);
         startActivity(mapIntent);
     }
