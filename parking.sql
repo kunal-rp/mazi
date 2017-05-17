@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 10, 2017 at 01:12 AM
+-- Generation Time: May 17, 2017 at 09:31 AM
 -- Server version: 10.1.19-MariaDB
 -- PHP Version: 7.0.13
 
@@ -59,6 +59,7 @@ CREATE TABLE `100011_area` (
 CREATE TABLE `college_info` (
   `college_name` varchar(50) NOT NULL,
   `college_id` int(11) NOT NULL,
+  `college_version` double NOT NULL,
   `college_coor_lng` decimal(13,10) NOT NULL,
   `college_coor_lat` decimal(13,10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -67,10 +68,10 @@ CREATE TABLE `college_info` (
 -- Dumping data for table `college_info`
 --
 
-INSERT INTO `college_info` (`college_name`, `college_id`, `college_coor_lng`, `college_coor_lat`) VALUES
-('California Polytechnic State University Pomona', 100010, '-117.8216050000', '34.0565020000'),
-('California Polytechnic State University SLO', 100011, '-120.6627620000', '35.3051020000'),
-('Mt. San Antonio College', 100012, '-117.8447650000', '34.0477240000');
+INSERT INTO `college_info` (`college_name`, `college_id`, `college_version`, `college_coor_lng`, `college_coor_lat`) VALUES
+('California Polytechnic State University Pomona', 100010, 2, '-117.8216050000', '34.0565020000'),
+('California Polytechnic State University SLO', 100011, 1, '-120.6627620000', '35.3051020000'),
+('Mt. San Antonio College', 100012, 1, '-117.8447650000', '34.0477240000');
 
 -- --------------------------------------------------------
 
@@ -102,17 +103,6 @@ INSERT INTO `parkinglot_info` (`parkinglot_id`, `college_id`, `parkinglot_name`,
 (2009, 100012, 'Parking Lot B', 34.0442, -117.847),
 (2010, 100012, 'Parking Lot D', 34.045, -117.845);
 
--- --------------------------------------------------------
-
---
--- Table structure for table `table_version`
---
-
-CREATE TABLE `table_version` (
-  `table_name` varchar(20) NOT NULL,
-  `version` varchar(8) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 --
 -- Indexes for dumped tables
 --
@@ -141,12 +131,6 @@ ALTER TABLE `college_info`
 --
 ALTER TABLE `parkinglot_info`
   ADD PRIMARY KEY (`parkinglot_id`);
-
---
--- Indexes for table `table_version`
---
-ALTER TABLE `table_version`
-  ADD PRIMARY KEY (`table_name`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

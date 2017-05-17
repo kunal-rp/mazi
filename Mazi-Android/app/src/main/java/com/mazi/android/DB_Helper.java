@@ -18,17 +18,19 @@ import java.util.ArrayList;
 
 public class DB_Helper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 16;
 
     private static final String TABLE_COLLEGE_INFO  = "college_info";
     private static final String COL_COLLEGE_NAME  = "college_name";
     private static final String COL_COLLEGE_ID  = "college_id";
+    private static final String COL_COLLEGE_VERSION  = "college_version";
     private static final String COL_COLLEGE_COOR_LAT  = "college_coor_lat";
     private static final String COL_COLLEGE_COOR_LNG  = "college_coor_lng";
     private static final String COLLEGE_CREATE_TABLE =
             "CREATE TABLE " + TABLE_COLLEGE_INFO + "(" +
                     COL_COLLEGE_ID + " INTEGER PRIMARY KEY, " +
                     COL_COLLEGE_NAME + " TEXT," +
+                    COL_COLLEGE_VERSION + " DOUBLE," +
                     COL_COLLEGE_COOR_LAT + " DECIMAL(13,10)," +
                     COL_COLLEGE_COOR_LNG + " DECIMAL(13,10)" +
                     " );";
@@ -67,21 +69,30 @@ public class DB_Helper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void clearAllTables(){
+        SQLiteDatabase db = getWritableDatabase();
+
+        db.execSQL("DELETE FROM "+ TABLE_COLLEGE_INFO);
+        db.execSQL("DELETE FROM "+ TABLE_PARKINGLOT_INFO);
+        db.close();
+    }
+
     public void addCollege(int id, JSONObject object) throws JSONException {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
         values.put(COL_COLLEGE_ID, id);
         values.put(COL_COLLEGE_NAME, object.getString("college_name"));
+        values.put(COL_COLLEGE_VERSION, object.getString("college_version"));
         values.put(COL_COLLEGE_COOR_LAT, object.getDouble("college_coor_lat"));
         values.put(COL_COLLEGE_COOR_LNG, object.getDouble("college_coor_lng"));
 
         db.insert(TABLE_COLLEGE_INFO, null, values);
+        Log.d("KTag", "Add College: "+values.toString());
         db.close();
     }
 
-    public ArrayList<ArrayList<String>> getAllColleges() {
-
+    public ArrayList<ArrayList<String>> getAllCollegesInformation() {
         ArrayList<ArrayList<String>> allColleges = new ArrayList<>();
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -89,20 +100,40 @@ public class DB_Helper extends SQLiteOpenHelper {
         Cursor c = db.rawQuery(selectQuery, null);
 
         c.moveToFirst();
-
         while (!c.isAfterLast()) {
             if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
 
                 ArrayList<String> temp = new ArrayList<>();
                 temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_ID)));
                 temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_NAME)));
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_COOR_LAT)));
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_COOR_LNG)));
                 allColleges.add(temp);
                 c.moveToNext();
-
-
             }
         }
 
+        db.close();
+        return allColleges;
+    }
+
+    public ArrayList<ArrayList<String>> getAllCollegeVersion() {
+        ArrayList<ArrayList<String>> allColleges = new ArrayList<>();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM `" + TABLE_COLLEGE_INFO+"`";
+        Cursor c = db.rawQuery(selectQuery, null);
+
+        c.moveToFirst();
+        while (!c.isAfterLast()) {
+            if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
+                ArrayList<String> temp = new ArrayList<>();
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_ID)));
+                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_VERSION)));
+                allColleges.add(temp);
+                c.moveToNext();
+            }
+        }
         db.close();
         return allColleges;
     }
@@ -148,6 +179,7 @@ public class DB_Helper extends SQLiteOpenHelper {
         values.put(COL_PARKINGLOT_COOR_LNG, object.getDouble("coor_lng"));
 
         db.insert(TABLE_PARKINGLOT_INFO, null, values);
+        Log.d("KTag", "Add ParkingLot: "+values.toString());
         db.close();
     }
 
@@ -157,10 +189,8 @@ public class DB_Helper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM `" + TABLE_PARKINGLOT_INFO+"` where `college_id` = " + id;
-        Log.d("KTag","Query: "+selectQuery);
 
         Cursor c = db.rawQuery(selectQuery, null);
-        Log.d("KTag","Lenght: "+c.getCount());
         c.moveToFirst();
 
         while (!c.isAfterLast()) {
@@ -190,5 +220,7 @@ public class DB_Helper extends SQLiteOpenHelper {
         cursor.close();
         return true;
     }
+
+
 
 }
