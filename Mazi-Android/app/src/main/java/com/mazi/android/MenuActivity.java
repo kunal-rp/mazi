@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
@@ -53,9 +54,12 @@ public class MenuActivity extends AppCompatActivity {
 
 
     private Socket mSocket;
+
     {
         try{
             mSocket = IO.socket(krpURL);
+
+
         } catch (URISyntaxException e) {
             Log.i("Socket", "Invalid URI");
             Toast.makeText(this, "No Connection", Toast.LENGTH_SHORT).show();

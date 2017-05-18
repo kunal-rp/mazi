@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.github.nkzawa.socketio.client.Socket;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -23,7 +25,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     public float lat, lng;
@@ -33,6 +35,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Spinner mCollegeSpinner;
     private Spinner mParkingSpinner;
+
+    private Socket mSocket;
 
     private ArrayList<String> hidden_college;
     private ArrayList<ArrayList<String>> hidden_parkinglots;
@@ -64,7 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                getApplicationContext(), android.R.layout.simple_spinner_item, face_college);
+                this, android.R.layout.simple_spinner_item, face_college);
 
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCollegeSpinner.setAdapter(adapter);
@@ -113,6 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
+
     private class GetParkingDataTask extends AsyncTask<JSONObject, Void, Void> {
         @Override
         protected Void doInBackground(JSONObject... object) {
@@ -134,11 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                    getApplicationContext(), android.R.layout.simple_spinner_item, face_parkinglots);
-
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mParkingSpinner.setAdapter(adapter);
+            PopulateSpinner(mParkingSpinner, face_parkinglots);
         }
 
 
@@ -167,5 +168,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(parkingLot));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(parkingLot,17));
 
+    }
+
+    private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 }
