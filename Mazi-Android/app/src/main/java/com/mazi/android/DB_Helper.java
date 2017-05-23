@@ -117,8 +117,8 @@ public class DB_Helper extends SQLiteOpenHelper {
         return allColleges;
     }
 
-    public ArrayList<ArrayList<String>> getAllCollegeVersion() {
-        ArrayList<ArrayList<String>> allColleges = new ArrayList<>();
+    public int getAllCollegeVersion() {
+        int version = 0;
 
         SQLiteDatabase db = this.getReadableDatabase();
         String selectQuery = "SELECT * FROM `" + TABLE_COLLEGE_INFO+"`";
@@ -127,15 +127,17 @@ public class DB_Helper extends SQLiteOpenHelper {
         c.moveToFirst();
         while (!c.isAfterLast()) {
             if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
-                ArrayList<String> temp = new ArrayList<>();
-                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_ID)));
-                temp.add(c.getString(c.getColumnIndex(COL_COLLEGE_VERSION)));
-                allColleges.add(temp);
+                int temp = c.getInt(c.getColumnIndex(COL_COLLEGE_VERSION));
+                if(temp > version){
+                    version = temp;
+                }
+
+
                 c.moveToNext();
             }
         }
         db.close();
-        return allColleges;
+        return version;
     }
 
     public boolean checkCollege(int id) {

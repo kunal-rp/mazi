@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,14 +21,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MenuActivity extends AppCompatActivity {
     private JSONObject initial_data_from_server;
     private JSONObject version_data;
+
 
     private DB_Helper db_helper;
 
@@ -71,16 +82,17 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
 
+
         db_helper = new DB_Helper(getApplicationContext(), null);
 
-        mSocket.on("initial_data", initialAction);
-        mSocket.on("allData", onData);
         mSocket.connect();
 
         //setup for the two spinners for college and parking lot selection
         mCollegeSpinner = (Spinner) findViewById(R.id.collegeMenu);
         mParkingSpinner = (Spinner) findViewById(R.id.parkinglotMenu);
 
+
+        new GetVersionData().execute();
 
         mCollegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -108,62 +120,114 @@ public class MenuActivity extends AppCompatActivity {
     }
 
 
-    private Emitter.Listener initialAction = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            version_data = (JSONObject) args[0];
-            CheckVersion();
-        }
-    };
 
-    private Emitter.Listener onData = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            initial_data_from_server = (JSONObject) args[0];
-            new PushNewData().execute();
-        }
-    };
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         mSocket.disconnect();
-        mSocket.off("data", onData);
+
     }
 
-    private void CheckVersion(){
+    private class GetVersionData extends AsyncTask<Object, Object, Void> {
+        @Override
+        protected Void doInBackground(Object... args) {
 
-        boolean getNewData = false;
-        ArrayList<ArrayList<String>> current_version = db_helper.getAllCollegeVersion();
-            if(current_version.size() == 0){
-                getNewData = true;
+            try {
+                String urlstring = "http://192.168.1.204:3000/checkVerison?ver="+ db_helper.getAllCollegeVersion();
+                Log.d("KTag",urlstring);
+                URL versionUrl = new URL(urlstring);
+                HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
+                myConnection.setRequestProperty("User-Agent", "android-client");
+                if (myConnection.getResponseCode() == 200) {
+                    InputStream responseBody = myConnection.getInputStream();
+                    InputStreamReader responseBodyReader  = new InputStreamReader(responseBody, "UTF-8");
+                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+
+                    String var = getStringFromInputStream(responseBody);
+                    version_data = new JSONObject(var);
+                    Log.d("KTag",var);
+
+                } else {
+                    Log.d("KTag","Error");
+                }
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-            else{
 
-                for(int i = 0; i < current_version.size(); i ++){
-                    ArrayList<String> temp = current_version.get(i);
-                    String college_id = temp.get(0);
-                    String college_version = temp.get(1);
 
-                    try {
-                        Log.d("KTag", college_version + " | "+ version_data.getInt(college_id));
+            return null;
+        }
 
-                        if(Integer.parseInt(college_version) != Integer.parseInt(version_data.getString(college_id))){
-                            getNewData = true;
-                            break;
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            new CheckVersion().execute();
+        }
+    }
+
+    private static String getStringFromInputStream(InputStream is) {
+
+        BufferedReader br = null;
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+
+            br = new BufferedReader(new InputStreamReader(is));
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        mSocket.emit("test", current_version.size());
-        if(getNewData){
-
-            mSocket.emit("getAllData" );
         }
-        else{
-            new GetAllCollegeToSpinner().execute();
+
+        return sb.toString();
+
+    }
+
+    private class CheckVersion extends AsyncTask<Object, Object, Void>{
+
+        int code;
+        @Override
+        protected Void doInBackground(Object... params) {
+
+            try {
+                Log.d("KTag",version_data.getString("code"));
+                code = version_data.getInt("code");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if(code == 2){
+                new PushNewData().execute();
+                Log.d("KTag","New Data");
+            }
+            else if(code == 1){
+                Log.d("KTag","NO New Data");
+                new GetAllCollegeToSpinner().execute();
+            }
         }
 
     }
@@ -202,8 +266,8 @@ public class MenuActivity extends AppCompatActivity {
             db_helper.clearAllTables();
 
             try {
-                JSONObject college_data = initial_data_from_server.getJSONObject("college_data");
-                JSONObject parking_data = initial_data_from_server.getJSONObject("parking_data");
+                JSONObject college_data = version_data.getJSONObject("college_data");
+                JSONObject parking_data = version_data.getJSONObject("parking_data");
 
                 JSONArray college_ids = college_data.getJSONArray("ids");
 
@@ -279,8 +343,9 @@ public class MenuActivity extends AppCompatActivity {
         startActivity(mapIntent);
     }
 
-    private static boolean doesDatabaseExist(Context context, String dbName) {
-        File dbFile = context.getDatabasePath(dbName);
-        return dbFile.exists();
-    }
+
+
+
+
+
 }
