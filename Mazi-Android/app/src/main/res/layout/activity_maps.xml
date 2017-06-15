@@ -24,16 +24,9 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:background="#FFFFFF">
 
-            <Spinner
-                android:id="@+id/collegeMenu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                />
 
             <Spinner
                 android:layout_width="match_parent"
-                android:layout_below="@+id/collegeMenu"
                 android:layout_height="wrap_content"
                 android:id="@+id/parkinglotMenu"
                 android:layout_alignParentStart="true"

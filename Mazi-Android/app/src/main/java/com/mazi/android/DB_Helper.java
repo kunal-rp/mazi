@@ -78,6 +78,7 @@ public class DB_Helper extends SQLiteOpenHelper {
     }
 
     public void addCollege(int id, JSONObject object) throws JSONException {
+        Log.d("KTag", object.toString());
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -171,6 +172,7 @@ public class DB_Helper extends SQLiteOpenHelper {
     }
 
     public void addParkingLot(int id, JSONObject object) throws JSONException {
+        Log.d("KTag", object.toString());
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 

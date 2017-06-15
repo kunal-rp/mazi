@@ -29,7 +29,7 @@ var table_user_gen = 'user_gen';
 
 var clients = {};
 
-app.get('/checkVerison',function (req,res) {
+app.get('/checkVersion',function (req,res) {
     
     console.log(req.query.ver);
     
@@ -41,8 +41,7 @@ app.get('/checkVerison',function (req,res) {
                 console.log("error  :" + err);
             }
         else{
-            console.log(results);
-             var version_number = results[0]['college_version'];
+            var version_number = results[0]['college_version'];
             for(i = 1; i < results.length; i++){
                 if(version_number < results[i]['college_version']){
                     version_number = results[i]['college_version'];

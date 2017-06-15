@@ -33,19 +33,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private DB_Helper db_helper;
 
-    private Spinner mCollegeSpinner;
+
     private Spinner mParkingSpinner;
 
     private Socket mSocket;
 
-    private ArrayList<String> hidden_college;
     private ArrayList<ArrayList<String>> hidden_parkinglots;
 
     //arrays for spinner info
-    public ArrayList<String> face_college = new ArrayList<>();
     public ArrayList<String> face_parkinglots = new ArrayList<>();
 
-    public String selected;
+    public String selected_college_id;
 
 
     @Override
@@ -57,21 +55,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
-        lat = bundle.getFloat("lat");
-        lng = bundle.getFloat("lng");
-        face_college = bundle.getStringArrayList("face_college");
-        hidden_college = bundle.getStringArrayList("hidden_college");
-        parkingLotName = bundle.getString("parkingLotName");
+        selected_college_id = bundle.getString("selected_college_id");
 
-        mCollegeSpinner = (Spinner) findViewById(R.id.collegeMenu);
+
+
         mParkingSpinner = (Spinner) findViewById(R.id.parkinglotMenu);
 
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, face_college);
-
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCollegeSpinner.setAdapter(adapter);
 
         new MapsActivity.GetParkingDataTask().execute();
 
@@ -80,27 +69,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mCollegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                selected = hidden_college.get(i);
-                new MapsActivity.GetParkingDataTask().execute();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {}
-        });
 
         mParkingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                lat = Float.parseFloat(hidden_parkinglots.get(i).get(1));
-                lng = Float.parseFloat(hidden_parkinglots.get(i).get(2));
+                lat = Float.parseFloat(hidden_parkinglots.get(i).get(2));
+                lng = Float.parseFloat(hidden_parkinglots.get(i).get(3));
                 parkingLotName = mParkingSpinner.getSelectedItem().toString();
 
                 LatLng parkingLot = new LatLng(lat, lng);
-                mMap.addMarker(new MarkerOptions().position(parkingLot).title(parkingLotName));
 //        mMap.addCircle(new CircleOptions().center(parkingLot).radius(80).fillColor(Color.parseColor("#19647E")).strokeColor(Color.parseColor("#06AED5")));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(parkingLot));
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(parkingLot,17));
@@ -124,10 +102,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             face_parkinglots = new ArrayList<>();
             hidden_parkinglots = new ArrayList<ArrayList<String>>();
             Log.d("KTag", "Parking LOTS-----");
-            ArrayList<ArrayList<String>> temp= db_helper.getAllParkingLotsFromCollege(selected);
+            ArrayList<ArrayList<String>> temp= db_helper.getAllParkingLotsFromCollege(selected_college_id);
             for(int i = 0; i < temp.size(); i++){
                 ArrayList<String> temp2 = new ArrayList<>();
                 temp2.add(temp.get(i).get(0));//id
+                temp2.add(temp.get(i).get(1));//name
                 temp2.add(temp.get(i).get(2));//lat
                 temp2.add(temp.get(i).get(3));//lng
                 hidden_parkinglots.add(temp2);
@@ -139,11 +118,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            PopulateSpinner(mParkingSpinner, face_parkinglots);
+            PopulateSpinner(mParkingSpinner,face_parkinglots);
         }
 
 
     }
+
+    private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
+        for(int i = 0; i < hidden_parkinglots.size(); i++){
+            ArrayList<String> temp = hidden_parkinglots.get(i);
+            LatLng parkingLot = new LatLng(Float.parseFloat(temp.get(2)), Float.parseFloat(temp.get(3)));
+            mMap.addMarker(new MarkerOptions().position(parkingLot).title(temp.get(1)));
+        }
+
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+    }
+
 
 
 
@@ -161,18 +154,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng parkingLot = new LatLng(lat, lng);
-        mMap.addMarker(new MarkerOptions().position(parkingLot).title(parkingLotName));
-//        mMap.addCircle(new CircleOptions().center(parkingLot).radius(80).fillColor(Color.parseColor("#19647E")).strokeColor(Color.parseColor("#06AED5")));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(parkingLot));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(parkingLot,17));
-
     }
 
-    private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-    }
+
 }
