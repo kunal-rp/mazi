@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: May 23, 2017 at 09:30 PM
+-- Generation Time: Jun 15, 2017 at 06:49 AM
 -- Server version: 10.1.19-MariaDB
 -- PHP Version: 7.0.13
 
@@ -88,7 +88,7 @@ CREATE TABLE `college_info` (
 --
 
 INSERT INTO `college_info` (`college_name`, `college_id`, `college_version`, `college_coor_lng`, `college_coor_lat`) VALUES
-('California Polytechnic State University Pomona', 100010, 1, '-117.8216050000', '34.0565020000'),
+('California Polytechnic State University Pomona', 100010, 4, '-117.8216050000', '34.0565020000'),
 ('California Polytechnic State University SLO', 100011, 2, '-120.6627620000', '35.3051020000'),
 ('Mt. San Antonio College', 100012, 3, '-117.8447650000', '34.0477240000');
 
