@@ -1,7 +1,12 @@
 package com.mazi.android;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
@@ -33,6 +38,8 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -79,7 +86,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         db_helper = new DB_Helper(getApplicationContext(), null);
 
-        mSocket.connect();
+        //mSocket.connect();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.requestRideButton);
+        fab.setImageBitmap(textAsBitmap("RIDE", 40, Color.WHITE ));
+
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.requestParkingButton);
+        fab2.setImageBitmap(textAsBitmap("PARK", 40, Color.WHITE ));
 
         //setup for the two spinners for college and parking lot selection
         mCollegeSpinner = (Spinner) findViewById(R.id.collegeMenu);
@@ -319,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void viewMap(View view){
-        Intent mapIntent = new Intent(this, MapsActivity.class);
+        Intent mapIntent = new Intent(this, ParkingMapsActivity.class);
         mapIntent.putExtra("lat", lat);
         mapIntent.putExtra("lng", lng);
         mapIntent.putExtra("selected_college",selected);
@@ -349,9 +362,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void selectCollege(View view){
 
-        Intent mapIntent = new Intent(this, MapsActivity.class);
+        Intent mapIntent = new Intent(this, ParkingMapsActivity.class);
         mapIntent.putExtra("selected_college_id", selected);
         startActivity(mapIntent);
+    }
+
+
+    public static Bitmap textAsBitmap(String text, float textSize, int textColor) {
+        Paint paint = new Paint(ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(textColor);
+        paint.setTextAlign(Paint.Align.LEFT);
+        float baseline = -paint.ascent(); // ascent() is negative
+        int width = (int) (paint.measureText(text) + 0.0f); // round
+        int height = (int) (baseline + paint.descent() + 0.0f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+        return image;
     }
 
 
