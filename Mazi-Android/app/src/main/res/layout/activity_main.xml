@@ -48,7 +48,7 @@
         android:clickable="true"
         app:fabSize="auto"
         app:srcCompat="@color/colorAccent"
-        android:onClick="selectCollege"
+        android:onClick="requestRide"
         android:layout_alignParentBottom="true"
         android:layout_alignEnd="@+id/toolbar" />
 
@@ -59,7 +59,7 @@
         android:clickable="true"
         app:fabSize="auto"
         app:srcCompat="@color/colorPrimary"
-        android:onClick="selectCollege"
+        android:onClick="requestParking"
         android:layout_alignTop="@+id/requestRideButton"
         android:layout_alignStart="@+id/toolbar"
         android:layout_marginStart="32dp" />
