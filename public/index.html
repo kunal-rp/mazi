@@ -53,17 +53,22 @@
                     socket.on('rider_request', function(data){
                     });
                     
+                    
+                    socket.on("matched_confirm",function(data){
+                        document.getElementById('output').innerHTML = 'Parker : '+data.parker + " Rider: "+ data.rider;
+                        socket.emit('joinRoom',{user_id : user.user_id,room_name: data.start_timestamp+data.rider+data.parker});
+                    });
+                    
+                    socket.on("joined_room_confirm",function(data){
+                        document.getElementById('output').innerHTML += data.num_room; 
+                    });
+                    
                     socket.on('event', function(data){
                         console.log("event");
                         console.log(data);
                         if(data.code == 400){
                             document.getElementById('output').innerHTML = data.message;
                         }
-                        else if(data.code == 200){
-                            document.getElementById('output').innerHTML = 'Parker : '+data.parker + " Rider: "+ data.rider;
-                            socket.emit('joinRoom',{user : user, room_name: data.start_timestamp+data.rider+data.parker});
-                        }
-                       
                     });
                     
                     socket.on('match', function(data){

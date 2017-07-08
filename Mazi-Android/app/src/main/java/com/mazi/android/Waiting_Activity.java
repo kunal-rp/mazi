@@ -38,9 +38,7 @@ public class Waiting_Activity extends AppCompatActivity {
     //temp textview for the activity
     private TextView textView;
 
-    //views used form the spinner NEED TO WORK ON
-    private View mProgressView;
-    private View mLoginFormView;
+
 
     String krpURL = "http://192.168.1.204:3000";
 
@@ -64,9 +62,8 @@ public class Waiting_Activity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         textView = (TextView) findViewById(R.id.tex);
+        textView.setText("Initail");
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -83,6 +80,7 @@ public class Waiting_Activity extends AppCompatActivity {
 
             @Override
             public void call(final Object... args) {
+
                 Log.d("KTag","Set USer Confirmed");
                 JSONObject obj = new JSONObject();
                 JSONObject temp= (JSONObject) args[0];
@@ -95,15 +93,35 @@ public class Waiting_Activity extends AppCompatActivity {
                     obj.put("type",type);
                     mSocket.emit("register",obj);
                     Log.d("KTag","Register Event");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            textView.setText("Request made : "+ type + " | "+ "college_id" + " | "+ selected_college_id+ "parkinglot_id" + " | "+ selected_parkinglot_id);
+                        }
+                    });
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+            }
+
+        });
+
+        mSocket.on("matched_confirm", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                matchMade();
             }
         });
 
         //will automatically call async task to establish connection with server
         new Waiting_Activity.EstablishWebSocket().execute();
 
+    }
+
+
+    public void matchMade(){
+        Intent intent = new Intent(this, RealtimeMapActivity.class);
+        startActivity(intent);
     }
 
 
@@ -123,7 +141,6 @@ public class Waiting_Activity extends AppCompatActivity {
         @Override
         protected Void doInBackground(JSONObject... params) {
             mSocket.connect();
-            showProgress(true);
             return null;
         }
 
@@ -152,50 +169,18 @@ public class Waiting_Activity extends AppCompatActivity {
                 user.put("user_name","KunalMobile");
 
                 mSocket.emit("setUser",user);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView.setText("Set User");
+                    }
+                });
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             return null;
         }
     }
-
-    /**
-     * Shows the progress UI and hides the login form.
-     * Copied from the login activiy
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
 
 
 }

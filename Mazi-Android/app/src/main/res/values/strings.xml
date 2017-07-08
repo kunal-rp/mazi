@@ -15,4 +15,5 @@
     </string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_waiting_">Waiting_Activity</string>
+    <string name="title_activity_realtime_map">RealtimeMapActivity</string>
 </resources>

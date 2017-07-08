@@ -53,6 +53,10 @@
         <activity
             android:name=".Waiting_Activity"
             android:label="@string/title_activity_waiting_"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".RealtimeMapActivity"
+            android:label="@string/title_activity_realtime_map"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

@@ -113,7 +113,6 @@ app.get('/checkVersion',function (req,res) {
 io.sockets.on('connection', newConnection);
 
 function newConnection(socket){
-    var user_id;
     console.log();
     console.log("New Client");
     console.log("ID : " + socket.id);
@@ -121,8 +120,8 @@ function newConnection(socket){
     socket.on('setUser',function(data){
         console.log("setUser");
         console.log(data);
-        user_id = data.user_id;
-        clients[user_id] = {socket_id : socket.id, status : 'initial_connected'};
+        socket.user_id = data.user_id;
+        clients[data.user_id] = {socket_id : socket.id, status : 'initial_connected'};
         console.log(clients)
         socket.emit('confirm_setUser',{user : data});
     });
@@ -218,12 +217,9 @@ function newConnection(socket){
                 else{
                     results_1 = results_1[0];
                     console.log("Match found")
-                    console.log(results_1);
                     
                     var mirror_socket_id = results_1.socket_id;
                     var mirror_user_id = results_1.user_id;
-                
-                    console.log(mirror_user_id);
                     
                     var query = "Delete from "+college_id+table_area+ " Where user_id = '"+mirror_user_id+"'";
                     connection.query(query, function(err,results){
@@ -238,24 +234,22 @@ function newConnection(socket){
 
                             var connection_data = {};
 
+                            connection_data['start_timestamp'] = Math.round((new Date()).getTime() / 1000);
+                            connection_data['college_id'] = college_id;
+                            connection_data['parkinglot_id'] = parkinglot_id;
                             if(client_type == 'ride'){
                                 connection_data['rider_user_id']= user_id;
                                 connection_data['parker_user_id'] = mirror_user_id;
-                                connection_data['room_name'] = user_id + ""+mirror_user_id;
+                                connection_data['index_room_name'] =connection_data['start_timestamp']+ user_id + ""+mirror_user_id;
                             }
                             else{
                                 connection_data['rider_user_id']= mirror_user_id;
                                 connection_data['parker_user_id'] = user_id;
-                                connection_data['room_name'] = mirror_user_id + ""+user_id;
+                                connection_data['index_room_name'] =connection_data['start_timestamp']+ mirror_user_id + ""+user_id;
                             }
-
-                            connection_data['start_timestamp'] = Math.round((new Date()).getTime() / 1000);
-                            connection_data['college_id'] = college_id;
-                            //connection_data['index_timestamp_room'] =
-                            connection_data['start_timestamp']+connection_data['room_name'];
-                            addConnection(connection_data);
                             clients[user_id].status = 'matched';
                             clients[mirror_user_id].status = 'matched';
+                            addConnection(connection_data);
                         }
                     });   
                 }
@@ -264,18 +258,19 @@ function newConnection(socket){
     });
     
     socket.on('joinRoom',function(data){
-        console.log('join room ' + data.user.user_id);
+        console.log('' + data.user_id + ' joins room '+ data.room_name);
         socket.join(data.room_name);
-        socket.emit('event',{code:300, length : io.sockets.adapter.rooms[data.room_name].length});
-        socket.broadcast.to(data.room_name).emit({code:300, length : io.sockets.adapter.rooms[data.room_name].length});
+        socket.emit('joined_room_confirm',{num_room : io.sockets.adapter.rooms[data.room_name].length});
     });
     
     
-    socket.on('disconnect',function(){
+    socket.on('disconnect',function(data){
+        var user_id =  socket.user_id;
        if(user_id != null ){
            if(clients[user_id] != undefined){
                if(clients[user_id].status == 'waiting_match'){
                    var college_id = clients[user_id]['selected_college'];
+                   var parkinglot_id = clients[user_id]['selected_parkinglot'];
                    var query = "Delete from "+college_id+table_area+ " Where user_id = '"+user_id+"'";
                    connection.query(query, function(err,results){
                        if(err){
@@ -317,30 +312,27 @@ function addUser(data){
 }
 
 function addConnection(data){
+    var index = data.index_room_name;
     var college_id = data.college_id;
-    var index = data.index_timestamp_room;
-    var status = 'initial';
-    var room_name = data.room_name;
+    var parkinglot_id = data.parkinglot_id;
     var rider_user_id = data.rider_user_id;
     var rider_location = 0;
-    var rider_status = 'initial';
     var parker_user_id = data.parker_user_id;
     var parker_location = 0;
-    var parker_status = 'initial';
     var start_timestamp = data.start_timestamp;
-    var end_timestamp = "-";
+    var end_timestamp = "N/A";
     
+    console.log("addConnection")
     
-    
-    var query = "INSERT INTO `"+college_id + table_connection + "` VALUES('" + index + "','" + status + "','" + rider_user_id +"','"+rider_location +"','" + rider_status +"','"+parker_user_id +"','"+parker_location +"','" + parker_status +    "','"+start_timestamp+"','"+end_timestamp +"')";
+    var query = "INSERT INTO `"+college_id + table_connection + "` VALUES('" + index + "'," + college_id + "," + parkinglot_id +",'"+rider_user_id +"','" + rider_location +"','"+parker_user_id +"','"+parker_location +"','" +    +start_timestamp+"','"+end_timestamp +"')";
     connection.query( query , function(err,results) {
         if(err){    
             console.log("query : " + query);
             console.log("error  :" + err);
         }
         else
-            io.to(clients[rider_user_id].socket_id).emit('event',{code:200, rider: rider_user_id, parker : parker_user_id,start_timestamp : start_timestamp});
-            io.to(clients[parker_user_id].socket_id).emit('event',{code:200, rider: rider_user_id, parker : parker_user_id,start_timestamp : start_timestamp});
+            io.to(clients[rider_user_id].socket_id).emit('matched_confirm',{ rider: rider_user_id, parker : parker_user_id,start_timestamp  : start_timestamp});
+            io.to(clients[parker_user_id].socket_id).emit('matched_confirm',{rider: rider_user_id, parker : parker_user_id,start_timestamp : start_timestamp});
     });
 }
               
