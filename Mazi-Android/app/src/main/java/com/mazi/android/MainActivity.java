@@ -351,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             mMap.clear();
             markers.clear();
         }
-        
+
         super.onBackPressed();
     }
 
