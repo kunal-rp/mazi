@@ -100,7 +100,7 @@ public class parking_fragment extends Fragment {
         //setup for the two spinners for college and parking lot selection
         mParkingSpinner = (Spinner) view.findViewById(R.id.parkinglotMenu);
 
-        new parking_fragment.GetParkingDataTask().execute();
+        GetParkingData();
 
 
         mParkingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -129,34 +129,23 @@ public class parking_fragment extends Fragment {
     /*
     Gets data from local db for the parking data
      */
-    private class GetParkingDataTask extends AsyncTask<JSONObject, Void, Void> {
-        @Override
-        protected Void doInBackground(JSONObject... object) {
-            face_parkinglots = new ArrayList<>();
-            hidden_parkinglots = new ArrayList<ArrayList<String>>();
-            Log.d("KTag", "ParkingLots data retrieved for college id : "+selected_college_id);
-            ArrayList<ArrayList<String>> temp= db_helper.getAllParkingLotsFromCollege(selected_college_id);
-            for(int i = 0; i < temp.size(); i++){
-                ArrayList<String> temp2 = new ArrayList<>();
-                temp2.add(temp.get(i).get(0));//id
-                temp2.add(temp.get(i).get(1));//name
-                temp2.add(temp.get(i).get(2));//lat
-                temp2.add(temp.get(i).get(3));//lng
-                hidden_parkinglots.add(temp2);//id,name,lat,lng
-                face_parkinglots.add(temp.get(i).get(1));
 
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            PopulateSpinner(mParkingSpinner,face_parkinglots);
+    private void GetParkingData() {
+        face_parkinglots = new ArrayList<>();
+        hidden_parkinglots = new ArrayList<ArrayList<String>>();
+        Log.d("KTag", "ParkingLots data retrieved for college id : " + selected_college_id);
+        ArrayList<ArrayList<String>> temp = db_helper.getAllParkingLotsFromCollege(selected_college_id);
+        for (int i = 0; i < temp.size(); i++) {
+            ArrayList<String> temp2 = new ArrayList<>();
+            temp2.add(temp.get(i).get(0));//id
+            temp2.add(temp.get(i).get(1));//name
+            temp2.add(temp.get(i).get(2));//lat
+            temp2.add(temp.get(i).get(3));//lng
+            hidden_parkinglots.add(temp2);//id,name,lat,lng
+            face_parkinglots.add(temp.get(i).get(1));
+            PopulateSpinner(mParkingSpinner, face_parkinglots);
 
         }
-
-
     }
 
     private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
