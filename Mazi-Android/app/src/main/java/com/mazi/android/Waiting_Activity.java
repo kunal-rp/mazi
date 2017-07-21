@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.Random;
 
 public class Waiting_Activity extends AppCompatActivity {
 
@@ -165,7 +166,11 @@ public class Waiting_Activity extends AppCompatActivity {
 
             try {
                 //Static random values for the user id and name
-                user.put("user_id", "bbbbbb");
+                Random r = new Random();
+
+                int Result = r.nextInt(16777216);
+
+                user.put("user_id", Integer.toHexString(Result));
                 user.put("user_name","KunalMobile");
 
                 mSocket.emit("setUser",user);
