@@ -19,7 +19,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.games.multiplayer.realtime.WaitingRoomListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,16 +43,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener,college_fragment.OnHeadlineSelectedListener,OnMapReadyCallback{
 
 
+    //var for the socket
+    private Socket mSocket;
 
+    private JSONObject user;
+
+    private SocketHandler socketHandler;
     String krpURL = "http://192.168.1.204:3000";
+
+    //connects to the server
+    {
+        try{
+            mSocket = IO.socket(krpURL);
+        } catch (URISyntaxException e) {
+            Log.i("Socket", "Invalid URI");
+            Toast.makeText(this, "No Connection", Toast.LENGTH_SHORT).show();
+        }
+        //need to handle exception where connection not made
+    }
 
     //var used to saved version data from REST API
     private JSONObject version_data;
@@ -66,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     //holds the college id,lat,lng of the current college id
     public String selected_college_id;
+    public String selected_parkinglot_id;
     public String type;
 
     public float lat;
@@ -76,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        socketHandler = new SocketHandler();
+
+
+        user = new JSONObject();
 
         //Initializes local db
         db_helper = new DB_Helper(this, null);
@@ -85,18 +113,29 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        new EstablishWebSocket().execute();
         new MainActivity.GetVersionData().execute();
 
 
-
-
-
+        mSocket.on("updateStatus", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    JSONObject obj = (JSONObject)args[0];
+                    Log.d("KTag",obj.toString());
+                    user.put("status",obj.getString("status"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
     }
 
+
     public void startCollegeFragment(){
-
-
+        mMap.clear();
+        markers.clear();
         college_fragment college_fragment = new college_fragment();
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
@@ -123,6 +162,9 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     @Override
     protected void onDestroy() {
+
+        mSocket.off();
+        mSocket.disconnect();
         super.onDestroy();
     }
 
@@ -165,6 +207,24 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     }
 
     @Override
+    public void submitRequest(String selected) {
+        selected_parkinglot_id = selected;
+        startWaitingActivity(true);
+        startCollegeFragment();
+    }
+
+    public void startWaitingActivity(boolean submitRequest){
+        Intent intent = new Intent(this, Waiting_Activity.class);
+        intent.putExtra("selected_college_id",selected_college_id);
+        intent.putExtra("selected_parkinglot_id",selected_parkinglot_id);
+        intent.putExtra("type",type);
+        intent.putExtra("submitRequest",submitRequest);
+        intent.putExtra("user", user.toString());
+        startActivity(intent);
+    }
+
+
+    @Override
     public void onParkingSpinnerItemSelected(float lat, float lng) {
         LatLng parking = new LatLng(lat, lng);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(parking));
@@ -173,9 +233,25 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     @Override
     public void onRequest(String t) {
-        type = t;
-        startParkingFragment(selected_college_id);
 
+        try {
+            if((user.getString("status")).equals("initial_connected")){
+                type = t;
+            }
+            String status = user.getString("status");
+            if(status.equals("initial_connected")){
+                startParkingFragment(selected_college_id);
+            }
+            else if(status.equals("waiting_match")){
+                startWaitingActivity(false);
+            }
+            else{
+                
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -353,6 +429,51 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         }
 
         super.onBackPressed();
+    }
+
+    //just calls connect
+    private class EstablishWebSocket extends AsyncTask<JSONObject, Void, Void>{
+
+        @Override
+        protected Void doInBackground(JSONObject... params) {
+            mSocket.connect();
+            socketHandler.setSocket(mSocket);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            new MainActivity.SetUser().execute();
+        }
+    }
+
+    /*
+    async called to emit the setUSer event to the server
+    server needs this info to identify the user with a socket connection
+    */
+    private class SetUser extends AsyncTask<JSONObject, Void, Void>{
+        @Override
+        protected Void doInBackground(JSONObject... params) {
+
+            Log.d("KTag","Set User Event Called");
+
+            try {
+                //Static random values for the user id and name
+                Random r = new Random();
+
+                int Result = r.nextInt(16777216);
+
+                user.put("user_id", Integer.toHexString(Result));
+                user.put("user_name","User"+Integer.toHexString(Result));
+
+                mSocket.emit("setUser",user);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 
 

@@ -46,13 +46,6 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".ParkingMapsActivity"
-            android:label="@string/title_activity_maps">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mazi.android.MainActivity" />
-        </activity>
-        <activity
             android:name=".Waiting_Activity"
             android:label="@string/title_activity_waiting_"
             android:theme="@style/AppTheme.NoActionBar" />

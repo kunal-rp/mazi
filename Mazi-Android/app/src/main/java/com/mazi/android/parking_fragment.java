@@ -1,14 +1,8 @@
 package com.mazi.android;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,24 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.graphics.Paint.ANTI_ALIAS_FLAG;
-
 
 public class parking_fragment extends Fragment {
-
-
-
-
 
     private DB_Helper db_helper;
 
@@ -49,8 +35,8 @@ public class parking_fragment extends Fragment {
 
     private ArrayList<MarkerOptions> markers;
 
-    //holds the college id,lat,lng of the current college id
-    public String selected;
+    //holds the parkinglot id,lat,lng of the current parkinglot id
+    public String selected_parkinglot_id;
     public float lat;
     public float lng;
 
@@ -61,6 +47,7 @@ public class parking_fragment extends Fragment {
     public interface OnHeadlineSelectedListener {
         public void onParkingSpinnerItemSelected(float lat, float lng);
         public void setMarkers(ArrayList<MarkerOptions> markers);
+        public void submitRequest(String selected_parkinglot_id);
     }
 
 
@@ -109,7 +96,7 @@ public class parking_fragment extends Fragment {
 
                 lat = Float.parseFloat(hidden_parkinglots.get(i).get(2));
                 lng = Float.parseFloat(hidden_parkinglots.get(i).get(3));
-                 hidden_parkinglots.get(i).get(0);
+                selected_parkinglot_id =  hidden_parkinglots.get(i).get(0);
 
                 mCallback.onParkingSpinnerItemSelected(lat,lng);
             }
@@ -117,6 +104,15 @@ public class parking_fragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        Button button = (Button) view.findViewById(R.id.submit);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.submitRequest(selected_parkinglot_id);
+            }
+        });
+
     }
 
     @Override
@@ -161,6 +157,8 @@ public class parking_fragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
     }
+
+
 
 
 

@@ -93,7 +93,6 @@ public class college_fragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d("KTag","College Fragment onCreateView");
         face_college = new ArrayList<>();
         hidden_college = new ArrayList<ArrayList<String>>();
 
@@ -105,7 +104,6 @@ public class college_fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         new college_fragment.GetAllCollegeToSpinner().execute();
-        Log.d("KTag","College Fragment onViewCreated");
         db_helper = new DB_Helper(getActivity(), null);
         //Sets floating buttons
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.requestRideButton);
@@ -138,14 +136,14 @@ public class college_fragment extends Fragment {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onRequest("Ride");
+                mCallback.onRequest("ride");
 
             }
         });
         fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onRequest("Park");
+                mCallback.onRequest("park");
             }
         });
 
