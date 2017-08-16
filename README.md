@@ -1,5 +1,5 @@
-![alt text](https://github.com/kunal-rp/mazi/blob/master/Logo%207.png)
-# Mazi
+![alt text](https://github.com/kunal-rp/vierve/blob/master/Vierve%20Logo%205.png)
+# Vierve
 Innovating College Parking one campus at a time
 
 ## Setup
