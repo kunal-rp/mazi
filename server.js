@@ -115,12 +115,7 @@ function newConnection(socket){
     socket.on('setUser',function(data){
         console.log("setUser "+data.user_id);
         socket.user_id = data.user_id;
-        if(clients[data.user_id] == undefined){
-            clients[data.user_id] = {socket_id : socket.id, status : 'initial_connected'};
-        }
-        else{
-            clients[data.user_id]["socket_id"] = socket.id;
-        }
+        clients[data.user_id] = {socket_id : socket.id, status : 'initial_connected'};
         socket.emit('updateStatus',{status : clients[socket.user_id].status});
        
     });
@@ -175,12 +170,11 @@ function newConnection(socket){
         var college_id = data.college_id;
         var parkinglot_id = data.parkinglot_id;
         var client_type = data.type;
+        var pu_lat = data.pickup_lat;
+        var pu_lng = data.pickup_lng;
         var opposite_type = 'ride';
         
         clients[user_id]['selected_college'] = college_id;
-        clients[user_id]['selected_parkinglot'] = parkinglot_id;
-        clients[user_id]['client_type'] = client_type;
-        clients[user_id]['time'] = time;
         
         if(client_type == 'ride'){
             opposite_type = 'park';
@@ -197,12 +191,9 @@ function newConnection(socket){
                 if(results_1.length == 0){
                     console.log("No matches found");
                     console.log(query_1);
-                    var query_2 = "INSERT into "+college_id+table_area+"(`user_id`, `user_name`, `parkinglot_id`, `time`, `type`, `socket_id`) VALUES( '"+ user_id+"','"+user_name+"','"+parkinglot_id+"',"+time +",'"+client_type+"','"+socket.id+"')";
+                    var query_2 = "INSERT into "+college_id+table_area+"(`user_id`, `user_name`, `parkinglot_id`, `time`, `type`, `socket_id`,`pickup_lat`,`pickup_lng`) VALUES( '"+ user_id+"','"+user_name+"','"+parkinglot_id+"',"+time +",'"+client_type+"','"+socket.id+"',"+pu_lat+","+pu_lng+")";
                     clients[user_id].status = 'waiting_match';
                     socket.emit('updateStatus',{status : clients[user_id].status});
-                    clients[user_id].request = "{}";
-                    clients[user_id].request.college_id = college_id;
-                     clients[user_id].request.parkinglot_id = parkinglot_id;
                     connection.query(query_2, function(err_2,results_2){
                         if(err_2){
                             console.log("Error while registering request into DB(area)")
@@ -218,7 +209,7 @@ function newConnection(socket){
                 }
                 else{
                     results_1 = results_1[0];
-                    
+                    console.log(results_1);
                     var mirror_socket_id = results_1.socket_id;
                     var mirror_user_id = results_1.user_id;
                     
@@ -294,8 +285,7 @@ function newConnection(socket){
            if(clients[user_id] != undefined){
                if(clients[user_id].status == 'waiting_match'){
                     var college_id = clients[user_id]['selected_college'];
-                    var parkinglot_id = clients[user_id]['selected_parkinglot'] ;
-                    removeRequest(user_id, college_id,parkinglot_id);
+                    removeRequest(user_id, college_id);
                 }
            }
            delete clients[user_id];
@@ -307,10 +297,13 @@ function newConnection(socket){
     socket.on('cancelRequest',function(){
         var user_id =  socket.user_id;
         var college_id = clients[user_id]['selected_college'];
-        var parkinglot_id = clients[user_id]['selected_parkinglot'] ;
-        removeRequest(user_id, college_id,parkinglot_id);
+        removeRequest(user_id, college_id);
         clients[user_id].status = 'initial_connected';
         socket.emit('updateStatus',{status : clients[user_id].status});
+    });
+
+    socket.on('endMatch',function(){
+
     });
     
     
@@ -332,7 +325,7 @@ function addUser(data){
     });
 }
 
-function removeRequest(user_id,college_id,parkinglot_id){
+function removeRequest(user_id,college_id){
     var query = "Delete from "+college_id+table_area+ " Where user_id = '"+user_id+"'";
     connection.query(query, function(err,results){
         if(err){

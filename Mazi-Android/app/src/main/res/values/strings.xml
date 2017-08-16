@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Mazi</string>
+    <string name="app_name">Vierve</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -14,8 +14,8 @@
         completions."
     </string>
     <string name="title_activity_maps">Map</string>
-    <string name="title_activity_waiting_">Waiting_Activity</string>
-    <string name="title_activity_realtime_map">RealtimeMapActivity</string>
+    <string name="title_activity_waiting_">Waiting for Match</string>
+    <string name="title_activity_realtime_map">Match Made!</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
