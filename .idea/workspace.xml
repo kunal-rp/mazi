@@ -2,28 +2,422 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="e18c7876-30bf-461c-a9be-5ceaf4161db2" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_annotations_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_compat_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_core_ui_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_core_utils_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_fragment_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_media_compat_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_v4_25_0_0.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_maps.xml" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileHashes.bin" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileHashes.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileSnapshots.bin" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileSnapshots.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.bin" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.bin" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.lock" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" afterPath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/app.iml" afterPath="$PROJECT_DIR$/Mazi-Android/app/app.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/build.gradle" afterPath="$PROJECT_DIR$/Mazi-Android/app/build.gradle" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/MainActivity.java" afterPath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/MainActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/ParkingMapsActivity.java" afterPath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/ParkingMapsActivity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/Waiting_Activity.java" afterPath="$PROJECT_DIR$/Mazi-Android/app/src/main/java/com/mazi/android/Waiting_Activity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_main.xml" afterPath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_main.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/strings.xml" afterPath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/strings.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.js" afterPath="$PROJECT_DIR$/server.js" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Logo 7.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileHashes.bin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/fileSnapshots.bin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.bin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/taskArtifacts/taskArtifacts.lock" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.bin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localClassSetAnalysis/localClassSetAnalysis.lock" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.bin" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.gradle/3.3/tasks/_app_compileDebugJavaWithJavac/localJarClasspathSnapshot/localJarClasspathSnapshot.lock" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/compiler.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/copyright/profiles_settings.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/gradle.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/animated_vector_drawable_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/appcompat_v7_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/constraint_layout_1_0_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/constraint_layout_solver_1_0_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/design_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/engine_io_client_0_6_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/espresso_core_2_2_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/espresso_idling_resource_2_2_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/exposed_instrumentation_api_publish_0_5.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_analytics_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_analytics_impl_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_auth_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_auth_common_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_auth_module_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_common_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_config_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_crash_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_database_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_database_connection_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_iid_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_messaging_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_storage_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/firebase_storage_common_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/hamcrest_core_1_3.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/hamcrest_integration_1_3.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/hamcrest_library_1_3.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/javawriter_2_1_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/javax_annotation_api_1_2.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/javax_inject_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/jsr305_2_0_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/junit_4_12.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/mediarouter_v7_24_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/okhttp_2_4_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/okhttp_ws_2_4_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/okio_1_4_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/palette_v7_24_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_ads_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_ads_lite_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_analytics_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_analytics_impl_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_appindexing_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_appinvite_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_auth_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_auth_base_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_awareness_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_base_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_basement_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_cast_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_cast_framework_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_clearcut_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_drive_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_fitness_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_games_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_gass_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_gcm_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_identity_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_iid_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_instantapps_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_location_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_maps_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_nearby_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_panorama_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_places_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_plus_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_safetynet_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_tagmanager_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_tagmanager_api_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_tasks_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_vision_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_wallet_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/play_services_wearable_9_8_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/recyclerview_v7_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/rules_0_5.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/runner_0_5.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/socket_io_client_0_6_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_annotations_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_compat_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_core_ui_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_core_utils_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_fragment_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_media_compat_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_v4_25_3_1.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/support_vector_drawable_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/libraries/transition_25_0_0.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/misc.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/modules.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/runConfigurations.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/.idea/workspace.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/Mazi-Android.iml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/Test-Mazi.iml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/.gitignore" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/app.iml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/build.gradle" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/proguard-rules.pro" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/debug/res/values/google_maps_api.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/AndroidManifest.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_login.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_main.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_realtime_map.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/activity_waiting_.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/fragment_college.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/layout/fragment_parking.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/mipmap-hdpi/ic_launcher.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/mipmap-mdpi/ic_launcher.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/mipmap-xhdpi/ic_launcher.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values-w820dp/dimens.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/colors.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/dimens.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/strings.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/main/res/values/styles.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/app/src/release/res/values/google_maps_api.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build.gradle" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-15-50-32-580.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-15-51-48-798.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-15-54-06-237.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-15-56-986.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-32-44-424.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-46-20-436.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-49-05-287.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-52-07-190.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-14-23-59-34-787.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-15-00-02-34-683.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-12-39-42-002.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-12-48-52-493.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-12-51-16-433.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-14-07-647.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-18-13-640.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-29-26-117.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-31-47-471.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-34-17-475.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-36-22-822.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-13-57-20-232.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-00-30-948.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-03-44-860.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-04-14-081.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-07-01-941.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-09-43-222.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-15-03-565.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-16-07-764.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-22-42-495.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-14-25-16-199.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-36-31-551.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-38-29-129.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-41-12-896.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-44-19-150.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-45-39-579.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-16-23-58-24-133.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-00-59-594.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-04-10-678.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-07-07-043.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-10-31-008.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-10-36-333.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-10-44-165.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-11-57-001.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-13-18-095.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-14-51-984.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-18-19-399.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-21-39-068.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-26-33-310.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-00-28-32-177.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-14-54-40-600.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-14-56-36-615.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-14-58-16-372.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-14-59-55-858.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-00-51-400.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-03-10-368.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-05-47-021.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-07-44-698.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-16-30-972.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-21-06-202.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-24-26-506.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-27-30-325.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-30-30-831.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-30-38-197.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-17-15-32-47-577.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-41-54-114.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-43-23-433.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-45-14-772.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-46-57-117.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-49-52-803.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-10-56-08-201.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-11-01-01-895.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-11-02-22-224.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-11-14-25-235.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-11-16-30-673.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-12-03-13-053.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-12-04-28-386.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-12-06-36-055.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-14-17-20-577.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-15-48-58-203.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-15-49-22-845.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-05-23-15-56-38-279.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-11-07-867.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-34-00-104.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-40-06-191.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-41-16-456.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-45-35-652.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-21-50-22-777.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-38-17-421.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-43-53-295.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-55-48-334.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-56-04-564.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-58-48-022.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-22-58-51-533.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-23-19-35-488.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-23-24-18-300.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-23-24-51-004.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-23-31-41-788.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-10-23-38-39-757.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-00-41-57-148.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-00-48-19-571.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-00-57-14-629.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-00-58-28-899.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-01-02-24-215.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-14-32-529.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-16-38-960.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-19-38-920.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-22-51-644.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-24-07-403.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-25-12-831.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-28-05-273.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-11-10-29-22-995.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-18-23-204.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-20-31-109.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-27-20-370.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-29-06-437.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-37-08-338.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-39-31-505.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-14-21-43-55-098.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-33-44-598.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-39-49-946.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-47-32-631.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-48-54-183.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-54-12-932.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-21-58-00-325.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-22-01-52-195.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-26-22-07-33-468.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-08-27-723.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-11-47-145.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-21-07-499.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-21-11-789.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-40-57-009.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-06-27-22-43-36-643.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-01-18-59-09-040.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-01-19-01-57-961.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-01-19-02-59-027.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-02-14-19-49-112.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-12-28-30-730.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-12-29-37-459.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-12-30-06-219.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-12-31-46-176.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-12-41-10-854.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-13-12-30-897.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-13-14-48-388.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-13-21-49-689.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-22-53-38-328.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-22-56-03-969.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-22-57-55-341.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-22-58-55-722.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-00-53-880.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-16-00-297.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-18-49-961.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-25-45-474.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-25-51-346.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-26-02-886.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-26-52-042.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-27-09-074.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-29-33-374.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-03-23-31-28-482.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-37-48-244.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-40-04-044.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-40-07-540.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-41-38-970.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-44-34-624.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-46-05-237.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-49-36-357.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-53-23-339.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-11-57-52-009.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-01-02-679.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-11-46-881.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-16-54-454.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-19-54-283.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-23-20-313.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-12-38-59-524.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-14-38-55-869.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-14-43-33-049.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-14-44-49-877.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-14-52-57-060.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-14-59-35-349.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-15-02-28-139.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-15-05-22-605.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-15-27-14-399.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-04-18-40-08-680.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-07-40-506.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-09-49-922.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-14-34-891.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-20-57-254.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-24-22-943.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-27-05-938.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-30-51-037.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-32-52-450.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-34-51-066.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-13-38-28-826.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-15-35-26-545.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-15-35-31-901.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-15-41-40-261.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-15-44-32-471.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-16-05-48-204.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-16-13-06-747.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-16-41-22-401.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-04-22-363.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-04-39-433.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-06-29-859.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-08-12-585.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-11-31-760.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-13-05-207.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-14-44-412.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-27-33-779.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-27-52-716.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-54-28-443.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-17-59-49-197.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-18-02-18-784.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-18-03-59-068.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-18-05-30-627.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-07-18-06-00-843.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-03-04-918.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-05-29-764.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-05-34-866.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-08-06-775.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-08-09-538.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-09-23-022.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-19-09-25-760.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-20-17-15-875.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-20-17-17-965.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-27-36-706.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-30-06-783.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-30-08-851.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-32-51-375.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-39-25-756.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-46-01-836.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-50-19-309.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-21-55-59-029.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-02-01-395.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-11-01-953.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-16-48-004.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-18-18-416.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-21-27-227.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-14-22-28-18-517.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-17-23-17-25-410.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-17-23-20-15-669.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-17-23-22-53-283.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-17-23-24-20-418.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-17-23-26-06-542.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-20-12-38-735.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-20-15-25-317.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-20-17-38-272.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-20-24-53-483.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-20-25-12-846.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-22-54-28-584.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-23-00-05-518.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-23-02-53-258.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-23-04-10-653.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-19-23-11-47-744.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-20-23-49-31-080.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-20-23-56-46-682.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-00-29-805.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-02-43-067.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-05-16-874.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-22-21-721.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-24-03-378.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-00-26-14-039.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-01-57-44-848.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-01-59-34-601.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-05-28-031.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-11-04-141.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-16-27-003.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-22-08-225.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-28-54-256.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-29-11-526.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-31-05-432.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-32-19-636.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-34-53-748.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-35-14-233.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-36-57-137.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-39-05-046.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-46-24-275.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-46-27-063.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-46-46-621.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-49-06-297.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/android-profile/profile-2017-07-21-02-53-21-784.rawproto" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/generated/mockable-android-25.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/build/intermediates/dex-cache/cache.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/gradle.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/gradle/wrapper/gradle-wrapper.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/gradle/wrapper/gradle-wrapper.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/gradlew" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/gradlew.bat" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/local.properties" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/readme.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/Mazi-Android/settings.gradle" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Mazi.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -78,14 +472,15 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="AndroidView">
         <subPane>
           <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="Mazi" />
+              <option name="myItemId" value="Vierve" />
               <option name="myItemType" value="com.android.tools.idea.navigator.nodes.AndroidViewProjectNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -95,12 +490,11 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Mazi-Android" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="FullScreen" value="true" />
   </component>
   <component name="RunManager">
@@ -192,22 +586,22 @@
     <editor active="false" />
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Android Monitor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24878837" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24959612" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
-      <window_info id="Android Model" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
