@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.vierve.LoginActivity">
+    tools:context="com.vierve.LoginActivity"
+    >
 
 
     <android.support.design.widget.AppBarLayout

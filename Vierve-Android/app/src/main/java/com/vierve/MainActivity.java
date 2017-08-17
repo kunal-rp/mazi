@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     private JSONObject user;
 
     private SocketHandler socketHandler;
-    String krpURL = "http://10.99.147.123:3000";
+    String krpURL = "http://192.168.1.204:3000";
 
     //connects to the server
     {

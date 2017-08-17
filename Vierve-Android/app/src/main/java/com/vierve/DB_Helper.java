@@ -157,15 +157,12 @@ public class DB_Helper extends SQLiteOpenHelper {
     public String getCollegeName(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         String results = "";
-        String Query = "Select * from `" + TABLE_COLLEGE_INFO + "` where `college_id` = " + id;
-        Cursor c = db.rawQuery(Query, null);
+        String query = "Select * from `" + TABLE_COLLEGE_INFO + "` where `college_id` = " + id;
+        Log.d("KTag","Query to Local DB : "+ query);
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
         if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
-
-
-
             results = c.getString(c.getColumnIndex(COL_COLLEGE_NAME));
-
-
         }
         c.close();
         return results;
@@ -173,8 +170,9 @@ public class DB_Helper extends SQLiteOpenHelper {
     public String getParkinglotName(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         String results = "";
-        String Query = "Select * from `" + TABLE_PARKINGLOT_INFO + "` where `parkinglot_id` = " + id;
-        Cursor c = db.rawQuery(Query, null);
+        String query = "Select * from `" + TABLE_PARKINGLOT_INFO + "` where `parkinglot_id` = " + id;
+        Cursor c = db.rawQuery(query, null);
+        c.moveToFirst();
         if (c.getString(c.getColumnIndex(COL_PARKINGLOT_NAME)) != null) {
             results = c.getString(c.getColumnIndex(COL_PARKINGLOT_NAME));
         }
