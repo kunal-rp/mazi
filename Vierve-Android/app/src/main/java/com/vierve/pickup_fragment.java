@@ -24,7 +24,7 @@ public class pickup_fragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface OnHeadlineSelectedListener {
-        public void setPickupLocation(double lat, double lng);
+        public void setPickupLocation(Float lat, Float lng);
     }
 
     @Nullable
@@ -45,7 +45,7 @@ public class pickup_fragment extends Fragment {
             @Override
             public void onClick(View v) {
                 LatLng ll = ((MainActivity)getActivity()).getCenterLocationCoordinates();
-                mCallback.setPickupLocation(ll.latitude,ll.longitude);
+                mCallback.setPickupLocation((float)ll.latitude,(float)ll.longitude);
             }
         });
 

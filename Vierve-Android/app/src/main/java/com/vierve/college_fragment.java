@@ -46,7 +46,7 @@ public class college_fragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface OnHeadlineSelectedListener {
-        public void onSpinnerItemSelected(float lat, float lng, String college_id);
+        public void onCollegeSpinnerItemSelected(float lat, float lng, String college_id);
         public void onPRActionRequest(String type);
     }
 
@@ -103,7 +103,7 @@ public class college_fragment extends Fragment {
                 selected = hidden_college.get(i).get(0);//id
                 lat = Float.parseFloat(hidden_college.get(i).get(2));//lat
                 lng = Float.parseFloat(hidden_college.get(i).get(3));//lng
-                mCallback.onSpinnerItemSelected(lat,lng, hidden_college.get(i).get(0));
+                mCallback.onCollegeSpinnerItemSelected(lat,lng, hidden_college.get(i).get(0));
             }
 
             @Override

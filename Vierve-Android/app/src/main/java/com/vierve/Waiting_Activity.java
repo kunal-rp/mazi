@@ -6,10 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
-import com.google.android.gms.vision.text.Text;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +18,7 @@ public class Waiting_Activity extends AppCompatActivity {
 
     //var for the socket
     private Socket mSocket;
-    SocketHandler socketHandler;
+    private SocketHandler socketHandler;
 
     //values retrieved from the previous activities
     private String type;
@@ -31,8 +31,6 @@ public class Waiting_Activity extends AppCompatActivity {
 
     private JSONObject user;
 
-
-    String krpURL = "http://192.168.1.204:3000";
     boolean submitRequest;
 
 
@@ -41,6 +39,7 @@ public class Waiting_Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting_);
+
 
 
         db_helper = new DB_Helper(this,null);
@@ -60,8 +59,8 @@ public class Waiting_Activity extends AppCompatActivity {
         TextView pText = (TextView) findViewById(R.id.parkinglot_name);
         pText.setText(db_helper.getParkinglotName(Integer.parseInt(selected_parkinglot_id)));
         if(type.equals("ride")){
-            pu_lat = bundle.getDouble("pickup_lat");
-            pu_lng = bundle.getDouble("pickup_lng");
+            pu_lat = bundle.getFloat("pickup_lat");
+            pu_lng = bundle.getFloat("pickup_lng");
         }
         else{
             pu_lat = 0;
@@ -76,6 +75,8 @@ public class Waiting_Activity extends AppCompatActivity {
 
         mSocket = socketHandler.getSocket();
 
+        mSocket.off("matched_confirm");
+
 
 
         if(submitRequest){
@@ -89,7 +90,7 @@ public class Waiting_Activity extends AppCompatActivity {
                 obj.put("pickup_lat",pu_lat);
                 obj.put("pickup_lng",pu_lng);
                 mSocket.emit("register",obj);
-                Log.d("KTag","Register Event");
+                Log.d("KTag","Register Event : "+ obj.toString());
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -104,7 +105,6 @@ public class Waiting_Activity extends AppCompatActivity {
             public void call(Object... args) {
 
                 JSONObject obj = (JSONObject)args[0];
-                Log.d("KTag","Args: "+ args[0].toString());
                 try {
                     matchMade(obj);
                 } catch (JSONException e) {
@@ -116,12 +116,15 @@ public class Waiting_Activity extends AppCompatActivity {
 
 
     public void matchMade(JSONObject obj) throws JSONException {
-        mSocket.off("matched_confirm");
         Intent intent = new Intent(this, MatchActivity.class);
 
         Log.d("KTag","Match : "+ obj.toString());
-        intent.putExtra("pu_lat",(Double) obj.get("pu_lat"));
-        intent.putExtra("pu_lng",(Double) obj.get("pu_lng"));
+        intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
+        intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
+        intent.putExtra("rider_id", (String) obj.getString("rider"));
+        intent.putExtra("parker_id", (String) obj.getString("parker"));
+        intent.putExtra("start_timestamp", (Integer) obj.getInt("start_timestamp"));
+        intent.putExtra("user", (String)user.toString());
         startActivity(intent);
     }
 
@@ -135,9 +138,11 @@ public class Waiting_Activity extends AppCompatActivity {
     public void cancelRequest(View view){
         JSONObject t = new JSONObject();
         mSocket.emit("cancelRequest",t);
-        mSocket.off("matched_confirm");
         finish();
     }
 
-
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "Press Cancel to return to main screen",Toast.LENGTH_LONG).show();
+    }
 }

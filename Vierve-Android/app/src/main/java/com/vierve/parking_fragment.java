@@ -46,7 +46,7 @@ public class parking_fragment extends Fragment {
     // Container Activity must implement this interface
     public interface OnHeadlineSelectedListener {
         public void onParkingSpinnerItemSelected(float lat, float lng);
-        public void setMarkers(ArrayList<MarkerOptions> markers);
+        public void setMarkers(ArrayList<MarkerOptions> markers,ArrayList<String> list);
         public void setParkingLot(String selected_parkinglot_id);
     }
 
@@ -113,6 +113,7 @@ public class parking_fragment extends Fragment {
             }
         });
 
+
     }
 
     @Override
@@ -139,9 +140,8 @@ public class parking_fragment extends Fragment {
             temp2.add(temp.get(i).get(3));//lng
             hidden_parkinglots.add(temp2);//id,name,lat,lng
             face_parkinglots.add(temp.get(i).get(1));
-            PopulateSpinner(mParkingSpinner, face_parkinglots);
-
         }
+        PopulateSpinner(mParkingSpinner, face_parkinglots);
     }
 
     private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
@@ -152,10 +152,17 @@ public class parking_fragment extends Fragment {
             markers.add(marker);
 
         }
-        mCallback.setMarkers(markers);
+        mCallback.setMarkers(markers,list);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+    }
+
+    public void updateSpinnerSelected(String id){
+
+        int index = face_parkinglots.indexOf(id);
+        Log.d("KTag",id + "|"+Integer.toString(index) + "|"+ hidden_parkinglots.toString());
+        mParkingSpinner.setSelection(index);
     }
 
 
