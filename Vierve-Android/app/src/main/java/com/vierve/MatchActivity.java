@@ -1,13 +1,10 @@
 package com.vierve;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -33,7 +30,7 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
 
 
     private double pu_lat, pu_lng;
-    private String rider_id, parker_id;
+    private String rider_user_id,rider_user_name, parker_user_id,parker_user_name;
     private int start_timestamp;
 
     private JSONObject user;
@@ -68,8 +65,10 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
         Bundle bundle = intent.getExtras();
         pu_lat = bundle.getDouble("pu_lat");
         pu_lng = bundle.getDouble("pu_lng");
-        rider_id = bundle.getString("rider_id");
-        parker_id = bundle.getString("parker_id");
+        rider_user_id = bundle.getString("rider_user_id");
+        rider_user_name = bundle.getString("rider_user_name");
+        parker_user_id = bundle.getString("parker_user_id");
+        parker_user_name = bundle.getString("parker_user_name");
         start_timestamp = bundle.getInt("start_timestamp");
         try {
             user = new JSONObject(bundle.getString("user"));
@@ -77,6 +76,27 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
             e.printStackTrace();
         }
 
+
+        final match_profile parker_profile = new match_profile();
+        Bundle parker_bundle = new Bundle();
+        parker_bundle.putString("username", parker_user_name);
+        parker_bundle.putString("type","Parker");
+        FragmentManager fm = getSupportFragmentManager();
+        parker_profile.setArguments(parker_bundle);
+        FragmentTransaction profile_transaction = fm.beginTransaction();
+        profile_transaction.replace(R.id.parker_profile, parker_profile, "parker_profile");
+        profile_transaction.addToBackStack(null);
+        profile_transaction.commit();
+
+        final match_profile rider_profile = new match_profile();
+        Bundle rider_bundle = new Bundle();
+        rider_bundle.putString("username", rider_user_name);
+        rider_bundle.putString("type","Rider");
+        rider_profile.setArguments(rider_bundle);
+        FragmentTransaction rider_transaction = fm.beginTransaction();
+        rider_transaction.replace(R.id.rider_profile, rider_profile, "rider_profile");
+        rider_transaction.addToBackStack(null);
+        rider_transaction.commit();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -131,6 +151,15 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
                         try {
                             Float t_lat = Float.parseFloat(Double.toString(obj.getDouble("lat")));
                             Float t_lng = Float.parseFloat(Double.toString(obj.getDouble("lng")));
+
+                            Location pu_location = new Location("pickup location");
+                            pu_location.setLatitude(pu_lat);
+                            pu_location.setLongitude(pu_lng);
+                            Location user_location = new Location("user");
+                            user_location.setLatitude(t_lat);
+                            user_location.setLongitude(t_lng);
+                            float distance = pu_location.distanceTo(user_location);
+
                             if(!obj.get("user_id").equals(user.get("user_id"))){
                                 if (opposite_marker == null) {
                                     MarkerOptions a = new MarkerOptions().position(new LatLng(t_lat, t_lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
@@ -149,6 +178,22 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
                                    user_marker.setPosition(new LatLng(t_lat,t_lng));
                                 }
                             }
+
+                            if(obj.get("user_id").equals(rider_user_id)){
+                                if(distance <= 10){
+                                    rider_profile.userIsNear();
+                                }
+                                else{
+                                    rider_profile.userIsNotNear();
+                                }
+                            }else{
+                                if(distance <= 10){
+                                    parker_profile.userIsNear();
+                                }
+                                else{
+                                    parker_profile.userIsNotNear();
+                                }
+                            }
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -163,8 +208,8 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
     public void emitJoinRoom() {
         JSONObject obj = new JSONObject();
         try {
-            obj.put("rider", rider_id);
-            obj.put("parker", parker_id);
+            obj.put("rider", rider_user_id);
+            obj.put("parker", parker_user_id);
             obj.put("lat", current_lat);
             obj.put("lng", current_lng);
             obj.put("start_timestamp", start_timestamp);

@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -148,7 +149,7 @@ public class parking_fragment extends Fragment {
         for(int i = 0; i < hidden_parkinglots.size(); i++){
             ArrayList<String> temp = hidden_parkinglots.get(i);
             LatLng parkingLot = new LatLng(Float.parseFloat(temp.get(2)), Float.parseFloat(temp.get(3)));
-            MarkerOptions marker = new MarkerOptions().position(parkingLot).title(temp.get(1));
+            MarkerOptions marker = new MarkerOptions().position(parkingLot).title(temp.get(1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));;
             markers.add(marker);
 
         }

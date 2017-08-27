@@ -18,7 +18,6 @@
     </android.support.design.widget.AppBarLayout>
 
 
-
     <fragment
         android:layout_below="@id/toolbar_parent"
         android:id="@+id/map"
@@ -26,5 +25,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="2"
+        android:layout_below="@+id/toolbar_parent"
+        android:layout_marginTop="10dp"
+        android:layout_margin="5dp"
+        android:background="@color/colorPrimary">
+
+        <FrameLayout
+            android:id="@+id/parker_profile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+
+            />
+        <FrameLayout
+            android:id="@+id/rider_profile"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            />
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -32,6 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -45,6 +46,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -52,6 +54,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener, college_fragment.OnHeadlineSelectedListener, pickup_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
@@ -88,12 +92,9 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     public Float pu_lat;
     public Float pu_lng;
 
-    //holds current
-    public float lat;
-    public float lng;
-
     //hodls user's current coordinates
-    private double current_lat, current_lng;
+    private double current_lat, current_lng,college_lat, college_lng;
+
 
 
     parking_fragment parking_fragment;
@@ -162,9 +163,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.style_json));
         mMap = googleMap;
-        LatLng college_selected = new LatLng(lat, lng);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(college_selected));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(college_selected, 17));
+        LatLng college_selected = new LatLng(27.380469, 33.632096);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(college_selected, 18));
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-
                         Log.d("KTag", "Marker Clicked : " + marker.getTitle() );
                         parking_fragment.updateSpinnerSelected(marker.getTitle());
                         return false;
@@ -301,14 +300,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                     Log.d("KTag", "Error");
                 }
 
-            } catch (MalformedURLException e) {
-                Log.d("KTag", e.toString());
-                e.printStackTrace();
             } catch (IOException e) {
-                Log.d("KTag", e.toString());
+                Toast.makeText(getApplicationContext(),"Cannot establish connection to Server for Check Version",Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             } catch (JSONException e) {
-                Log.d("KTag", e.toString());
+                Toast.makeText(getApplicationContext(),"Can't put Check Verison results into JSON Object",Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
             return null;
@@ -366,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 code = version_data.getInt("code");
 
             } catch (JSONException e) {
+                Toast.makeText(getApplicationContext(),"No Results from Check version",Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
             return null;
@@ -454,9 +451,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     //Moves map focus when a new spinner item is clicked for the college_fragment
     @Override
     public void onCollegeSpinnerItemSelected(float lat, float lng, String college_id) {
+        college_lat = lat;
+        college_lng = lng;
+        Log.d("KTag","College Selected: "+ college_lat + ","+ college_lng);
         LatLng college = new LatLng(lat, lng);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(college));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(college, 13));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(college, 14));
         selected_college_id = college_id;
     }
 
@@ -471,33 +470,41 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         if(askPermissions() == true){
             current_lat = GPSTracker.latitude;
             current_lng = GPSTracker.longitude;
-            /*
-            HERE will check if the user's current location is close enough for it to request a parking spot or a ride
-            For a Park : 3 mile
-            For a Ride : 1 mile
-             */
-            Log.d("KTag","Location Change Lat:"+ current_lat+ "Lng :"+ current_lng);
-            try {
-                String status = user.getString("status");
+
+            type=t;
+            Location college = new Location("college");
+            college.setLatitude(college_lat);
+            college.setLongitude(college_lng);
+            Location current = new Location("user");
+            current.setLatitude(current_lat);
+            current.setLongitude(current_lng);
+            float distance = college.distanceTo(current);
+            if((type.equals("ride") && distance > 3218.68)||(type.equals("park") && distance > 6437.36) ){
+                Toast.makeText(this,"User is too far away from college. Current Distance : "+distance,Toast.LENGTH_SHORT).show();
+            }
+            else{
+                try {
+                    String status = user.getString("status");
 
                 /*
                 For now if the match activity is called and it goes back to this activity, the status is reverted back to the 'initial_connected'
                 Future Use: After Match activity is the Rating Activity, and after that is finished it automatically goes back to this activity and the server will update the status
                  */
 
-                if (status.equals("matched")) {
-                    user.put("status", "initial_connected");
-                }
-                status = user.getString("status");
-                if ((user.getString("status")).equals("initial_connected")) {
-                    type = t;
-                    user.put("type",type);
-                    startParkingFragment(selected_college_id);
-                }
+                    if (status.equals("matched")) {
+                        user.put("status", "initial_connected");
+                    }
+                    status = user.getString("status");
+                    if ((user.getString("status")).equals("initial_connected")) {
+                        user.put("type",type);
+                        startParkingFragment(selected_college_id);
+                    }
 
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+
         }
         else{
             Toast.makeText(this, "Need GPS Access to Continue",Toast.LENGTH_LONG).show();
@@ -611,6 +618,14 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     }
 
 
+    @Override
+    protected void onResume() {
+        FragmentManager fm = this.getSupportFragmentManager();
+        for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+            fm.popBackStack();
+        }
+        super.onResume();
+    }
 
     @Override
     public void onBackPressed() {

@@ -85,7 +85,6 @@ public class Waiting_Activity extends AppCompatActivity {
                 obj.put("user",user);
                 obj.put("college_id", selected_college_id);
                 obj.put("parkinglot_id",selected_parkinglot_id);
-                obj.put("time",0);
                 obj.put("type",type);
                 obj.put("pickup_lat",pu_lat);
                 obj.put("pickup_lng",pu_lng);
@@ -121,8 +120,10 @@ public class Waiting_Activity extends AppCompatActivity {
         Log.d("KTag","Match : "+ obj.toString());
         intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
         intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
-        intent.putExtra("rider_id", (String) obj.getString("rider"));
-        intent.putExtra("parker_id", (String) obj.getString("parker"));
+        intent.putExtra("rider_user_id", (String) obj.getString("rider_user_id"));
+        intent.putExtra("rider_user_name", (String) obj.getString("rider_user_name"));
+        intent.putExtra("parker_user_id", (String) obj.getString("parker_user_id"));
+        intent.putExtra("parker_user_name", (String) obj.getString("parker_user_name"));
         intent.putExtra("start_timestamp", (Integer) obj.getInt("start_timestamp"));
         intent.putExtra("user", (String)user.toString());
         startActivity(intent);
