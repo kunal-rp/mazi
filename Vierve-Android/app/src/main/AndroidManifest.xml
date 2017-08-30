@@ -47,7 +47,10 @@
             android:screenOrientation="portrait"/>
         <activity
             android:name="com.vierve.MatchActivity"
-            android:label="@string/title_activity_realtime_map"
+            android:theme="@style/AppTheme"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name="com.vierve.RatingActivity"
             android:theme="@style/AppTheme"
             android:screenOrientation="portrait"/>
     </application>

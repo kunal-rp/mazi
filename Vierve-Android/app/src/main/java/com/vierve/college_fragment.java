@@ -26,7 +26,7 @@ import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 public class college_fragment extends Fragment {
 
 
-    private DB_Helper db_helper;
+    private DB_Helper_Data db_helper_data;
 
     //List used to store the college id, lat, lng
     private ArrayList<ArrayList<String>>hidden_college;
@@ -81,7 +81,7 @@ public class college_fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         new college_fragment.GetAllCollegeToSpinner().execute();
-        db_helper = new DB_Helper(getActivity(), null);
+        db_helper_data = new DB_Helper_Data(getActivity(), null);
         //Sets floating buttons
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.requestRideButton);
         fab.setImageBitmap(textAsBitmap("RIDE", 40, Color.WHITE ));
@@ -170,7 +170,7 @@ public class college_fragment extends Fragment {
         protected Void doInBackground(Object... params) {
 
 
-            ArrayList<ArrayList<String>> temp= db_helper.getAllCollegesInformation();
+            ArrayList<ArrayList<String>> temp= db_helper_data.getAllCollegesInformation();
             for(int i = 0; i < temp.size(); i++){
                 ArrayList<String> temp2 = new ArrayList<>();
                 temp2.add (temp.get(i).get(0));//id

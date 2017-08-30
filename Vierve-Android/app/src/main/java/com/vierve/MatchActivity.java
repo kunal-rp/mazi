@@ -1,12 +1,15 @@
 package com.vierve;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Socket;
@@ -26,11 +29,11 @@ import org.json.JSONObject;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MatchActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MatchActivity extends AppCompatActivity implements verification_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
 
 
     private double pu_lat, pu_lng;
-    private String rider_user_id,rider_user_name, parker_user_id,parker_user_name;
+    private String rider_user_id, rider_user_name, parker_user_id, parker_user_name;
     private int start_timestamp;
 
     private JSONObject user;
@@ -48,6 +51,10 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
 
     Timer timer;
 
+    verification_fragment verification_fragment;
+
+    private final int DISTANCE_MINIMUM = 10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +67,11 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
 
 
         mSocket.off("joined_room_confirm");
+        mSocket.off("issueConfirmation");
         mSocket.off("updateCurrentLocation");
+        mSocket.off("revertConfirmation");
+
+
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         pu_lat = bundle.getDouble("pu_lat");
@@ -80,7 +91,7 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
         final match_profile parker_profile = new match_profile();
         Bundle parker_bundle = new Bundle();
         parker_bundle.putString("username", parker_user_name);
-        parker_bundle.putString("type","Parker");
+        parker_bundle.putString("type", "Parker");
         FragmentManager fm = getSupportFragmentManager();
         parker_profile.setArguments(parker_bundle);
         FragmentTransaction profile_transaction = fm.beginTransaction();
@@ -91,7 +102,7 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
         final match_profile rider_profile = new match_profile();
         Bundle rider_bundle = new Bundle();
         rider_bundle.putString("username", rider_user_name);
-        rider_bundle.putString("type","Rider");
+        rider_bundle.putString("type", "Rider");
         rider_profile.setArguments(rider_bundle);
         FragmentTransaction rider_transaction = fm.beginTransaction();
         rider_transaction.replace(R.id.rider_profile, rider_profile, "rider_profile");
@@ -111,17 +122,16 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                            current_lat = GPSTracker.latitude;
-                            current_lng = GPSTracker.longitude;
-                            Log.d("KTag", "Current Location : " + current_lat + "," + current_lng);
-                            JSONObject obj = new JSONObject();
-                            try {
-                                obj.put("lat", current_lat);
-                                obj.put("lng", current_lng);
-                                mSocket.emit("updateLocation", obj);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                        current_lat = GPSTracker.latitude;
+                        current_lng = GPSTracker.longitude;
+                        JSONObject obj = new JSONObject();
+                        try {
+                            obj.put("lat", current_lat);
+                            obj.put("lng", current_lng);
+                            mSocket.emit("updateLocation", obj);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
 
                     }
@@ -137,6 +147,44 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
                 Log.d("KTag", "Joined Room : " + obj.toString());
+            }
+        });
+
+        mSocket.on("issueConfirmation", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject obj = (JSONObject) args[0];
+                verification_fragment = new verification_fragment();
+                Log.d("KTag","confirmation issued");
+                Bundle bundle1 = new Bundle();
+                try {
+                    bundle1.putString("confirmationNumber",obj.getString("confirmationNumber"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                verification_fragment.setArguments(bundle1);
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction rider_transaction = fm.beginTransaction();
+                rider_transaction.replace(R.id.verificationSpace, verification_fragment, "verification_space");
+                rider_transaction.addToBackStack(null);
+                rider_transaction.commit();
+            }
+        });
+
+        mSocket.on("revertConfirmation", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d("KTag","confirmation reverted");
+                getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.verificationSpace)).commit();
+            }
+        });
+
+        mSocket.on("finish", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Log.d("KTag","FINISHED!!!!");
+                startRating();
+
             }
         });
 
@@ -160,37 +208,38 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
                             user_location.setLongitude(t_lng);
                             float distance = pu_location.distanceTo(user_location);
 
-                            if(!obj.get("user_id").equals(user.get("user_id"))){
+                            if (!obj.get("user_id").equals(user.get("user_id"))) {
                                 if (opposite_marker == null) {
                                     MarkerOptions a = new MarkerOptions().position(new LatLng(t_lat, t_lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
                                     opposite_marker = mMap.addMarker(a);
+                                } else {
+                                    opposite_marker.setPosition(new LatLng(t_lat, t_lng));
                                 }
-                                else{
-                                    opposite_marker.setPosition(new LatLng(t_lat,t_lng));
-                                }
-                            }
-                            else{
+                            } else {
                                 if (user_marker == null) {
                                     MarkerOptions a = new MarkerOptions().position(new LatLng(t_lat, t_lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
                                     user_marker = mMap.addMarker(a);
+                                } else {
+                                    user_marker.setPosition(new LatLng(t_lat, t_lng));
                                 }
-                                else{
-                                   user_marker.setPosition(new LatLng(t_lat,t_lng));
+                                if (distance <= 10) {
+                                    mSocket.emit("atPickup", new JSONObject());
+                                } else {
+                                    mSocket.emit("notAtPickup", new JSONObject());
                                 }
                             }
 
-                            if(obj.get("user_id").equals(rider_user_id)){
-                                if(distance <= 10){
+                            if (obj.get("user_id").equals(rider_user_id)) {
+                                if (distance <= DISTANCE_MINIMUM) {
                                     rider_profile.userIsNear();
-                                }
-                                else{
+
+                                } else {
                                     rider_profile.userIsNotNear();
                                 }
-                            }else{
-                                if(distance <= 10){
+                            } else {
+                                if (distance <= DISTANCE_MINIMUM) {
                                     parker_profile.userIsNear();
-                                }
-                                else{
+                                } else {
                                     parker_profile.userIsNotNear();
                                 }
                             }
@@ -229,7 +278,12 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
         MarkerOptions marker_options = new MarkerOptions().position(pickup_loc).title("PicKUp Location");
         pu_marker = mMap.addMarker(marker_options);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(pickup_loc));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pickup_loc,13));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(pickup_loc, 13));
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ) {
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
 
     }
 
@@ -237,5 +291,21 @@ public class MatchActivity extends AppCompatActivity implements OnMapReadyCallba
     protected void onDestroy() {
         timer.cancel();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+    @Override
+    public void sendConfirmation() {
+        Log.d("KTag","send confirmation");
+        mSocket.emit("confirmPickUp", new JSONObject());
+    }
+
+    public void startRating() {
+        Intent intent = new Intent(this, RatingActivity.class);
+        startActivity(intent);
     }
 }

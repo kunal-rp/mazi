@@ -25,7 +25,7 @@ public class Waiting_Activity extends AppCompatActivity {
     private String selected_college_id, selected_parkinglot_id;
     double pu_lat,pu_lng;
 
-    private DB_Helper db_helper;
+    private DB_Helper_Data db_helper_data;
 
 
 
@@ -42,7 +42,7 @@ public class Waiting_Activity extends AppCompatActivity {
 
 
 
-        db_helper = new DB_Helper(this,null);
+        db_helper_data = new DB_Helper_Data(this,null);
 
 
         socketHandler = new SocketHandler();
@@ -55,9 +55,9 @@ public class Waiting_Activity extends AppCompatActivity {
         type = bundle.getString("type");
 
         TextView cText = (TextView) findViewById(R.id.college_name);
-        cText.setText(db_helper.getCollegeName(Integer.parseInt(selected_college_id)));
+        cText.setText(db_helper_data.getCollegeName(Integer.parseInt(selected_college_id)));
         TextView pText = (TextView) findViewById(R.id.parkinglot_name);
-        pText.setText(db_helper.getParkinglotName(Integer.parseInt(selected_parkinglot_id)));
+        pText.setText(db_helper_data.getParkinglotName(Integer.parseInt(selected_parkinglot_id)));
         if(type.equals("ride")){
             pu_lat = bundle.getFloat("pickup_lat");
             pu_lng = bundle.getFloat("pickup_lng");

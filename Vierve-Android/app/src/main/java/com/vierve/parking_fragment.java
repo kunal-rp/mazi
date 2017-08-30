@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public class parking_fragment extends Fragment {
 
-    private DB_Helper db_helper;
+    private DB_Helper_Data db_helper_data;
 
     //List used to store the college id, lat, lng
     private ArrayList<ArrayList<String>>hidden_parkinglots;
@@ -83,7 +83,7 @@ public class parking_fragment extends Fragment {
 
         markers = new ArrayList<>();
 
-        db_helper = new DB_Helper(getActivity(), null);
+        db_helper_data = new DB_Helper_Data(getActivity(), null);
 
         //setup for the two spinners for college and parking lot selection
         mParkingSpinner = (Spinner) view.findViewById(R.id.parkinglotMenu);
@@ -132,7 +132,7 @@ public class parking_fragment extends Fragment {
         face_parkinglots = new ArrayList<>();
         hidden_parkinglots = new ArrayList<ArrayList<String>>();
         Log.d("KTag", "ParkingLots data retrieved for college id : " + selected_college_id);
-        ArrayList<ArrayList<String>> temp = db_helper.getAllParkingLotsFromCollege(selected_college_id);
+        ArrayList<ArrayList<String>> temp = db_helper_data.getAllParkingLotsFromCollege(selected_college_id);
         for (int i = 0; i < temp.size(); i++) {
             ArrayList<String> temp2 = new ArrayList<>();
             temp2.add(temp.get(i).get(0));//id

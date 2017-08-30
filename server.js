@@ -26,10 +26,13 @@ var table_parkinglot_info = 'parkinglot_info';
 var table_area = "_area";
 var table_connection = "_connect";
 var table_user_prim = 'user_prim';
+var table_user_gen = 'user_gen';
 
 var clients = {};
 
 var number_college = {};
+
+
 
 /*
 var query_number_college = "Select * from "+table_parkinglot_info;
@@ -49,6 +52,39 @@ connection.query(query_number_college, function(error_number_college,results_num
 });
 */
 
+
+app.get('/checkUser',function (req,res) {
+    var given_user_name = req.query.user_name;
+    var given_password = req.query.user_password;
+    
+
+    var query_user_prim = "Select * From "+ table_user_prim + " Where `user_name` = '"+given_user_name+"' && `user_password`='" +given_password+"'";
+    console.log(query_user_prim);
+    connection.query(query_user_prim,function(err, results){
+        if(err){
+                console.log("query : " + query_user_prim);
+                console.log("error  :" + err);
+        }
+        else{
+            console.log(results[0]);
+            if(results.length == 0){
+                res.end(JSON.stringify({code:1}));
+            }
+            else{
+                if(clients[results[0]['user_id']] != undefined){
+                    res.end(JSON.stringify({code:2}));
+                }
+                else{
+                    res.end(JSON.stringify({code:3 , user_id : results[0]['user_id'],user_name : results[0]['user_name'] }));
+                }
+                
+            }
+        }
+    });
+    
+
+
+});
 
 
 
@@ -143,7 +179,6 @@ function newConnection(socket){
         socket.user_name = data.user_name;
         clients[data.user_id] = {socket_id : socket.id, status : 'initial_connected'};
         socket.emit('updateStatus',{status : clients[socket.user_id].status});
-       
     });
     
  
@@ -239,14 +274,14 @@ function newConnection(socket){
                     
                 }
                 else{
-                    removeRequest(mirror_user_id,college_id,parkinglot_id,client_type);
+                
 
                     results_1 = results_1[0];
                     var mirror_socket_id = results_1.socket_id;
                     var mirror_user_id = results_1.user_id;
                     var mirror_user_name = results_1.user_name;
 
-                    
+                    removeRequest(mirror_user_id);
                             
 
                     var start_timestamp = Math.round((new Date()).getTime() / 1000);
@@ -276,12 +311,30 @@ function newConnection(socket){
                         pu_lat = results_1.pickup_lat;
                     	pu_lng = results_1.pickup_lng;
                     }
+                    
+                    clients[user_id]["rider_user_id"] = rider_user_id;
+                    clients[mirror_user_id]["rider_user_id"] = rider_user_id;
+
+                    clients[user_id]["parker_user_id"] = parker_user_id;
+                    clients[mirror_user_id]["atPickup"] = false;
+                    clients[user_id]["atPickup"] = false;
+                    clients[mirror_user_id]["parker_user_id"] = parker_user_id;
+
                     clients[user_id].status = 'matched';
                     clients[mirror_user_id].status = 'matched';
                     socket.broadcast.to(clients[mirror_user_id].socket_id).emit('updateStatus',{status : clients[user_id].status});
                     socket.emit('updateStatus',{status : clients[user_id].status});
                    	
-                    var query = "INSERT INTO `"+table_connection + "` VALUES('" + index_room_name + "'," + college_id +"," + parkinglot_id +",'"+rider_user_id +"','" + rider_location +"','"+parker_user_id +"','"+parker_location+"','" +    +start_timestamp+"','"+end_timestamp +"')";
+                    if(socket.user_id === rider_user_id){
+                        socket.broadcast.to(clients[parker_user_id].socket_id ).emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
+                               
+                   }else{
+                        socket.broadcast.to(clients[rider_user_id].socket_id).emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
+                    }
+                    socket.emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
+                            
+
+                    /*var query = "INSERT INTO `"+table_connection + "` VALUES('" + index_room_name + "'," + college_id +"," + parkinglot_id +",'"+rider_user_id +"','" + rider_location +"','"+parker_user_id +"','"+parker_location+"','" +    +start_timestamp+"','"+end_timestamp +"')";
                     connection.query( query , function(err2,results2) {
                        	if(err2){    
                         console.log("query : " + query);
@@ -289,16 +342,9 @@ function newConnection(socket){
 
                         var match_confirmed_data = { rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp};
                         }else{
-                            if(socket.user_id === rider_user_id){
-                            	socket.broadcast.to(clients[parker_user_id].socket_id ).emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
-                               
-                           	}else{
-                            	socket.broadcast.to(clients[rider_user_id].socket_id).emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
-                            }
-                            socket.emit('matched_confirm',{ rider_user_id: rider_user_id, rider_user_name : rider_user_name, parker_user_id : parker_user_id,parker_user_name : parker_user_name,pu_lat : pu_lat,pu_lng : pu_lng,start_timestamp : start_timestamp});
                             
                         } 
-                    });                
+                    }); */               
                 }
             }
         });
@@ -318,18 +364,60 @@ function newConnection(socket){
         io.to(clients[socket.user_id]["room_name"]).emit('updateCurrentLocation',{user_id : socket.user_id, lat : data.lat, lng : data.lng});
     });
 
+    socket.on('notAtPickup',function(){
+        console.log("Not At Pickup");
+        if(clients[socket.user_id]["status"] == "verification"){
+            clients[socket.user_id]["confirmed"] = false;
+            clients[socket.user_id]["status"] = "matched";
+            delete clients[socket.user_id]["confirmed"];
+            console.log(clients[socket.user]);
+            socket.emit('updateStatus',{status : clients[socket.user_id].status});
+            io.to(clients[socket.user_id]["room_name"]).emit('revertConfirmation',{});
+        }
+    });
+
+    socket.on('atPickup',function(){
+        if(clients[socket.user_id]["status"] != "verification"){
+            clients[socket.user_id]["status"] = "verification";
+            socket.emit('updateStatus',{status : clients[socket.user_id].status});
+        }
+        var rider_user_id = clients[socket.user_id]["rider_user_id"];
+        var parker_user_id = clients[socket.user_id]["parker_user_id"];
+        if( clients[rider_user_id]["status"] == "verification" && clients[parker_user_id]["status"]=="verification" && (clients[parker_user_id]["confirmed"]  == undefined || clients[rider_user_id]["confirmed"] == undefined)){
+            clients[parker_user_id]["confirmed"] = false;
+            clients[rider_user_id]["confirmed"] = false;
+            io.to(clients[socket.user_id]["room_name"]).emit('issueConfirmation',{confirmationNumber : Math.floor(Math.random() * (999)) + 100});                                
+        }
+    });
+
+    socket.on('confirmPickUp',function(data){
+        console.log(socket.user_id + " confirmed");
+        clients[socket.user_id]["confirmed"] = true;
+
+        var rider_user_id = clients[socket.user_id]["rider_user_id"];
+        var parker_user_id = clients[socket.user_id]["parker_user_id"];
+        console.log(clients[parker_user_id]);
+        console.log(clients[rider_user_id]);
+        if(clients[rider_user_id]["confirmed"] === true && clients[parker_user_id]["confirmed"] === true){
+            io.to(clients[socket.user_id]["room_name"]).emit('finish',{});
+            console.log("Finished :"+clients[socket.user_id]["room_name"]);
+        
+        }
+    });
+
+    
+
     socket.on('disconnect',function(data){
         var user_id =  socket.user_id;
         if(user_id != null ){
            if(clients[user_id] != undefined){
-               if(clients[user_id].status == 'waiting_match'){
-                    var college_id = clients[user_id]['selected_college'];
-                    var parkinglot_id = clients[user_id]['selected_parkinglot'];
-                    var client_type = clients[user_id]['client_type'];
-                    removeRequest(user_id, college_id,parkinglot_id,client_type);
-                }
+               if(clients[user_id].status != 'initial_connected'){
+                    
+                    removeRequest(user_id);
+                }    
+                delete clients[user_id];
            }
-           delete clients[user_id];
+           
        }
         
         console.log("Disconnected "+socket.id );
@@ -340,7 +428,7 @@ function newConnection(socket){
         var college_id = clients[user_id]['selected_college'];
         var parkinglot_id = clients[user_id]['parkinglot_id'];
         var client_type = clients[user_id]['client_type'];
-        removeRequest(user_id, college_id,parkinglot_id,client_type);
+        removeRequest(user_id);
         clients[user_id].status = 'initial_connected';
         socket.emit('updateStatus',{status : clients[user_id].status});
     });
@@ -368,7 +456,7 @@ function addUser(data){
     });
 }
 
-function removeRequest(user_id,college_id, parkinglot_id,client_type){
+function removeRequest(user_id){
     var query = "Delete from "+table_area+ " Where user_id = '"+user_id+"'";
     connection.query(query, function(err,results){
         if(err){

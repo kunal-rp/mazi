@@ -1,24 +1,16 @@
 package com.vierve;
 
-import android.*;
 import android.Manifest;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
@@ -32,7 +24,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
@@ -46,16 +37,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener, college_fragment.OnHeadlineSelectedListener, pickup_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
@@ -78,7 +64,9 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     //local db to store data for college and parking lot data
     //Future use : hold user credential data
-    private DB_Helper db_helper;
+    private DB_Helper_Data db_helper_data;
+
+    private Db_Helper_User db_helper_user;
 
     //holds all of the markers to be shown on the map
     private ArrayList<Marker> markers = new ArrayList<>();
@@ -123,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         user = new JSONObject();
 
         //Initializes local db
-        db_helper = new DB_Helper(this, null);
+        db_helper_data = new DB_Helper_Data(this, null);
+        db_helper_user = new Db_Helper_User(this,null);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -133,12 +122,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         //instantiates the GPS Tracher Service class , which provides the cuser's current gps coordinates
         new GPSTracker(MainActivity.this);
 
-        //remove previous listeners for this event
         mSocket.off("updateStatus");
 
-
-        //simply changes the status of the user
-        //possible statuses : initial_connected , waiting_match , matched
         mSocket.on("updateStatus", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -230,8 +215,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
             new MainActivity.SetUser().execute();
+            super.onPostExecute(aVoid);
         }
     }
 
@@ -247,17 +232,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             Log.d("KTag", "Set User Event Called");
 
             try {
-                //Static random values for the user id and name
-                Random r = new Random();
+                JSONObject obj = db_helper_user.getInfo();
 
-                //Future Use : Get user id and name from the local DB
-                //For now, generates random number and converts to Hex
-                int Result = r.nextInt(16777216);
-
-                user.put("user_id", Integer.toHexString(Result));
-                //username is 'User' + user_id
-                user.put("user_name", "User" + Integer.toHexString(Result));
-
+                user.put("user_id", obj.get("user_id"));
+                user.put("user_name", obj.get("user_name"));
                 mSocket.emit("setUser", user);
 
             } catch (JSONException e) {
@@ -274,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     }
 
     /*
-   Async task that calles REST API to first get the current data version number from db_helper
+   Async task that calles REST API to first get the current data version number from db_helper_data
    Then passes that into the 'checkVersion' URL
     */
     private class GetVersionData extends AsyncTask<Object, Object, Void> {
@@ -282,8 +260,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         protected Void doInBackground(Object... args) {
             try {
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = krpURL + "/checkVersion?ver=" + db_helper.getAllCollegeVersion();
-                Log.d("KTag", Integer.toString(db_helper.getAllCollegeVersion()));
+                String urlstring = krpURL + "/checkVersion?ver=" + db_helper_data.getAllCollegeVersion();
+                Log.d("KTag", Integer.toString(db_helper_data.getAllCollegeVersion()));
                 Log.d("KTag", "GetVersionData REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
@@ -394,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
             Log.d("KTag", "PushNewData");
             //first will clear all of the data from both local db tables for colleges and parking
-            db_helper.clearAllTables();
+            db_helper_data.clearAllTables();
 
             try {
                 //breaks up college data and parking data into vars
@@ -407,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 //pushes data from college into the local db table for colleges
                 for (int i = 0; i < college_ids.length(); i++) {
                     int num = college_ids.getInt(i);
-                    db_helper.addCollege(num, college_data.getJSONObject(Integer.toString(num)));
+                    db_helper_data.addCollege(num, college_data.getJSONObject(Integer.toString(num)));
                 }
 
                 //parses array of ids to get all of the parking data
@@ -416,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 //pushes data from college into the local db table for parking
                 for (int i = 0; i < parkinglot_ids.length(); i++) {
                     int num = parkinglot_ids.getInt(i);
-                    db_helper.addParkingLot(num, parking_data.getJSONObject(Integer.toString(num)));
+                    db_helper_data.addParkingLot(num, parking_data.getJSONObject(Integer.toString(num)));
                 }
 
             } catch (JSONException e) {
@@ -472,29 +450,29 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             current_lng = GPSTracker.longitude;
 
             type=t;
+
             Location college = new Location("college");
             college.setLatitude(college_lat);
             college.setLongitude(college_lng);
-            Location current = new Location("user");
-            current.setLatitude(current_lat);
-            current.setLongitude(current_lng);
-            float distance = college.distanceTo(current);
+            Location user_location = new Location("user");
+            user_location.setLatitude(current_lat);
+            user_location.setLongitude(current_lng);
+            float distance = college.distanceTo(user_location);
+
             if((type.equals("ride") && distance > 3218.68)||(type.equals("park") && distance > 6437.36) ){
                 Toast.makeText(this,"User is too far away from college. Current Distance : "+distance,Toast.LENGTH_SHORT).show();
             }
             else{
                 try {
                     String status = user.getString("status");
-
                 /*
                 For now if the match activity is called and it goes back to this activity, the status is reverted back to the 'initial_connected'
                 Future Use: After Match activity is the Rating Activity, and after that is finished it automatically goes back to this activity and the server will update the status
                  */
 
-                    if (status.equals("matched")) {
+                    if (status.equals("matched") || status.equals("verification") ) {
                         user.put("status", "initial_connected");
                     }
-                    status = user.getString("status");
                     if ((user.getString("status")).equals("initial_connected")) {
                         user.put("type",type);
                         startParkingFragment(selected_college_id);
