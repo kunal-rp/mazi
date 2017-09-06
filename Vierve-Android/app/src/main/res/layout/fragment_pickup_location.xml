@@ -7,6 +7,13 @@
     android:layout_margin="10dp">
 
 
+    <ImageView
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:src="@drawable/user_marker"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"/>
+
     <Button
         android:id="@+id/setPickupLocation"
         android:layout_width="match_parent"

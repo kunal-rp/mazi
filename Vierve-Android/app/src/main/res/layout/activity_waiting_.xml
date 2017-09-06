@@ -2,21 +2,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     >
 
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/cast_expanded_controller_control_toolbar_min_height"
         android:theme="@style/AppTheme.AppBarOverlay"
-        android:layout_alignParentStart="true"
         android:id="@+id/toolbar_parent"
         >
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_toolbar_logo"
-            android:layout_gravity="center"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout android:layout_height="match_parent" android:layout_width="wrap_content"
+                android:layout_centerInParent="true">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/vierve_logo"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Vierve"
+                    android:gravity="center"
+                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
@@ -24,12 +40,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_below="@id/toolbar_parent"
-        android:id="@+id/linearLayout">
+        android:id="@+id/linearLayout"
+        android:layout_marginTop="40dp"
+        >
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Searching at"
+            android:text="Searching for a"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ride/Parking Spot"
+            android:id="@+id/request_type"
+
+            android:gravity="center"
+            android:textSize="30dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="at"
             android:gravity="center"
             android:textSize="20dp"
             />

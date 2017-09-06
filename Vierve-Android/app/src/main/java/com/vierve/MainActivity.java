@@ -15,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -41,7 +43,6 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Random;
 
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener, college_fragment.OnHeadlineSelectedListener, pickup_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
@@ -107,35 +108,49 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         socketHandler = new SocketHandler();
         user = new JSONObject();
 
         //Initializes local db
         db_helper_data = new DB_Helper_Data(this, null);
         db_helper_user = new Db_Helper_User(this,null);
+        try {
+            user = db_helper_user.getInfo();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        Button btn = (Button) findViewById(R.id.btn_logOff);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         //instantiates the GPS Tracher Service class , which provides the cuser's current gps coordinates
         new GPSTracker(MainActivity.this);
+
+
 
         mSocket.off("updateStatus");
 
         mSocket.on("updateStatus", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                try {
-                    JSONObject obj = (JSONObject) args[0];
-                    Log.d("KTag", "Status Update : " + obj.toString());
-                    user.put("status", obj.getString("status"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
+
+                JSONObject obj = (JSONObject) args[0];
+                Log.d("KTag", "Status Update : " + obj.toString());
+                checkStatus(obj);
             }
         });
+
 
     }
 
@@ -460,24 +475,12 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             float distance = college.distanceTo(user_location);
 
             if((type.equals("ride") && distance > 3218.68)||(type.equals("park") && distance > 6437.36) ){
-                Toast.makeText(this,"User is too far away from college. Current Distance : "+distance,Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"User is too far away from college." ,Toast.LENGTH_SHORT).show();
             }
             else{
                 try {
-                    String status = user.getString("status");
-                /*
-                For now if the match activity is called and it goes back to this activity, the status is reverted back to the 'initial_connected'
-                Future Use: After Match activity is the Rating Activity, and after that is finished it automatically goes back to this activity and the server will update the status
-                 */
-
-                    if (status.equals("matched") || status.equals("verification") ) {
-                        user.put("status", "initial_connected");
-                    }
-                    if ((user.getString("status")).equals("initial_connected")) {
-                        user.put("type",type);
-                        startParkingFragment(selected_college_id);
-                    }
-
+                    user.put("type",type);
+                    startParkingFragment(selected_college_id);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -530,7 +533,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         if (type.equals("ride")) {
             startPickupFragment();
         } else {
-            startWaitingActivity(true);
+            submitRequest();
         }
     }
 
@@ -563,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         pu_lat = lat;
         pu_lng = lng;
         Log.d("KTag", Double.toString(lat) + " " + Double.toString(lng));
-        startWaitingActivity(true);
+        submitRequest();
     }
 
     /*
@@ -580,18 +583,59 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     After all of the necessary datat fro a Park or Ride Request is recieved, the waiting activity is called
     All of the necessary information to make the request is passed to the activity
      */
-    public void startWaitingActivity(boolean submitRequest) {
+    public void submitRequest() {
         startCollegeFragment();
-        Intent intent = new Intent(this, Waiting_Activity.class);
-        intent.putExtra("selected_college_id", selected_college_id);
-        intent.putExtra("selected_parkinglot_id", selected_parkinglot_id);
-        if (type.equals("ride")) {
-            intent.putExtra("pickup_lat", pu_lat);
-            intent.putExtra("pickup_lng", pu_lng);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("college_id", selected_college_id);
+            obj.put("parkinglot_id",selected_parkinglot_id);
+            obj.put("type",type);
+            obj.put("pickup_lat",pu_lat);
+            obj.put("pickup_lng",pu_lng);
+            mSocket.emit("register",obj);
+            Log.d("KTag","Register Event : "+ obj.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        intent.putExtra("type", type);
-        intent.putExtra("submitRequest", submitRequest);
-        intent.putExtra("user", user.toString());
+    }
+
+    public void startWaitingActivity(String college_id, String parkinglot_id, String client_type){
+        Log.d("KTag","Start Waiting Activity");
+        Intent intent = new Intent(this, Waiting_Activity.class);
+        intent.putExtra("selected_college_id", college_id);
+        intent.putExtra("selected_parkinglot_id", parkinglot_id);
+        intent.putExtra("type", client_type);
+        startActivity(intent);
+    }
+
+    public void startMatchActivity(JSONObject obj) throws JSONException {
+        Intent intent = new Intent(this, MatchActivity.class);
+        Log.d("KTag","Match : "+ obj.toString());
+        intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
+        intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
+        intent.putExtra("rider_user_id", (String) obj.getString("rider_user_id"));
+        intent.putExtra("rider_user_name", (String) obj.getString("rider_user_name"));
+        intent.putExtra("parker_user_id", (String) obj.getString("parker_user_id"));
+        intent.putExtra("parker_user_name", (String) obj.getString("parker_user_name"));
+        intent.putExtra("start_timestamp", (Integer) obj.getInt("start_timestamp"));
+        startActivity(intent);
+    }
+
+    public void startRatingActivity(JSONObject obj){
+        Intent intent = new Intent(this, RatingActivity.class);
+        try {
+            if(user.getString("user_id").equals(obj.get("rider_user_id"))){
+                intent.putExtra("user_id",obj.getString("rider_user_id"));
+                intent.putExtra("user_name",obj.getString("rider_user_name"));
+            }
+            else{
+                intent.putExtra("user_id",obj.getString("parker_user_id"));
+                intent.putExtra("user_name",obj.getString("parker_user_name"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         startActivity(intent);
     }
 
@@ -602,7 +646,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
         }
+        Log.d("KTag","getUserStatus on REsume");
+        mSocket.emit("getUserStatus", new JSONObject());
         super.onResume();
+
+
     }
 
     @Override
@@ -622,4 +670,25 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         mSocket.disconnect();
         super.onDestroy();
     }
+
+    private void checkStatus(JSONObject obj){
+        Log.d("KTag","Check Status : \n"+obj.toString());
+        try {
+            if(obj.getString("status").equals("waiting_match")){
+                startWaitingActivity(obj.getString("selected_college"),obj.getString("selected_parkinglot"),obj.getString("client_type"));
+            }
+            else if(obj.get("status").equals("matched")){
+                startMatchActivity(obj);
+            }
+            else if(obj.get("status").equals("finish")){
+                startRatingActivity(obj);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 }

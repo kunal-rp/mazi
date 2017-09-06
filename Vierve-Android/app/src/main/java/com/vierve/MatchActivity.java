@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -36,7 +38,8 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
     private String rider_user_id, rider_user_name, parker_user_id, parker_user_name;
     private int start_timestamp;
 
-    private JSONObject user;
+
+    private Boolean joined_room_confirm = false;
 
     private GoogleMap mMap;
 
@@ -44,7 +47,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
     private Socket mSocket;
     private SocketHandler socketHandler;
 
-    private Marker opposite_marker, user_marker, pu_marker;
+    private Marker pu_marker,rider_marker,parker_marker ;
 
 
     private double current_lat, current_lng;
@@ -55,10 +58,18 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
     private final int DISTANCE_MINIMUM = 10;
 
+    private JSONObject clients = new JSONObject();
+
+    private Db_Helper_User db_helper_user;
+    JSONObject current_user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_match);
+
+        db_helper_user = new Db_Helper_User(this,null);
+
 
         socketHandler = new SocketHandler();
         mSocket = socketHandler.getSocket();
@@ -70,7 +81,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         mSocket.off("issueConfirmation");
         mSocket.off("updateCurrentLocation");
         mSocket.off("revertConfirmation");
-
+        mSocket.off("disconnected");
 
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
@@ -82,7 +93,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         parker_user_name = bundle.getString("parker_user_name");
         start_timestamp = bundle.getInt("start_timestamp");
         try {
-            user = new JSONObject(bundle.getString("user"));
+            current_user = db_helper_user.getInfo();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -99,6 +110,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         profile_transaction.addToBackStack(null);
         profile_transaction.commit();
 
+
         final match_profile rider_profile = new match_profile();
         Bundle rider_bundle = new Bundle();
         rider_bundle.putString("username", rider_user_name);
@@ -108,6 +120,25 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         rider_transaction.replace(R.id.rider_profile, rider_profile, "rider_profile");
         rider_transaction.addToBackStack(null);
         rider_transaction.commit();
+
+
+        JSONObject parkerObj = new JSONObject();
+        JSONObject riderObj = new JSONObject();
+        try {
+            parkerObj.put("fragment",parker_profile);
+            parkerObj.put("user_name",parker_user_name);
+            parkerObj.put("type","park");
+            clients.put(parker_user_id,parkerObj);
+            riderObj.put("fragment",rider_profile);
+            riderObj.put("user_name",rider_user_name);
+            riderObj.put("type","rider");
+            clients.put(rider_user_id,riderObj);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -122,18 +153,18 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        current_lat = GPSTracker.latitude;
-                        current_lng = GPSTracker.longitude;
-                        JSONObject obj = new JSONObject();
-                        try {
-                            obj.put("lat", current_lat);
-                            obj.put("lng", current_lng);
-                            mSocket.emit("updateLocation", obj);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                        if(current_lat != GPSTracker.latitude || current_lng != GPSTracker.longitude){
+                            current_lat = GPSTracker.latitude;
+                            current_lng = GPSTracker.longitude;
+                            JSONObject obj = new JSONObject();
+                            try {
+                                obj.put("lat", current_lat);
+                                obj.put("lng", current_lng);
+                                mSocket.emit("updateLocation", obj);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-
-
                     }
                 });
             }
@@ -147,8 +178,43 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
                 Log.d("KTag", "Joined Room : " + obj.toString());
+
+                JSONObject userObj = null;
+                try {
+                    userObj = (JSONObject) clients.get(obj.getString("user_id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
+
+        mSocket.on("disconnected", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                JSONObject obj = (JSONObject) args[0];
+                Log.d("KTag", "Joined Room : " + obj.toString());
+
+                JSONObject userObj = null;
+                try {
+                    userObj = (JSONObject) clients.get(obj.getString("user_id"));
+                    final JSONObject finalUserObj = userObj;
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ((match_profile) finalUserObj.get("fragment")).disconnected();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
         mSocket.on("issueConfirmation", new Emitter.Listener() {
             @Override
@@ -174,16 +240,19 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         mSocket.on("revertConfirmation", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.d("KTag","confirmation reverted");
-                getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.verificationSpace)).commit();
+                Log.d("KTag", "confirmation reverted");
+                Fragment current = getSupportFragmentManager().findFragmentById(R.id.verificationSpace);
+                if (current instanceof verification_fragment) {
+                    getSupportFragmentManager().beginTransaction().remove(getSupportFragmentManager().findFragmentById(R.id.verificationSpace)).commit();
+
+                }
             }
         });
 
         mSocket.on("finish", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.d("KTag","FINISHED!!!!");
-                startRating();
+
 
             }
         });
@@ -200,49 +269,71 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                             Float t_lat = Float.parseFloat(Double.toString(obj.getDouble("lat")));
                             Float t_lng = Float.parseFloat(Double.toString(obj.getDouble("lng")));
 
-                            Location pu_location = new Location("pickup location");
+                            BitmapDescriptor icon;
+
+                            Location pu_location = new Location("pickup");
                             pu_location.setLatitude(pu_lat);
                             pu_location.setLongitude(pu_lng);
                             Location user_location = new Location("user");
                             user_location.setLatitude(t_lat);
                             user_location.setLongitude(t_lng);
                             float distance = pu_location.distanceTo(user_location);
+                            Log.d("KTag",obj.getString("user_id")+ " updateLocation");
 
-                            if (!obj.get("user_id").equals(user.get("user_id"))) {
-                                if (opposite_marker == null) {
-                                    MarkerOptions a = new MarkerOptions().position(new LatLng(t_lat, t_lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
-                                    opposite_marker = mMap.addMarker(a);
-                                } else {
-                                    opposite_marker.setPosition(new LatLng(t_lat, t_lng));
-                                }
-                            } else {
-                                if (user_marker == null) {
-                                    MarkerOptions a = new MarkerOptions().position(new LatLng(t_lat, t_lng)).icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
-                                    user_marker = mMap.addMarker(a);
-                                } else {
-                                    user_marker.setPosition(new LatLng(t_lat, t_lng));
-                                }
+
+
+                            if(obj.getString("user_id").equals(current_user.get("user_id"))){
+                                icon = BitmapDescriptorFactory.fromResource(R.drawable.user_marker);
+
                                 if (distance <= 10) {
+                                    Log.d("KTag","AtPickup ");
                                     mSocket.emit("atPickup", new JSONObject());
                                 } else {
                                     mSocket.emit("notAtPickup", new JSONObject());
                                 }
                             }
-
-                            if (obj.get("user_id").equals(rider_user_id)) {
-                                if (distance <= DISTANCE_MINIMUM) {
-                                    rider_profile.userIsNear();
-
-                                } else {
-                                    rider_profile.userIsNotNear();
-                                }
-                            } else {
-                                if (distance <= DISTANCE_MINIMUM) {
-                                    parker_profile.userIsNear();
-                                } else {
-                                    parker_profile.userIsNotNear();
-                                }
+                            else{
+                                icon = BitmapDescriptorFactory.fromResource(R.drawable.other_marker);
                             }
+
+
+                            JSONObject userObj = (JSONObject) clients.get(obj.getString("user_id"));
+                            if(((match_profile)userObj.get("fragment")).getDisconnected()){
+                                final JSONObject finalUserObj = userObj;
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            ((match_profile) finalUserObj.get("fragment")).connected();
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                            }
+                            if (distance <= DISTANCE_MINIMUM) {
+                                ((match_profile)userObj.get("fragment")).userIsNear();
+
+                            } else {
+                                ((match_profile)userObj.get("fragment")).userIsNotNear();
+                            }
+
+
+                            if(userObj.getString("type").equals("ride")){
+                                rider_marker.setVisible(true);
+                                rider_marker.setIcon(icon);
+                                rider_marker.setPosition(new LatLng(t_lat, t_lng));
+                            }
+                            else{
+                                parker_marker.setVisible(true);
+                                parker_marker.setIcon(icon);
+                                parker_marker.setPosition(new LatLng(t_lat, t_lng));
+                            }
+
+
+
+
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -252,6 +343,8 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             }
         });
     }
+
+
 
 
     public void emitJoinRoom() {
@@ -267,6 +360,8 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             e.printStackTrace();
         }
     }
+
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -285,6 +380,9 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         }
         mMap.setMyLocationEnabled(true);
 
+        rider_marker =  mMap.addMarker(new MarkerOptions().position(new LatLng(pu_lat, pu_lng)).visible(false));
+        parker_marker =  mMap.addMarker(new MarkerOptions().position(new LatLng(pu_lat, pu_lng)).visible(false));
+
     }
 
     @Override
@@ -295,7 +393,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        Toast.makeText(getApplicationContext(),"Cannot Cancel Match",Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -305,7 +403,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
     }
 
     public void startRating() {
-        Intent intent = new Intent(this, RatingActivity.class);
-        startActivity(intent);
+
     }
+
 }

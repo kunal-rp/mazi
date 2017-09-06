@@ -5,14 +5,39 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?android:attr/actionBarSize"
         android:theme="@style/AppTheme.AppBarOverlay"
         >
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_toolbar_logo"
-            android:layout_gravity="center"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <LinearLayout android:layout_height="match_parent" android:layout_width="wrap_content"
+                android:layout_centerInParent="true">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_toolbar_logo"
+                   />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Vierve"
+                    android:gravity="center"
+                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
+
+            </LinearLayout>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="Log Off"
+                android:background="@android:color/transparent"
+                android:layout_alignParentEnd="true"
+                android:id="@+id/btn_logOff"
+                />
+
+        </RelativeLayout>
+
     </android.support.design.widget.AppBarLayout>
 
     <fragment
@@ -20,14 +45,13 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true">
 
         <FrameLayout
             android:id="@+id/contentFragment"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            />
+            android:layout_height="fill_parent" />
 
     </fragment>
 </LinearLayout>

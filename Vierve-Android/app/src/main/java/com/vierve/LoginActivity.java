@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
@@ -89,6 +90,7 @@ public class LoginActivity extends AppCompatActivity  {
         mProgressView = findViewById(R.id.login_progress);
 
 
+
         if(db_helper_user.getRemember() == true){
             Log.d("KTag","Pre Set Test");
             JSONObject obj;
@@ -97,7 +99,7 @@ public class LoginActivity extends AppCompatActivity  {
                 obj = db_helper_user.getInfo();
                 showProgress(true);
                 user_name = obj.getString("user_name");
-                user_password = obj.getString(("user_password"));
+                user_password = obj.getString("user_password");
                 remember = true;
                 mUserNameView.setText(user_name);
                 mPasswordView.setText(user_password);
@@ -117,6 +119,12 @@ public class LoginActivity extends AppCompatActivity  {
             public void onClick(View view) {
                 user_name = mUserNameView.getText().toString();
                 user_password = mPasswordView.getText().toString();
+                if(mRemember.isEnabled()){
+                    remember = true;
+                }
+                else{
+                    remember = false;
+                }
                 Log.d("KTag","Details Username : "+ user_name + ", Password :" +user_password);
                 attemptLogin();
             }
@@ -327,36 +335,40 @@ public class LoginActivity extends AppCompatActivity  {
             showProgress(false);
 
             if (code == 3) {
-                //valid username or password
-                db_helper_user.clearAllTables();
-                JSONObject obj= new JSONObject();
-                try {
-                    obj.put("user_id",resultJSON.getString("user_id"));
-                    obj.put("user_name",user_name);
-                    obj.put("user_password",user_password);
-                    obj.put("remember",1);
-                    db_helper_user.setUserInfo(obj);
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (remember == true) {
+                    //valid username or password
+                    db_helper_user.clearAllTables();
+                    JSONObject obj = new JSONObject();
+                    try {
+                        obj.put("user_id", resultJSON.getString("user_id"));
+                        obj.put("user_name", user_name);
+                        obj.put("user_password", user_password);
+                        obj.put("remember", 1);
+                        db_helper_user.setUserInfo(obj);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
                 }
                 startActivity(intent);
             } else if (code == 1) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(),"Invalid Username or Password",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Invalid Username or Password", Toast.LENGTH_LONG).show();
                     }
                 });
-            }
-            else{
+            } else {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(),"User active on different device",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "User active on different device", Toast.LENGTH_LONG).show();
                     }
                 });
             }
         }
     }
+
+
 }
 

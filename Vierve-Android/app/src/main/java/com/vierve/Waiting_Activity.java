@@ -29,7 +29,6 @@ public class Waiting_Activity extends AppCompatActivity {
 
 
 
-    private JSONObject user;
 
     boolean submitRequest;
 
@@ -58,46 +57,18 @@ public class Waiting_Activity extends AppCompatActivity {
         cText.setText(db_helper_data.getCollegeName(Integer.parseInt(selected_college_id)));
         TextView pText = (TextView) findViewById(R.id.parkinglot_name);
         pText.setText(db_helper_data.getParkinglotName(Integer.parseInt(selected_parkinglot_id)));
+
+        TextView typeTextview = (TextView) findViewById(R.id.request_type);
         if(type.equals("ride")){
-            pu_lat = bundle.getFloat("pickup_lat");
-            pu_lng = bundle.getFloat("pickup_lng");
+            typeTextview.setText("Ride");
         }
         else{
-            pu_lat = 0;
-            pu_lng = 0;
+            typeTextview.setText("Parking Spot");
         }
-        try {
-            user = new JSONObject(bundle.getString("user"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
 
         mSocket = socketHandler.getSocket();
 
         mSocket.off("matched_confirm");
-
-
-
-        if(submitRequest){
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("user",user);
-                obj.put("college_id", selected_college_id);
-                obj.put("parkinglot_id",selected_parkinglot_id);
-                obj.put("type",type);
-                obj.put("pickup_lat",pu_lat);
-                obj.put("pickup_lng",pu_lng);
-                mSocket.emit("register",obj);
-                Log.d("KTag","Register Event : "+ obj.toString());
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-        }
-
-
 
         mSocket.on("matched_confirm", new Emitter.Listener() {
             @Override
@@ -116,7 +87,6 @@ public class Waiting_Activity extends AppCompatActivity {
 
     public void matchMade(JSONObject obj) throws JSONException {
         Intent intent = new Intent(this, MatchActivity.class);
-
         Log.d("KTag","Match : "+ obj.toString());
         intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
         intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
@@ -125,7 +95,6 @@ public class Waiting_Activity extends AppCompatActivity {
         intent.putExtra("parker_user_id", (String) obj.getString("parker_user_id"));
         intent.putExtra("parker_user_name", (String) obj.getString("parker_user_name"));
         intent.putExtra("start_timestamp", (Integer) obj.getInt("start_timestamp"));
-        intent.putExtra("user", (String)user.toString());
         startActivity(intent);
     }
 

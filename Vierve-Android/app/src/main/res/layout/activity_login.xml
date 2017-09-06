@@ -8,22 +8,6 @@
     android:background="@color/colorPrimary"
     >
 
-
-    <android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="\@krp.exe"/>
-
-    </android.support.design.widget.AppBarLayout>
-
-
     <LinearLayout
 
     android:layout_width="match_parent"
@@ -47,7 +31,8 @@
 
 
     <!-- Login progress -->
-    <ScrollView
+    <LinearLayout
+        android:orientation="vertical"
         android:id="@+id/login_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -105,9 +90,18 @@
                 android:text="Sign In"
                 android:textStyle="bold"
                 android:background="@color/colorAccent"/>
+            <Button
+                android:id="@+id/register"
+                style="?android:textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Register"
+                android:textStyle="bold"
+                android:background="@color/colorPrimary"/>
 
         </LinearLayout>
-    </ScrollView>
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/login_progress"

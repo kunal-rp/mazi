@@ -81,7 +81,7 @@ public class college_fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         new college_fragment.GetAllCollegeToSpinner().execute();
-        db_helper_data = new DB_Helper_Data(getActivity(), null);
+
         //Sets floating buttons
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.requestRideButton);
         fab.setImageBitmap(textAsBitmap("RIDE", 40, Color.WHITE ));
@@ -166,9 +166,10 @@ public class college_fragment extends Fragment {
 
     private class GetAllCollegeToSpinner extends AsyncTask<Object, Object, Void>{
 
+
         @Override
         protected Void doInBackground(Object... params) {
-
+            db_helper_data = new DB_Helper_Data(getActivity(), null);
 
             ArrayList<ArrayList<String>> temp= db_helper_data.getAllCollegesInformation();
             for(int i = 0; i < temp.size(); i++){
