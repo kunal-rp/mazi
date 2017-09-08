@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,7 +19,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 
@@ -40,13 +44,14 @@ public class college_fragment extends Fragment {
     public String selected;
     public float lat;
     public float lng;
+    private double current_lat, current_lng;
 
 
     OnHeadlineSelectedListener mCallback;
 
     // Container Activity must implement this interface
     public interface OnHeadlineSelectedListener {
-        public void onCollegeSpinnerItemSelected(float lat, float lng, String college_id);
+        public void onCollegeSpinnerItemSelected(float lat, float lng,float ride_limit, float park_limit, String college_id);
         public void onPRActionRequest(String type);
     }
 
@@ -92,9 +97,12 @@ public class college_fragment extends Fragment {
         //setup for the two spinners for college and parking lot selection
         mCollegeSpinner = (Spinner) view.findViewById(R.id.collegeMenu);
 
+        Bundle bundle = getArguments();
+        current_lat = bundle.getDouble("current_lat");
+        current_lng = bundle.getDouble("current_lng");
 
 
-        PopulateSpinner(mCollegeSpinner,face_college);
+
 
         mCollegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -103,7 +111,9 @@ public class college_fragment extends Fragment {
                 selected = hidden_college.get(i).get(0);//id
                 lat = Float.parseFloat(hidden_college.get(i).get(2));//lat
                 lng = Float.parseFloat(hidden_college.get(i).get(3));//lng
-                mCallback.onCollegeSpinnerItemSelected(lat,lng, hidden_college.get(i).get(0));
+                Float ride_limit = Float.parseFloat(hidden_college.get(i).get(4));//ride_limit
+                Float park_limit = Float.parseFloat(hidden_college.get(i).get(5));//park_limit
+                mCallback.onCollegeSpinnerItemSelected(lat,lng,ride_limit,park_limit, hidden_college.get(i).get(0));
             }
 
             @Override
@@ -178,17 +188,47 @@ public class college_fragment extends Fragment {
                 temp2.add (temp.get(i).get(1));//name
                 temp2.add (temp.get(i).get(2));//lat
                 temp2.add (temp.get(i).get(3));//lng
+                temp2.add (temp.get(i).get(4));//ride_limit
+                temp2.add (temp.get(i).get(5));//park_limit
+
+                Location college = new Location("college");
+                college.setLatitude(Double.parseDouble(temp.get(i).get(2)));
+                college.setLongitude(Double.parseDouble(temp.get(i).get(3)));
+                Location user_location = new Location("user");
+                user_location.setLatitude(current_lat);
+                user_location.setLongitude(current_lng);
+                temp2.add (Float.toString(college.distanceTo(user_location)));
+
                 hidden_college.add(temp2);//id,lat,lng
-                face_college.add(temp.get(i).get(1));//name
             }
+            Collections.sort(hidden_college, new Comparator<ArrayList<String>>() {
+                @Override
+                public int compare(ArrayList<String> o1, ArrayList<String> o2) {
+                    float one = Float.parseFloat(o1.get(6));
+                    float two = Float.parseFloat(o2.get(6));
+                    if (one > two)
+                        return 1;
+                    if (one < two)
+                        return -1;
+                    return 0;
+                }
+
+
+            });
             return null;
         }
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            PopulateSpinner(mCollegeSpinner,face_college);
+            ArrayList<String> x = new ArrayList<>();
+            for(int i = 0; i < hidden_college.size(); i++){
+                x.add(hidden_college.get(i).get(1));
+            }
+            PopulateSpinner(mCollegeSpinner,x);
 
         }
     }
+
+
 
 }

@@ -7,6 +7,16 @@
     android:layout_margin="10dp">
 
 
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:text="Please choose a pick up location near a road, so that the driver can easily pick you up."
+        android:layout_below="@+id/parkinglotMenu"
+        android:textSize="20dp"
+        android:layout_margin="5dp"
+        android:background="#FFFFFF"
+        android:textColor="@color/colorPrimary"
+        android:gravity="center"
+        />
+
     <ImageView
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"

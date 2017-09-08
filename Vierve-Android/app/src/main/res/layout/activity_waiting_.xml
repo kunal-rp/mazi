@@ -8,7 +8,7 @@
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/cast_expanded_controller_control_toolbar_min_height"
+        android:layout_height="?android:attr/actionBarSize"
         android:theme="@style/AppTheme.AppBarOverlay"
         android:id="@+id/toolbar_parent"
         >
@@ -19,8 +19,8 @@
                 android:layout_centerInParent="true">
                 <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/vierve_logo"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_toolbar_logo"
                     />
                 <TextView
                     android:layout_width="wrap_content"
@@ -30,6 +30,8 @@
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>
 
             </LinearLayout>
+
+
 
         </RelativeLayout>
 
@@ -41,7 +43,6 @@
         android:orientation="vertical"
         android:layout_below="@id/toolbar_parent"
         android:id="@+id/linearLayout"
-        android:layout_marginTop="40dp"
         >
 
         <TextView

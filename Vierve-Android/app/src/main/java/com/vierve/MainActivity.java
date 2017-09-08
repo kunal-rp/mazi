@@ -22,11 +22,16 @@ import android.widget.Toast;
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -60,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     //var used to saved version data from REST API
     private JSONObject version_data;
 
+    final static double METERS_IN_MILE = 1609.34;
+
 
     private GoogleMap mMap;
 
@@ -81,8 +88,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     public Float pu_lat;
     public Float pu_lng;
 
+
     //hodls user's current coordinates
     private double current_lat, current_lng,college_lat, college_lng;
+    private double ride_limit,park_limit;
 
 
 
@@ -147,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
                 JSONObject obj = (JSONObject) args[0];
                 Log.d("KTag", "Status Update : " + obj.toString());
+                try {
+                    user.put("status",obj.getString("status"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 checkStatus(obj);
             }
         });
@@ -432,7 +446,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     public void startCollegeFragment() {
         mMap.clear();
         markers.clear();
+        Bundle bundle = new Bundle();
+        bundle.putDouble("current_lat",current_lat);
+        bundle.putDouble("current_lg",current_lng);
         college_fragment college_fragment = new college_fragment();
+        college_fragment.setArguments(bundle);
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
         transaction.replace(R.id.contentFragment, college_fragment);
@@ -443,10 +461,13 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     //Moves map focus when a new spinner item is clicked for the college_fragment
     @Override
-    public void onCollegeSpinnerItemSelected(float lat, float lng, String college_id) {
+    public void onCollegeSpinnerItemSelected(float lat, float lng,float ridel,float parkl, String college_id) {
+        mMap.clear();
         college_lat = lat;
         college_lng = lng;
-        Log.d("KTag","College Selected: "+ college_lat + ","+ college_lng);
+        ride_limit = ridel;
+        park_limit = parkl;
+        Log.d("KTag","College Selected: "+ college_lat + ","+ college_lng + " | Ride Limits : "+ ride_limit + ","+park_limit);
         LatLng college = new LatLng(lat, lng);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(college, 14));
         selected_college_id = college_id;
@@ -459,8 +480,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
      */
     @Override
     public void onPRActionRequest(String t) {
-
         if(askPermissions() == true){
+            mMap.clear();
             current_lat = GPSTracker.latitude;
             current_lng = GPSTracker.longitude;
 
@@ -474,8 +495,32 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             user_location.setLongitude(current_lng);
             float distance = college.distanceTo(user_location);
 
-            if((type.equals("ride") && distance > 3218.68)||(type.equals("park") && distance > 6437.36) ){
-                Toast.makeText(this,"User is too far away from college." ,Toast.LENGTH_SHORT).show();
+            if((type.equals("ride") && distance > (ride_limit * METERS_IN_MILE)) || (type.equals("park") && distance > (park_limit * METERS_IN_MILE)) ){
+                Toast.makeText(this,"User is too far away from college.\nUser needs to be in the circle" ,Toast.LENGTH_SHORT).show();
+                Circle circle;
+                Marker marker = mMap.addMarker(new MarkerOptions().position( new LatLng(current_lat,current_lng)).title("current location").icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker)));
+                if((type.equals("ride") && distance > (ride_limit * METERS_IN_MILE))){
+
+                    circle = mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(college_lat, college_lng))
+                            .radius(ride_limit * METERS_IN_MILE)
+                            .strokeColor(R.color.colorPrimary));
+                    }
+                else{
+                    circle = mMap.addCircle(new CircleOptions()
+                            .center(new LatLng(college_lat, college_lng))
+                            .radius(park_limit * METERS_IN_MILE)
+                            .strokeColor(R.color.colorPrimary));
+                }
+
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(marker.getPosition());
+                builder.include(circle.getCenter());
+                LatLngBounds bounds = builder.build();
+
+                int padding = 20; // offset from edges of the map in pixels
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                mMap.animateCamera(cu);
             }
             else{
                 try {
@@ -542,7 +587,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     @Override
     public void onParkingSpinnerItemSelected(float lat, float lng) {
         LatLng parking = new LatLng(lat, lng);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(parking));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(parking, 17));
     }
 
@@ -552,6 +596,16 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
      */
     public void startPickupFragment() {
         mMap.clear();
+
+        current_lat = GPSTracker.latitude;
+        current_lng = GPSTracker.longitude;
+        LatLng current_loc = new LatLng(current_lat, current_lng);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current_loc, 20));
+
+        Circle circle = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(college_lat, college_lng))
+                .radius(ride_limit * METERS_IN_MILE)
+                .strokeColor(R.color.colorPrimary));
         pickup_fragment pickup_fragment = new pickup_fragment();
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
@@ -565,8 +619,22 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     public void setPickupLocation(Float lat, Float lng) {
         pu_lat = lat;
         pu_lng = lng;
-        Log.d("KTag", Double.toString(lat) + " " + Double.toString(lng));
-        submitRequest();
+
+        Location college = new Location("college");
+        college.setLatitude(college_lat);
+        college.setLongitude(college_lng);
+        Location pu_loc = new Location("pu_loc");
+        pu_loc.setLatitude(pu_lat);
+        pu_loc.setLongitude(pu_lng);
+        float distance = college.distanceTo(pu_loc);
+        if(distance > (ride_limit * METERS_IN_MILE)){
+            Toast.makeText(this,"Pick Up Location is too far away from college" ,Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Log.d("KTag", Double.toString(lat) + " " + Double.toString(lng));
+            submitRequest();
+        }
+
     }
 
     /*
@@ -646,8 +714,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
         }
-        Log.d("KTag","getUserStatus on REsume");
-        mSocket.emit("getUserStatus", new JSONObject());
+        try {
+            if(user.get("status") != null){
+                Log.d("KTag","getUserStatus on REsume");
+                mSocket.emit("getUserStatus", new JSONObject());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         super.onResume();
 
 
@@ -673,6 +748,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     private void checkStatus(JSONObject obj){
         Log.d("KTag","Check Status : \n"+obj.toString());
+        Log.d("KTag","User : \n"+user.toString());
         try {
             if(obj.getString("status").equals("waiting_match")){
                 startWaitingActivity(obj.getString("selected_college"),obj.getString("selected_parkinglot"),obj.getString("client_type"));
@@ -687,6 +763,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             e.printStackTrace();
         }
     }
+
+
 
 
 

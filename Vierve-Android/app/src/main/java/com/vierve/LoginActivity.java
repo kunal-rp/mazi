@@ -335,20 +335,24 @@ public class LoginActivity extends AppCompatActivity  {
             showProgress(false);
 
             if (code == 3) {
-                if (remember == true) {
-                    //valid username or password
-                    db_helper_user.clearAllTables();
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("user_id", resultJSON.getString("user_id"));
-                        obj.put("user_name", user_name);
-                        obj.put("user_password", user_password);
-                        obj.put("remember", 1);
-                        db_helper_user.setUserInfo(obj);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                db_helper_user.clearAllTables();
+                //valid username or password
 
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("user_id", resultJSON.getString("user_id"));
+                    obj.put("user_name", user_name);
+                    obj.put("user_password", user_password);
+                    obj.put("remember", (mRemember.isEnabled())?1:0);
+                    db_helper_user.setUserInfo(obj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (mRemember.isChecked() == true) {
+                    db_helper_user.setRemember(true);
+                }
+                else{
+                    db_helper_user.setRemember(false);
                 }
                 startActivity(intent);
             } else if (code == 1) {
@@ -358,11 +362,19 @@ public class LoginActivity extends AppCompatActivity  {
                         Toast.makeText(getApplicationContext(), "Invalid Username or Password", Toast.LENGTH_LONG).show();
                     }
                 });
-            } else {
+            } else if(code == 2) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Toast.makeText(getApplicationContext(), "User active on different device", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+            else if(code == 4){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "Need to verify email to continue.\nCheck email", Toast.LENGTH_LONG).show();
                     }
                 });
             }

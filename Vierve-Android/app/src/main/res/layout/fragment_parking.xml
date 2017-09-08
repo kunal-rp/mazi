@@ -19,13 +19,15 @@
         android:popupTheme="@android:style/ThemeOverlay.Material.Light"
         />
 
+
+
+
     <Button
         android:id="@+id/submit"
         android:onClick="submitRequest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/toolbar"
         android:text="Set Parking Lot"
         android:background="#FFFFFF"
         android:textColor="@color/colorAccent"/>

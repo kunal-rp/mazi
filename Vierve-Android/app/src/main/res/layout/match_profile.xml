@@ -5,32 +5,42 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp"
     >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Driver/Rider"
+            android:id="@+id/profile_type"
+            android:textSize="20dp"
+            android:layout_alignParentLeft="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:text="\@username"
+            android:id="@+id/profile_username"
+            android:textStyle="italic"
+            android:textSize="15dp"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
+
+
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Driver/Rider"
-        android:id="@+id/profile_type"
-        android:textSize="20dp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="\@username"
-        android:id="@+id/profile_username"
-        android:textStyle="italic"
-        android:textSize="15dp" />
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/isNear"
-        android:gravity="center"
+        android:gravity="right"
         android:background="@color/colorAccent"
         android:layout_margin="5dp"
         android:textColor="#FFFFFF"
+        android:textAlignment="center"
         android:text="Near PickUp Location"
         android:visibility="invisible"/>
+
 
 
 </LinearLayout>
