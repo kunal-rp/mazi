@@ -15,6 +15,7 @@ import android.widget.Spinner;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class parking_fragment extends Fragment {
 
     // Container Activity must implement this interface
     public interface OnHeadlineSelectedListener {
-        public void onParkingSpinnerItemSelected(float lat, float lng);
+        public void onParkingSpinnerItemSelected(float lat, float lng,int index);
         public void setMarkers(ArrayList<MarkerOptions> markers,ArrayList<String> list);
         public void setParkingLot(String selected_parkinglot_id);
     }
@@ -98,8 +99,7 @@ public class parking_fragment extends Fragment {
                 lat = Float.parseFloat(hidden_parkinglots.get(i).get(2));
                 lng = Float.parseFloat(hidden_parkinglots.get(i).get(3));
                 selected_parkinglot_id =  hidden_parkinglots.get(i).get(0);
-
-                mCallback.onParkingSpinnerItemSelected(lat,lng);
+                mCallback.onParkingSpinnerItemSelected(lat,lng,i);
             }
 
             @Override
@@ -142,21 +142,22 @@ public class parking_fragment extends Fragment {
             hidden_parkinglots.add(temp2);//id,name,lat,lng
             face_parkinglots.add(temp.get(i).get(1));
         }
-        PopulateSpinner(mParkingSpinner, face_parkinglots);
+        PopulateSpinner(mParkingSpinner, hidden_parkinglots);
     }
 
-    private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
+    private void PopulateSpinner(Spinner spinner, ArrayList<ArrayList<String>> list) {
+        ParkingSpinnerAdapter parkingSpinnerAdapter = new ParkingSpinnerAdapter(getContext(),list);
+        spinner.setAdapter(parkingSpinnerAdapter);
+        ArrayList<String> face = new ArrayList<>();
         for(int i = 0; i < hidden_parkinglots.size(); i++){
             ArrayList<String> temp = hidden_parkinglots.get(i);
             LatLng parkingLot = new LatLng(Float.parseFloat(temp.get(2)), Float.parseFloat(temp.get(3)));
             MarkerOptions marker = new MarkerOptions().position(parkingLot).title(temp.get(1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));;
             markers.add(marker);
+            face.add(temp.get(1));
 
         }
-        mCallback.setMarkers(markers,list);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item, list);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        mCallback.setMarkers(markers,face);
     }
 
     public void updateSpinnerSelected(String id){

@@ -44,6 +44,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * A login screen that offers login via email/password.
@@ -81,6 +82,12 @@ public class LoginActivity extends AppCompatActivity  {
 
         db_helper_user = new Db_Helper_User(this,null);
 
+        try {
+            Log.d("KTag","DBUSER "+db_helper_user.getInfo().toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         mUserNameView = (EditText) findViewById(R.id.user_name);
         mPasswordView = (EditText) findViewById(R.id.user_password);
         mRemember = (CheckBox) findViewById(R.id.remember);
@@ -90,9 +97,8 @@ public class LoginActivity extends AppCompatActivity  {
         mProgressView = findViewById(R.id.login_progress);
 
 
-
+        Log.d("KTag","Remember? "+db_helper_user.getRemember());
         if(db_helper_user.getRemember() == true){
-            Log.d("KTag","Pre Set Test");
             JSONObject obj;
             try {
                 Log.d("KTag","Pre set details");
@@ -103,7 +109,7 @@ public class LoginActivity extends AppCompatActivity  {
                 remember = true;
                 mUserNameView.setText(user_name);
                 mPasswordView.setText(user_password);
-                mRemember.setEnabled(true);
+                mRemember.setChecked(true);
                 Log.d("KTag","Details Username : "+ user_name + ", Password :" +user_password);
                 attemptLogin();
 
@@ -119,7 +125,7 @@ public class LoginActivity extends AppCompatActivity  {
             public void onClick(View view) {
                 user_name = mUserNameView.getText().toString();
                 user_password = mPasswordView.getText().toString();
-                if(mRemember.isEnabled()){
+                if(mRemember.isChecked()){
                     remember = true;
                 }
                 else{
@@ -127,6 +133,15 @@ public class LoginActivity extends AppCompatActivity  {
                 }
                 Log.d("KTag","Details Username : "+ user_name + ", Password :" +user_password);
                 attemptLogin();
+            }
+        });
+
+        Button registerButton = (Button) findViewById(R.id.register);
+        registerButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), RegisterActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -180,12 +195,15 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     private boolean isUsernameValid(String username) {
-        return username.length() <16;
+        return !TextUtils.isEmpty(username) && username.length() <16;
     }
 
+
+
     private boolean isPasswordValid(String password) {
-        return password.length() < 31 ;
+        return !TextUtils.isEmpty(password) ;
     }
+
 
     /**
      * Shows the progress UI and hides the login form.
@@ -343,7 +361,7 @@ public class LoginActivity extends AppCompatActivity  {
                     obj.put("user_id", resultJSON.getString("user_id"));
                     obj.put("user_name", user_name);
                     obj.put("user_password", user_password);
-                    obj.put("remember", (mRemember.isEnabled())?1:0);
+                    obj.put("remember", (mRemember.isChecked())?1:0);
                     db_helper_user.setUserInfo(obj);
                 } catch (JSONException e) {
                     e.printStackTrace();

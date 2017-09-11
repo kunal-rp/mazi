@@ -45,8 +45,6 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
     private String rider_user_id, rider_user_name, parker_user_id, parker_user_name;
     private int start_timestamp;
 
-    private Boolean joined_room_confirm = false;
-
     private GoogleMap matchMap;
 
     //var for the socket
@@ -55,7 +53,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
     private Marker pu_marker,rider_marker,parker_marker ;
 
-    private boolean atPickup = false;
+    private boolean manualPickup = false;
 
 
     private double current_lat, current_lng;
@@ -84,6 +82,8 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         socketHandler = new SocketHandler();
         mSocket = socketHandler.getSocket();
 
+
+
         new GPSTracker(MatchActivity.this);
 
 
@@ -110,6 +110,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
 
         final match_profile parker_profile = new match_profile();
+        parker_profile.disconnected();
         Bundle parker_bundle = new Bundle();
         parker_bundle.putString("username", parker_user_name);
         parker_bundle.putString("type", "Parker");
@@ -122,6 +123,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
 
         final match_profile rider_profile = new match_profile();
+        rider_profile.disconnected();
         final Bundle rider_bundle = new Bundle();
         rider_bundle.putString("username", rider_user_name);
         rider_bundle.putString("type", "Rider");
@@ -176,7 +178,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        emitJoinRoom();
+
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -206,7 +208,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                                 obj.put("lng", current_lng);
 
                                 //if the user is within the minimun distance from the pu spot, it is at the pu spot
-                                if (distance <= DISTANCE_MINIMUM ) {
+                                if (distance <= DISTANCE_MINIMUM || manualPickup == true ) {
                                     obj.put("atPickup", true);
                                 } else {
                                     obj.put("atPickup", false);
@@ -225,6 +227,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
 
 
+        emitJoinRoom();
 
         mSocket.on("joined_room_confirm", new Emitter.Listener() {
             @Override
@@ -256,6 +259,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                         public void run() {
                             try {
                                 ((match_profile) finalUserObj.get("fragment")).disconnected();
+                                Toast.makeText(getApplicationContext(),"Other User disconnected.\nUser has 1 minute to reconnect",Toast.LENGTH_LONG).show();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -322,6 +326,17 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                             Float t_lng = Float.parseFloat(Double.toString(obj.getDouble("lng")));
                             Boolean atPickup = obj.getBoolean("atPickup");
 
+
+                            Location pu_location = new Location("pickup");
+                            pu_location.setLatitude(pu_lat);
+                            pu_location.setLongitude(pu_lng);
+                            Location user_location = new Location("user");
+                            user_location.setLatitude(t_lat);
+                            user_location.setLongitude(t_lng);
+
+                            //current distance from the user to the pickup spot
+                            float distance = pu_location.distanceTo(user_location);
+
                             JSONObject userObj = (JSONObject) clients.get(obj.getString("user_id"));
 
                             BitmapDescriptor icon;
@@ -363,8 +378,12 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
                             //updates if it is at the pickup spot or not
                             if (atPickup == true) {
-                                ((match_profile)userObj.get("fragment")).userIsNear();
-
+                                if(distance <= DISTANCE_MINIMUM){
+                                    ((match_profile)userObj.get("fragment")).userIsNear();
+                                }
+                                else{
+                                    ((match_profile)userObj.get("fragment")).userCantGetAnyCloser();
+                                }
                             } else {
                                 ((match_profile)userObj.get("fragment")).userIsNotNear();
                             }
@@ -471,22 +490,11 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         }
     }
 
-    public void setAtPickup() {
-        Log.d("KTag","AtPickup ");
-        mSocket.emit("atPickup", new JSONObject());
-        atPickup = true;
-    }
+
 
     @Override
     public void manualClose() {
-        setAtPickup();
-        JSONObject userObj = null;
-        try {
-            userObj = (JSONObject) clients.get(current_user.getString("user_id"));
-            ((match_profile)userObj.get("fragment")).userIsNear();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        manualPickup = true;
 
     }
 }

@@ -7,6 +7,7 @@ var mysql= require('mysql');
 const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
 var path = require('path');
 var nodemailer = require('nodemailer');//sending mail
+var validator = require('mailgun-email-validation');
 
 //Ensures server continues to run if any exception occurs. Will have to come up with a better system in the future
 process.on('uncaughtException', function (err) {
@@ -61,7 +62,7 @@ function getTimestamp () {
     service:  'Mailgun',
     auth: {
      user: 'postmaster@vierve.com',
-     pass: '9c629d0ee22d4529ac897cf272b4aa22'   
+     pass: 'El65ZPAjjNcqp2VaTDQ5'   
     }
 });
 
@@ -71,6 +72,7 @@ the username and key is checked , and if correct the email is then set to verifi
 */
 app.get('/verifyEmail',function (req,res) {
     var given_user_name = req.query.user_name;
+    iven_user_name = given_user_name.toLowerCase();
     var given_hash = req.query.hash;
 
 
@@ -139,6 +141,7 @@ used to check the user status
 */
 app.get('/checkUser',function (req,res) {
     var given_user_name = req.query.user_name;
+    iven_user_name = given_user_name.toLowerCase();
     var given_password = req.query.user_password;
 
     
@@ -193,36 +196,77 @@ app.get('/checkUser',function (req,res) {
     });
 });
 
+app.get('/checkUsername',function(req,res){
+    if(req.query.user_name == undefined ){
+        res.end(JSON.stringify({code: 0}, null, 3));
+    }
+    else{
+        var given_user_name = (req.query.user_name)
+        given_user_name = given_user_name.toLowerCase();
+        var query_user_name_prim = "Select * From "+ table_user_prim + " Where `user_name` = '"+given_user_name+"'";
+        connection.query(query_user_name_prim,function(err, results){
+            if(err){
+                logData("Error/checkUsername API  :" + err);
+                logData("Query : " + query_user_name_prim);
+            }
+            else{
+                if(results.length == 0){
+                    res.end(JSON.stringify({code: 2}, null, 3));
+                }
+                else{
+                    //username taken
+                    res.end(JSON.stringify({code: 1}, null, 3));
+                }
+            }
+
+        });
+    }
+});
+
 app.get('/createUser',function (req,res) {
     var data = {}
     if(req.query.user_name == undefined ||req.query.user_password == undefined ||req.query.user_email == undefined  ){
         res.end(JSON.stringify({code: 1}, null, 3));
     }
     else{
-        data.user_name = req.query.user_name;
-        data.user_password = req.query.user_password;
-        data.user_email = req.query.user_email;
 
-        generateUserID(data,function(err){
-            if(err != null){
-                res.end(JSON.stringify({code: 1}, null, 3));
-            } else {
-                logData("userCreated |"+data.toString())
-                res.end(JSON.stringify({code: 2}, null, 3));
-                var mailOpts = {
-                    from:'noreply@vierve.com',
-                    to: data.user_email,
-                    subject: 'Email Verification',
-                    html : '<h1>Welcome to Vierve @'+data.user_name+'!</h1> <p>Click the link below to activate your account.</p><p></p>'
-                };
-                transporter.sendMail(mailOpts, function (err2, response) {
-                    if (err2) {
-                        logData("Email sending error :"+err2)
-                    } else {
-                        logData("Email Verification sent to "+ data.user_email)
-                    }
-                })
+         validator.check(req.query.user_email , function(valid_email_err, valid) {
+            if (valid_email_err){
+                logData("Valid Email Error");
+                logData(valid_email_err);
+            }
+            else{
+                if(valid == false){
+                    res.end(JSON.stringify({code: 1}, null, 3));
+                }
+                else{
+                    data.user_name = (req.query.user_name).toLowerCase();
+                    data.user_password = req.query.user_password;
+                    data.user_email = req.query.user_email;
 
+                    generateUserID(data,function(err){
+                        if(err){
+                            res.end(JSON.stringify({code: 1}, null, 3));
+                        } else {
+                            logData("userCreated |"+data.toString())
+                            res.end(JSON.stringify({code: 2}, null, 3));
+                            var mailOpts = {
+                                from:'noreply@vierve.com',
+                                to: data.user_email,
+                                subject: 'Email Verification',
+                                html : '<h1>Welcome to Vierve @'+data.user_name+'!</h1> <p>Click the link below to activate your account.</p><p></p>'
+                            };
+                            transporter.sendMail(mailOpts, function (err2, response) {
+                                if (err2) {
+                                    logData("Email sending error :"+err2)
+                                } else {
+                                    logData("Email Verification sent to "+ data.user_email)
+                                }
+                            })
+
+                        }
+                    });
+                }
             }
         });
     }});
@@ -389,7 +433,7 @@ function newConnection(socket){
 
         if(clients[socket.user_id] == undefined ){
             clients[socket.user_id] = {socket_id: socket.id,connected : socket.connected,status: 'initial_connected'}
-            getUserStatus();
+            getUserStatus(socket.user_id);
             logData(socket.user_id + " setUser initial")
         }
         else{
@@ -398,48 +442,89 @@ function newConnection(socket){
             logData(socket.user_id + " setUser reconnect")
             if(clients[socket.user_id]["status"] == 'waiting_match'){
                 clearTimeout(clients[socket.user_id]['timer']);
-                getUserStatus();
+                getUserStatus(socket.user_id);
             }
-            else if(clients[socket.user_id]["status"] == 'matched' || clients[socket.user_id]["status"] == 'finish') {
-                joinRoom();
-                getUserStatus();
+            else if(clients[socket.user_id]["status"] == 'matched') {
+                clearTimeout(clients[socket.user_id]['timer']);
+                getUserStatus(socket.user_id);
+            }
+            else if ( clients[socket.user_id]["status"] == 'finish'){
+                getUserStatus(socket.user_id);
             }
         }
     });
 
     socket.on('getUserStatus',function(){
-        getUserStatus();
+        getUserStatus(socket.user_id);
     });    
 
-    function getUserStatus(){
-            var status = clients[socket.user_id].status;
-            if(status == 'initial_connected'){
-                socket.emit('updateStatus',clients[socket.user_id]);
+    function getUserStatus(user_id){
+            if(user_id == socket.user_id){
+                var status = clients[socket.user_id].status;
+                if(status == 'initial_connected'){
+                    socket.emit('updateStatus',clients[socket.user_id]);
+                }
+                else if(status == 'waiting_match'){
+                    socket.emit('updateStatus',{status: status,selected_college:clients[socket.user_id].selected_college , selected_parkinglot:clients[socket.user_id].selected_parkinglot, client_type:clients[socket.user_id].client_type});
+                }
+                else if(status == 'matched'){
+                    socket.emit('updateStatus',{
+                        status: status,
+                        pu_lat: clients[socket.user_id].pu_lat ,
+                        pu_lng: clients[socket.user_id].pu_lng,
+                        rider_user_id:  clients[socket.user_id].rider_user_id,
+                        rider_user_name: clients[socket.user_id].rider_user_name,
+                        parker_user_id: clients[socket.user_id].parker_user_id,
+                        parker_user_name: clients[socket.user_id].parker_user_name,
+                        start_timestamp:clients[socket.user_id].start_timestamp
+                    });
+                }
+                else if(status == 'finish'){
+                    socket.emit('updateStatus',{
+                        status: status,
+                        match_end_type: clients[socket.user_id].match_end_type,
+                        rider_user_id:  clients[socket.user_id].rider_user_id,
+                        rider_user_name: clients[socket.user_id].rider_user_name,
+                        parker_user_id: clients[socket.user_id].parker_user_id,
+                        parker_user_name: clients[socket.user_id].parker_user_name  
+                    });
+                }
             }
-            else if(status == 'waiting_match'){
-                socket.emit('updateStatus',{status: status,selected_college:clients[socket.user_id].selected_college , selected_parkinglot:clients[socket.user_id].selected_parkinglot, client_type:clients[socket.user_id].client_type});
+            else{
+                var status = clients[user_id].status;
+                if(status == 'initial_connected'){
+                     socket.broadcast.to(clients[user_id].socket_id).emit('updateStatus',clients[user_id]);
+                }
+                else if(status == 'waiting_match'){
+                    socket.broadcast.to(clients[user_id].socket_id).emit('updateStatus',{status: status,
+                        selected_college:clients[user_id].selected_college , 
+                        selected_parkinglot:clients[user_id].selected_parkinglot, 
+                        client_type:clients[user_id].client_type});
+                }
+                else if(status == 'matched'){
+                    socket.broadcast.to(clients[user_id].socket_id).emit('updateStatus',{
+                        status: status,
+                        pu_lat: clients[user_id].pu_lat ,
+                        pu_lng: clients[user_id].pu_lng,
+                        rider_user_id:  clients[user_id].rider_user_id,
+                        rider_user_name: clients[user_id].rider_user_name,
+                        parker_user_id: clients[user_id].parker_user_id,
+                        parker_user_name: clients[user_id].parker_user_name,
+                        start_timestamp:clients[user_id].start_timestamp
+                    });
+                }
+                else if(status == 'finish'){
+                    socket.broadcast.to(clients[user_id].socket_id).emit('updateStatus',{
+                        status: status,
+                        match_end_type: clients[user_id].match_end_type,
+                        rider_user_id:  clients[user_id].rider_user_id,
+                        rider_user_name: clients[user_id].rider_user_name,
+                        parker_user_id: clients[user_id].parker_user_id,
+                        parker_user_name: clients[user_id].parker_user_name  
+                    });
+                }
             }
-            else if(status == 'matched'){
-                socket.emit('updateStatus',{
-                    status: status,
-                    pu_lat: clients[socket.user_id].pu_lat ,
-                    pu_lng: clients[socket.user_id].pu_lng,
-                    rider_user_id:  clients[socket.user_id].rider_user_id,
-                    rider_user_name: clients[socket.user_id].rider_user_name,
-                    parker_user_id: clients[socket.user_id].parker_user_id,
-                    parker_user_name: clients[socket.user_id].parker_user_name,
-                    start_timestamp:clients[socket.user_id].start_timestamp
-                });
-            }
-            else if(status == 'finish'){
-                socket.emit('updateStatus',{
-                    status: status,
-                    rider_user_id:  clients[socket.user_id].rider_user_id,
-                    rider_user_name: clients[socket.user_id].rider_user_name,
-                    parker_user_id: clients[socket.user_id].parker_user_id,
-                    parker_user_name: clients[socket.user_id].parker_user_name  
-                });
-            }
+            
         
     }
     
@@ -484,7 +569,7 @@ function newConnection(socket){
             else{
                 if(results_1.length == 0){
                     clients[user_id].status = 'waiting_match';
-                    getUserStatus();
+                    getUserStatus(socket.user_id);
                     var query_2 = "INSERT into "+table_area+"(`user_id`, `user_name`,`college_id`, `parkinglot_id`, `time`, `type`, `socket_id`,`pickup_lat`,`pickup_lng`) VALUES( '"+ user_id+"','"+user_name+"','"+college_id + "','"+parkinglot_id+"',"+time +",'"+client_type+"','"+socket.id+"',"+pu_lat+","+pu_lng+")";
                     connection.query(query_2, function(err_2,results_2){
                         if(err_2){
@@ -569,16 +654,12 @@ function newConnection(socket){
                     clients[mirror_user_id]["room_name"] = room_name;
 
                     if(clients[mirror_user_id].connected){
-                        console.log(mirror_user_id+ " Update Status Matched ")
-                        socket.broadcast.to(clients[mirror_user_id].socket_id).emit('updateStatus',clients[mirror_user_id]);
+                        getUserStatus(mirror_user_id);
 
                     }
-                    else{
-
-                    }
+                    
                     if(clients[socket.user_id].connected){
-                        console.log(socket.user_id+ " Update Status Matched ")
-                        getUserStatus();
+                        getUserStatus(socket.user_id);
                     }
                     
                     
@@ -640,11 +721,11 @@ function newConnection(socket){
         clients[socket.user_id].closeToPickup = true;
             var rider_user_id = clients[socket.user_id]["rider_user_id"];
             var parker_user_id = clients[socket.user_id]["parker_user_id"];
-                    if( clients[rider_user_id].closeToPickup == true && clients[parker_user_id].closeToPickup == true && (clients[rider_user_id].confirmed == undefined && clients[parker_user_id].confirmed == undefined)){
-                clients[rider_user_id].confirmed = false;
-                clients[parker_user_id].confirmed = false;
-                io.to(clients[socket.user_id]["room_name"]).emit('issueConfirmation',{confirmationNumber : Math.floor(Math.random() * (999)) + 100}); 
-                logData(clients[socket.user_id].room_name + " match issueConfirmation | "+socket.user_id )                               
+                if( clients[rider_user_id].closeToPickup == true && clients[parker_user_id].closeToPickup == true && (clients[rider_user_id].confirmed == undefined && clients[parker_user_id].confirmed == undefined)){
+                    clients[rider_user_id].confirmed = false;
+                    clients[parker_user_id].confirmed = false;
+                    io.to(clients[socket.user_id]["room_name"]).emit('issueConfirmation',{confirmationNumber : Math.floor(Math.random() * (999)) + 100}); 
+                    logData(clients[socket.user_id].room_name + " match issueConfirmation | "+socket.user_id )                               
             }
     }
 
@@ -659,43 +740,38 @@ function newConnection(socket){
         var parker_user_id = clients[socket.user_id]["parker_user_id"];
 
         if(clients[rider_user_id]["confirmed"] === true && clients[parker_user_id]["confirmed"] === true  ){
-            clients[rider_user_id]["confirmed"] === false
-            clients[parker_user_id]["confirmed"] === false
-
-            clients[rider_user_id].status = 'finish';
-            clients[parker_user_id].status = 'finish';
-            var mirror_user_id;
-
-            if(socket.user_id == rider_user_id){
-                mirror_user_id = parker_user_id
-            }
-            else{
-                mirror_user_id = rider_user_id
-            }
-            logData(clients[socket.user_id].room_name + " finished " )
-            if(clients[socket.user_id].connected){
-                getUserStatus();
-            }
-            if(clients[mirror_user_id].connected){
-                socket.broadcast.to(clients[mirror_user_id].socket_id).emit('updateStatus',{status: clients[mirror_user_id].status,
-                    rider_user_id:  clients[mirror_user_id].rider_user_id,
-                    rider_user_name: clients[mirror_user_id].rider_user_name,
-                    parker_user_id: clients[mirror_user_id].parker_user_id,
-                    parker_user_name: clients[mirror_user_id].parker_user_name  
-                });
-            }
-            
-            
-            
-        
+            endMatch(rider_user_id, parker_user_id,0)
         }
     });
 
+    function endMatch(user_1, user_2,type){
+
+        clients[user_1].status = 'finish';
+        clients[user_2].status = 'finish';
+        clients[user_1]["confirmed"] = false
+        clients[user_2]["confirmed"] = false 
+
+        clients[user_1]["match_end_type"] = type
+        clients[user_2]["match_end_type"] = type
+        
+        logData(clients[socket.user_id].room_name + " finished " )
+        if(clients[user_1].connected){
+
+            getUserStatus(user_1);
+        }
+        if(clients[user_2].connected){
+            getUserStatus(user_2);
+        } 
+        
+   
+    }
+
     socket.on('finish',function(data){
+        resetUser();
         var rated_user = data.user_id;
-        var given_rating = data.rating;
-        resetUser();   
+        var given_rating = data.rating;   
         rateUser(rated_user,given_rating);
+
     });
 
     
@@ -709,7 +785,8 @@ function newConnection(socket){
             }
             else if(clients[user_id].status == 'waiting_match'){  
                 clients[user_id]['timer'] = setTimeout(function(){
-                removeRequest(user_id);
+                    removeRequest(user_id);
+                    delete clients[user_id];
                 
                 }, 30000);
                 delete clients[user_id].socket_id;
@@ -718,6 +795,12 @@ function newConnection(socket){
                 userNotAtPickup();
                 socket.leave(clients[socket.user_id].room_name);
                 io.to(clients[socket.user_id]["room_name"]).emit('disconnected',{user_id:socket.user_id});
+                clients[user_id]['timer'] = setTimeout(function(){
+                    endMatch(clients[socket.user_id].rider_user_id,clients[socket.user_id].parker_user_id,1+"|"+socket.user_id)
+                    delete clients[user_id];
+                    console.log("Match Ended by Disconnect")
+                
+                }, 6000);
                 delete clients[user_id].socket_id
             }
             else {
@@ -738,7 +821,7 @@ function newConnection(socket){
         var client_type = clients[user_id]['client_type'];
         removeRequest(user_id);
         clients[user_id].status = 'initial_connected';
-        getUserStatus();
+        getUserStatus(socket.user_id);
     });
 
 
@@ -772,7 +855,7 @@ function newConnection(socket){
 
     function resetUser(){
         clients[socket.user_id] = {socket_id : socket.id, status : 'initial_connected',connected : socket.connected}
-        getUserStatus();
+        getUserStatus(socket.user_id);
         logData(socket.user_id + " setUser initial")
     }
 }

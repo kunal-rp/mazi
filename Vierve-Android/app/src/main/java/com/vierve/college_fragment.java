@@ -85,7 +85,7 @@ public class college_fragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        new college_fragment.GetAllCollegeToSpinner().execute();
+
 
         //Sets floating buttons
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.requestRideButton);
@@ -100,7 +100,6 @@ public class college_fragment extends Fragment {
         Bundle bundle = getArguments();
         current_lat = bundle.getDouble("current_lat");
         current_lng = bundle.getDouble("current_lng");
-
 
 
 
@@ -134,6 +133,8 @@ public class college_fragment extends Fragment {
             }
         });
 
+        new college_fragment.GetAllCollegeToSpinner().execute();
+
     }
 
     @Override
@@ -144,10 +145,9 @@ public class college_fragment extends Fragment {
 
     }
 
-    private void PopulateSpinner(Spinner spinner, ArrayList<String> list) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), R.layout.spinner_item, list);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+    private void PopulateSpinner(Spinner spinner, ArrayList<ArrayList<String>> list) {
+        CollegeSpinnerAdapter collegeSpinnerAdapter = new CollegeSpinnerAdapter(getContext(),hidden_college);
+        spinner.setAdapter(collegeSpinnerAdapter);
     }
 
 
@@ -181,6 +181,7 @@ public class college_fragment extends Fragment {
         protected Void doInBackground(Object... params) {
             db_helper_data = new DB_Helper_Data(getActivity(), null);
 
+            Log.d("KTag","Location CF:"+current_lat + ","+current_lng);
             ArrayList<ArrayList<String>> temp= db_helper_data.getAllCollegesInformation();
             for(int i = 0; i < temp.size(); i++){
                 ArrayList<String> temp2 = new ArrayList<>();
@@ -197,7 +198,9 @@ public class college_fragment extends Fragment {
                 Location user_location = new Location("user");
                 user_location.setLatitude(current_lat);
                 user_location.setLongitude(current_lng);
-                temp2.add (Float.toString(college.distanceTo(user_location)));
+                temp2.add((college.distanceTo(user_location)/1609.34 <= 50)?String.format("%.2f",(college.distanceTo(user_location)/1609.34)):"+50");
+
+
 
                 hidden_college.add(temp2);//id,lat,lng
             }
@@ -220,11 +223,8 @@ public class college_fragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            ArrayList<String> x = new ArrayList<>();
-            for(int i = 0; i < hidden_college.size(); i++){
-                x.add(hidden_college.get(i).get(1));
-            }
-            PopulateSpinner(mCollegeSpinner,x);
+
+            PopulateSpinner(mCollegeSpinner,hidden_college);
 
         }
     }

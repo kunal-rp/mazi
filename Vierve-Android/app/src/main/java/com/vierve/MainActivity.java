@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.JsonReader;
@@ -93,8 +94,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     private double current_lat, current_lng,college_lat, college_lng;
     private double ride_limit,park_limit;
 
-
-
     parking_fragment parking_fragment;
 
     //holds the permissions needed for the app to function
@@ -116,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("KTag","Main Activity onCreate");
+
 
 
         socketHandler = new SocketHandler();
@@ -139,12 +140,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                db_helper_user.clearAllTables();
+                try {
+                    Log.d("KTag","DBUSER "+db_helper_user.getInfo().toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 finish();
             }
         });
-
-        //instantiates the GPS Tracher Service class , which provides the cuser's current gps coordinates
-        new GPSTracker(MainActivity.this);
 
 
 
@@ -186,8 +190,11 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        Log.d("KTag", "Marker Clicked : " + marker.getTitle() );
-                        parking_fragment.updateSpinnerSelected(marker.getTitle());
+                        for(int i = 0; i < markers.size(); i++){
+                            markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
+                        }
+                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
                         return false;
                     }
                 });
@@ -385,6 +392,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             } else if (code == 1) {
                 //in case local db had up to date data
                 Log.d("KTag", "checkVersion : NO New Data");
+                new GPSTracker(MainActivity.this);
                 startCollegeFragment();
 
             }
@@ -436,6 +444,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            new GPSTracker(MainActivity.this);
             startCollegeFragment();
         }
     }
@@ -444,11 +453,19 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     Clears the map of all markers and adds the fragment to the view
      */
     public void startCollegeFragment() {
+
         mMap.clear();
         markers.clear();
+
+        current_lat = GPSTracker.latitude;
+        current_lng = GPSTracker.longitude;
+        Log.d("KTag",current_lat+","+current_lng);
+
+
         Bundle bundle = new Bundle();
         bundle.putDouble("current_lat",current_lat);
-        bundle.putDouble("current_lg",current_lng);
+        bundle.putDouble("current_lng",current_lng);
+        Log.d("KTag","Location Main:"+current_lat + ","+current_lng);
         college_fragment college_fragment = new college_fragment();
         college_fragment.setArguments(bundle);
         FragmentManager fm = getSupportFragmentManager();
@@ -456,6 +473,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         transaction.replace(R.id.contentFragment, college_fragment);
         transaction.commit();
 
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //No call for super(). Bug on API Level > 11.
     }
 
 
@@ -484,6 +505,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             mMap.clear();
             current_lat = GPSTracker.latitude;
             current_lng = GPSTracker.longitude;
+            Log.d("KTag","PR:"+current_lat+","+current_lng);
 
             type=t;
 
@@ -585,9 +607,13 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     //Moves map focus when a new spinner item is clicked for the parking_fragment
     @Override
-    public void onParkingSpinnerItemSelected(float lat, float lng) {
-        LatLng parking = new LatLng(lat, lng);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(parking, 17));
+    public void onParkingSpinnerItemSelected(float lat, float lng,int index) {
+
+        for(int i = 0; i < markers.size(); i++){
+            markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
+        }
+        markers.get(index).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markers.get(index).getPosition(), 17));
     }
 
     /*
@@ -692,14 +718,13 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     public void startRatingActivity(JSONObject obj){
         Intent intent = new Intent(this, RatingActivity.class);
         try {
-            if(user.getString("user_id").equals(obj.get("rider_user_id"))){
-                intent.putExtra("user_id",obj.getString("rider_user_id"));
-                intent.putExtra("user_name",obj.getString("rider_user_name"));
-            }
-            else{
-                intent.putExtra("user_id",obj.getString("parker_user_id"));
-                intent.putExtra("user_name",obj.getString("parker_user_name"));
-            }
+
+            intent.putExtra("user_id",user.getString("user_id"));
+            intent.putExtra("rider_user_id",obj.getString("rider_user_id"));
+            intent.putExtra("rider_user_name",obj.getString("rider_user_name"));
+            intent.putExtra("parker_user_id",obj.getString("parker_user_id"));
+            intent.putExtra("parker_user_name",obj.getString("parker_user_name"));
+            intent.putExtra("match_end_type",obj.getString("match_end_type"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -747,8 +772,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     }
 
     private void checkStatus(JSONObject obj){
-        Log.d("KTag","Check Status : \n"+obj.toString());
-        Log.d("KTag","User : \n"+user.toString());
         try {
             if(obj.getString("status").equals("waiting_match")){
                 startWaitingActivity(obj.getString("selected_college"),obj.getString("selected_parkinglot"),obj.getString("client_type"));
@@ -763,10 +786,4 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             e.printStackTrace();
         }
     }
-
-
-
-
-
-
 }
