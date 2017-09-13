@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:weightSum="1"
+    android:layout_margin="10dp"
+    >
+    <TextView android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight=".9"
+        android:text="College Name"
+        android:id="@+id/college_name"
+        android:textSize="15dp"
+        android:textColor="@color/colorPrimary"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:layout_marginLeft="5dp"
+        android:gravity="center"/>
+    <ImageView android:layout_height="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight=".1"
+        android:src="@drawable/quantum_ic_keyboard_arrow_down_white_36"
+        android:textSize="15dp"
+        android:gravity="right"
+        android:tint="@color/colorAccent"/>
+
+
+</LinearLayout>

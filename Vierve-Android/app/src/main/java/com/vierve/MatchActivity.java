@@ -110,7 +110,6 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
 
         final match_profile parker_profile = new match_profile();
-        parker_profile.disconnected();
         Bundle parker_bundle = new Bundle();
         parker_bundle.putString("username", parker_user_name);
         parker_bundle.putString("type", "Parker");
@@ -123,7 +122,6 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
 
         final match_profile rider_profile = new match_profile();
-        rider_profile.disconnected();
         final Bundle rider_bundle = new Bundle();
         rider_bundle.putString("username", rider_user_name);
         rider_bundle.putString("type", "Rider");

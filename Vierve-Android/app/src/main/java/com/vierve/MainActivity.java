@@ -18,6 +18,7 @@ import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -53,6 +54,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener, college_fragment.OnHeadlineSelectedListener, pickup_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
 
+    /*
+
+    The Launcher Activity
+    User picks the college and the request type
+     */
+
+
     //var for the socket
     private Socket mSocket;
 
@@ -61,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     //used to make socket universal throughout all acivites
     private SocketHandler socketHandler;
-    String krpURL = "http://192.168.5.135:3000";
+
 
     //var used to saved version data from REST API
     private JSONObject version_data;
@@ -96,13 +104,13 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     parking_fragment parking_fragment;
 
-    //holds the permissions needed for the app to function
-    String[] permissions = new String[]{Manifest.permission.ACCESS_FINE_LOCATION};
+
 
     //connects to the server
     {
         try {
-            mSocket = IO.socket(krpURL);
+            socketHandler = new SocketHandler();
+            mSocket = IO.socket(socketHandler.getURL());
 
         } catch (URISyntaxException e) {
             Log.i("Socket", "Invalid URI");
@@ -118,8 +126,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         Log.d("KTag","Main Activity onCreate");
 
 
-
-        socketHandler = new SocketHandler();
         user = new JSONObject();
 
         //Initializes local db
@@ -147,6 +153,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                     e.printStackTrace();
                 }
                 finish();
+            }
+        });
+
+        ImageView profile = (ImageView) findViewById(R.id.profile);
+        profile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),UserOverviewActivity.class );
+                startActivity(intent);
             }
         });
 
@@ -186,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                new GPSTracker(MainActivity.this);
                 new EstablishWebSocket().execute();
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
@@ -201,37 +217,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             }
         });
 
-    }
-
-
-    /*
-    Returns true if all permissions have been granted
-    Returns false if permissions missing, and then requests the permission
-     */
-    public boolean askPermissions(){
-        for (int i = 0; i < permissions.length; i++) {
-            String permission = permissions[i];
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{permission}, 123);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /*
-    After the permission alert diolog is requested, in the clase that the user clicks deny, it asks again and again
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == 123) {
-            for (int i = 0; i < permissions.length; i++) {
-                String permission = permissions[i];
-                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{permission}, 123);
-                }
-            }
-        }
     }
 
 
@@ -296,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         protected Void doInBackground(Object... args) {
             try {
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = krpURL + "/checkVersion?ver=" + db_helper_data.getAllCollegeVersion();
+                String urlstring = socketHandler.getURL() + "/checkVersion?ver=" + db_helper_data.getAllCollegeVersion();
                 Log.d("KTag", Integer.toString(db_helper_data.getAllCollegeVersion()));
                 Log.d("KTag", "GetVersionData REST API check");
                 URL versionUrl = new URL(urlstring);
@@ -368,6 +353,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     private class CheckVersion extends AsyncTask<Object, Object, Void> {
 
         int code;
+        String message;
 
         @Override
         protected Void doInBackground(Object... params) {
@@ -392,8 +378,21 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             } else if (code == 1) {
                 //in case local db had up to date data
                 Log.d("KTag", "checkVersion : NO New Data");
-                new GPSTracker(MainActivity.this);
+
                 startCollegeFragment();
+            }
+            else if(code == 0){
+                try {
+                    message = version_data.getString("message");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         }
@@ -501,7 +500,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
      */
     @Override
     public void onPRActionRequest(String t) {
-        if(askPermissions() == true){
             mMap.clear();
             current_lat = GPSTracker.latitude;
             current_lng = GPSTracker.longitude;
@@ -552,11 +550,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                     e.printStackTrace();
                 }
             }
-
-        }
-        else{
-            Toast.makeText(this, "Need GPS Access to Continue",Toast.LENGTH_LONG).show();
-        }
 
     }
 

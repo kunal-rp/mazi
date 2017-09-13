@@ -1,9 +1,14 @@
 package com.vierve;
 
+import android.*;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -17,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
@@ -49,74 +55,77 @@ import java.util.regex.Pattern;
 /**
  * A login screen that offers login via email/password.
  */
+
+
 public class LoginActivity extends AppCompatActivity  {
 
-    private Intent intent;
+    private SocketHandler socketHandler;
 
-    String krpURL = "http://192.168.5.135:3000";
+    String url = "http://192.168.5.135:3000";
 
     // UI references.
     private EditText mUserNameView;
     private EditText mPasswordView;
-
-
-    private View mProgressView;
-    private View mLoginFormView;
     private CheckBox mRemember;
 
+    //Progress Circle Objects
+    private View mProgressView;
+    private View mLoginFormView;
+
+    //DB Stores User data
     private Db_Helper_User db_helper_user;
 
+    //Activity vars
     private String user_name;
     private String user_password;
 
-    private boolean remember;
-
+    //Stores the JSON Object After each REST API Call
     private JSONObject resultJSON;
 
+
+    //holds the permissions needed for the app to function
+    String[] permissions = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        intent = new Intent(this, MainActivity.class);
+        socketHandler = new SocketHandler();
+        /*Sets the url to the parameter
+        All future activities base their connections off of this url
+         */
+        socketHandler.setURL(url);
 
+        //DB User Info handler
         db_helper_user = new Db_Helper_User(this,null);
-
-        try {
-            Log.d("KTag","DBUSER "+db_helper_user.getInfo().toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
         mUserNameView = (EditText) findViewById(R.id.user_name);
         mPasswordView = (EditText) findViewById(R.id.user_password);
         mRemember = (CheckBox) findViewById(R.id.remember);
 
-
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
 
-        Log.d("KTag","Remember? "+db_helper_user.getRemember());
+        /*
+        If currently stored data has remembered selected,
+        automatically pulls data and attempts to log in
+         */
         if(db_helper_user.getRemember() == true){
             JSONObject obj;
             try {
-                Log.d("KTag","Pre set details");
                 obj = db_helper_user.getInfo();
                 showProgress(true);
                 user_name = obj.getString("user_name");
                 user_password = obj.getString("user_password");
-                remember = true;
                 mUserNameView.setText(user_name);
                 mPasswordView.setText(user_password);
                 mRemember.setChecked(true);
-                Log.d("KTag","Details Username : "+ user_name + ", Password :" +user_password);
                 attemptLogin();
 
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         }
 
         Button signInButton = (Button) findViewById(R.id.sign_in);
@@ -125,17 +134,12 @@ public class LoginActivity extends AppCompatActivity  {
             public void onClick(View view) {
                 user_name = mUserNameView.getText().toString();
                 user_password = mPasswordView.getText().toString();
-                if(mRemember.isChecked()){
-                    remember = true;
-                }
-                else{
-                    remember = false;
-                }
-                Log.d("KTag","Details Username : "+ user_name + ", Password :" +user_password);
                 attemptLogin();
             }
         });
 
+
+        //Registration Activity
         Button registerButton = (Button) findViewById(R.id.register);
         registerButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -144,13 +148,7 @@ public class LoginActivity extends AppCompatActivity  {
                 startActivity(intent);
             }
         });
-
-
     }
-
-
-
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -250,7 +248,7 @@ public class LoginActivity extends AppCompatActivity  {
         protected Void doInBackground(Object... args) {
             try {
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = krpURL + "/checkUser?user_name=" + user_name + "&user_password="+user_password;
+                String urlstring = socketHandler.getURL() + "/checkUser?user_name=" + user_name + "&user_password="+user_password;
                 Log.d("KTag",urlstring);
                 Log.d("KTag", "Check User REST API check");
                 URL versionUrl = new URL(urlstring);
@@ -261,11 +259,19 @@ public class LoginActivity extends AppCompatActivity  {
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
+                    Log.d("KTag",var);
                     resultJSON = new JSONObject(var);
                     Log.d("KTag", "Sucsessful http REST API");
+                    Log.d("KTag", "JSON Response Object : " +resultJSON.toString());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            new LoginActivity.PushNewData().execute();
+                        }
+                    });
 
                 } else {
-                    Log.d("KTag", "Error");
+                    Log.d("KTag", Integer.toString(myConnection.getResponseCode()));
                 }
 
             } catch (IOException e) {
@@ -287,12 +293,6 @@ public class LoginActivity extends AppCompatActivity  {
                 e.printStackTrace();
             }
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-
-            new LoginActivity.PushNewData().execute();
         }
     }
 
@@ -333,6 +333,7 @@ public class LoginActivity extends AppCompatActivity  {
     private class PushNewData extends AsyncTask<Object, Object, Void> {
 
         int code;
+        String message;
 
         @Override
         protected Void doInBackground(Object... params) {
@@ -341,7 +342,7 @@ public class LoginActivity extends AppCompatActivity  {
                 code = resultJSON.getInt("code");
 
             } catch (JSONException e) {
-                Toast.makeText(getApplicationContext(),"No Results from Check User",Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "No Results from Check User", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
             return null;
@@ -352,7 +353,8 @@ public class LoginActivity extends AppCompatActivity  {
             super.onPostExecute(aVoid);
             showProgress(false);
 
-            if (code == 3) {
+            if (code == 1) {
+
                 db_helper_user.clearAllTables();
                 //valid username or password
 
@@ -361,43 +363,58 @@ public class LoginActivity extends AppCompatActivity  {
                     obj.put("user_id", resultJSON.getString("user_id"));
                     obj.put("user_name", user_name);
                     obj.put("user_password", user_password);
-                    obj.put("remember", (mRemember.isChecked())?1:0);
+                    obj.put("user_email", resultJSON.getString("user_email"));
+                    obj.put("remember", (mRemember.isChecked()) ? 1 : 0);
                     db_helper_user.setUserInfo(obj);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 if (mRemember.isChecked() == true) {
                     db_helper_user.setRemember(true);
-                }
-                else{
+                } else {
                     db_helper_user.setRemember(false);
                 }
-                startActivity(intent);
-            } else if (code == 1) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "Invalid Username or Password", Toast.LENGTH_LONG).show();
-                    }
-                });
-            } else if(code == 2) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "User active on different device", Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-            else if(code == 4){
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getApplicationContext(), "Need to verify email to continue.\nCheck email", Toast.LENGTH_LONG).show();
-                    }
-                });
+
+                if (askPermissions() == true) {
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+                } else {
+
+                    Toast.makeText(getApplicationContext(), "Need GPS Access to Continue", Toast.LENGTH_LONG).show();
+                }
+            } else if (code == 0) {
+                try {
+                    message = resultJSON.getString("message");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
             }
         }
     }
+
+
+    /*
+   Returns true if all permissions have been granted
+   Returns false if permissions missing, and then requests the permission
+    */
+    public boolean askPermissions(){
+        for (int i = 0; i < permissions.length; i++) {
+            String permission = permissions[i];
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, 123);
+                return false;
+            }
+        }
+        return true;
+    }
+
 
 
 }

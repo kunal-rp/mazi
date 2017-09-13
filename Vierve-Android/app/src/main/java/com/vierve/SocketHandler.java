@@ -8,6 +8,7 @@ import com.github.nkzawa.socketio.client.Socket;
 
 public class SocketHandler {
     private static Socket socket;
+    private static String url;
 
     public static synchronized Socket getSocket(){
         return socket;
@@ -16,5 +17,16 @@ public class SocketHandler {
     public static synchronized void setSocket(Socket socket){
         SocketHandler.socket = socket;
     }
+
+    public static synchronized String getURL(){
+        return url;
+    }
+
+    public static synchronized void setURL(String u){
+        url = u;
+    }
+
+
+
 }
 
