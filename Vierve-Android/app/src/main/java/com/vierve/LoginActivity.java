@@ -107,6 +107,26 @@ public class LoginActivity extends AppCompatActivity  {
         mProgressView = findViewById(R.id.login_progress);
 
 
+        TextView forgot_username = (TextView) findViewById(R.id.forgot_username);
+        forgot_username.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ForgotActivity.class);
+                intent.putExtra("type_forget","username");
+                startActivity(intent);
+            }
+        });
+
+        TextView forgot_password = (TextView) findViewById(R.id.forgot_password);
+        forgot_password.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), ForgotActivity.class);
+                intent.putExtra("type_forget","password");
+                startActivity(intent);
+            }
+        });
+
         /*
         If currently stored data has remembered selected,
         automatically pulls data and attempts to log in

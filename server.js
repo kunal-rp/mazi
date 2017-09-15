@@ -131,84 +131,88 @@ app.get('/verifyEmail',function (req,res) {
             connection.release()
 
         }
-
-
     }); 
 });
+
 
 
 /*
 used to check the user status
 */
 app.get('/checkUser',function (req,res) {
-    var given_user_name = req.query.user_name;
-    given_user_name = given_user_name.toLowerCase();
-    var given_password = req.query.user_password;
+	if(req.query.user_name == undefined ||req.query.user_password == undefined ){
+		res.json({code: 0, message: "Parameters not meet"});
+	}
+	else{
+		var given_user_name = req.query.user_name;
+	    given_user_name = given_user_name.toLowerCase();
+	    var given_password = req.query.user_password;
 
-    connectionPool.getConnection(function(connection_error,connection){
-        if(connection_error){
-            console.log(connection_error)
-            connection.release()
-            res.json({code:0,message:"Cannot Establish DB Connection"});
-        }
-        else{
-            var query_user_prim = "Select * From "+ table_user_prim + " Where `user_name` = '"+given_user_name+"'";
-            connection.query(query_user_prim,function(err, results){
-                if(err){
-                        console.log("Error/checkUser API  :" + err);
-                        console.log("Query : " + query_user_prim);
-                        res.json({code:0,message:"Error with DB Query"});
-                }
-                else{
-                    
-                    if(results.length == 0){
-                        res.json({code:0,message:"Invalid Username"});
-                        console.log(" checkUser invalid username | "+given_user_name + "|"+given_password)
+	    connectionPool.getConnection(function(connection_error,connection){
+	        if(connection_error){
+	            console.log(connection_error)
+	            connection.release()
+	            res.json({code:0,message:"Cannot Establish DB Connection"});
+	        }
+	        else{
+	            var query_user_prim = "Select * From "+ table_user_prim + " Where `user_name` = '"+given_user_name+"'";
+	            connection.query(query_user_prim,function(err, results){
+	                if(err){
+	                        console.log("Error/checkUser API  :" + err);
+	                        console.log("Query : " + query_user_prim);
+	                        res.json({code:0,message:"Error with DB Query"});
+	                }
+	                else{
+	                    
+	                    if(results.length == 0){
+	                        res.json({code:0,message:"Invalid Username"});
+	                        console.log(" checkUser invalid username | "+given_user_name + "|"+given_password)
 
-                    }
-                    else{
-                        bcrypt.compare(results[0]['user_id']+ ""+given_password, results[0]['user_password'], function(password_check_error, password_result) {
-                            if(password_check_error){
-                                console.log("Password check Error")
-                                console.log(password_check_error)
-                                res.json({code:0,message:"Error Compare Password"});
-                            }
-                            else{
+	                    }
+	                    else{
+	                        bcrypt.compare(results[0]['user_id']+ ""+given_password, results[0]['user_password'], function(password_check_error, password_result) {
+	                            if(password_check_error){
+	                                console.log("Password check Error")
+	                                console.log(password_check_error)
+	                                res.json({code:0,message:"Error Compare Password"});
+	                            }
+	                            else{
 
-                                if(password_result == true){
-                                    if(clients[results[0]['user_id']] != undefined && clients[results[0]['user_id']]['socket_id'] != undefined){
-                                        res.json({code:0,message:"User Currently Active on Other Device"});
-                                        console.log(" checkUser valid username or password, account active on another device")
-                                    }
-                                    else{
-                                        
-                                        if(results[0].email_verified == 1){
-                                            res.json({code:1 , user_id : results[0]['user_id'],user_name : results[0]['user_name'],user_email: results[0]['user_email']});
-                                            console.log(" checkUser pass for user "+ results[0]['user_id']);
-                                        }
-                                        else{
-                                            res.json({code:0,message:"User email Not Verified.\nPlease Verify Email"});
-                                            console.log(" checkUser emailNotVerified "+ results[0]['user_id']);
-                                        } 
-                                    }
-                                }
-                                else{
-                                    res.json({code:0,message:"Invalid Password"});
-                                    console.log(" checkUser invalid password | "+given_user_name + "|"+given_password)
-                                }
-                            }
-                        });
-                    }
-                }
-            });
-            connection.release();
-        }
-    });
+	                                if(password_result == true){
+	                                    if(clients[results[0]['user_id']] != undefined && clients[results[0]['user_id']]['socket_id'] != undefined){
+	                                        res.json({code:0,message:"User Currently Active on Other Device"});
+	                                        console.log(" checkUser valid username or password, account active on another device")
+	                                    }
+	                                    else{
+	                                        
+	                                        if(results[0].email_verified == 1){
+	                                            res.json({code:1 , user_id : results[0]['user_id'],user_name : results[0]['user_name'],user_email: results[0]['user_email']});
+	                                            console.log(" checkUser pass for user "+ results[0]['user_id']);
+	                                        }
+	                                        else{
+	                                            res.json({code:0,message:"User email Not Verified.\nPlease Verify Email"});
+	                                            console.log(" checkUser emailNotVerified "+ results[0]['user_id']);
+	                                        } 
+	                                    }
+	                                }
+	                                else{
+	                                    res.json({code:0,message:"Invalid Password"});
+	                                    console.log(" checkUser invalid password | "+given_user_name + "|"+given_password)
+	                                }
+	                            }
+	                        });
+	                    }
+	                }
+	            });
+	            connection.release();
+	        }
+	    });
+	}
 });
 
 app.get('/checkUsername',function(req,res){
     if(req.query.user_name == undefined ){
-        res.json({code: 0});
+        res.json({code: 0, message: "Parameters not meet"});
     }
     else{
 
@@ -246,8 +250,8 @@ app.get('/checkUsername',function(req,res){
 });
 
 app.get('/updateUser',function(req,res){
-	if(req.query.new_user_password == undefined || req.query.new_user_name == undefined ||req.query.user_password == undefined ||req.query.user_email == undefined || req.query.user_id == undefined    ){
-        res.json({code: 1});
+	if(req.query.new_user_password == undefined || req.query.new_user_name == undefined ||req.query.user_password == undefined ||req.query.user_email == undefined || req.query.user_id == undefined){
+        res.json({code: 0, message: "Parameters not meet"});
     }
     else{
     	var user_id = req.query.user_id
@@ -270,7 +274,6 @@ app.get('/updateUser',function(req,res){
                         res.json({code:0,message:"Error with DB Query"});
                     }
                     else{
-                    	console.log(result_get_user)
                     	bcrypt.compare(user_id+ ""+user_password, result_get_user[0]['user_password'], function(password_check_error, password_result) {
                     		if(password_check_error){
                     			console.log("Password check Error")
@@ -281,7 +284,6 @@ app.get('/updateUser',function(req,res){
                     			if(password_result == true){
                     				bcrypt.genSalt(10, function(salt_err, salt) {
 					                    bcrypt.hash(user_id+""+new_user_password, salt, function(has_err, hash) {
-					                     
 					                        var query_update_user = "UPDATE `"+table_user_prim + "` SET `user_name`='"+new_user_name+"',`user_password`= '"+hash+"' WHERE `user_id`='"+user_id+"'";
 					                        connection.query(query_update_user,function(err,result){
 					                        	if(err){
@@ -311,10 +313,113 @@ app.get('/updateUser',function(req,res){
     }
 });
 
+
+app.get('/resetCredential',function(req,res){
+	if(req.query.user_email == undefined || req.query.type_forget == undefined ){
+        res.json({code: 0, message: "Parameters not meet"});
+    }
+    else{
+    	var user_email = req.query.user_email
+    	var type_forget = req.query.type_forget
+    	connectionPool.getConnection(function(connection_error,connection){
+            if(connection_error){
+                console.log(connection_error)
+                connection.release()
+                res.json({code:0,message:"Error Establishing DB Connection"});
+            }
+            else{
+            	var query_get_user = "Select * From "+ table_user_prim + " Where `user_email`='"+user_email+"'"
+            	connection.query(query_get_user,function(err_get_user,result_get_user){
+            		if(err_get_user){
+                        console.log("Error/checkUsername API  :" + err_get_user);
+                        console.log("Query : " + query_get_user);
+                        res.json({code:0,message:"Error with DB Query"});
+                    }
+                    else{
+                    	if(result_get_user.length == 0){
+                    		console.log("No Email Match");
+                        	res.json({code:0,message:"No Email Matched in our Records"});
+                    	}
+                    	else{
+                    		if(result_get_user[0]['email_verified'] == 0){
+                    			console.log("Emai not verified");
+                        		res.json({code:0,message:"This email still needs to be verified.\n Please login into this email and verify"});
+                    		}
+                    		else{
+                    			var user_name = result_get_user[0]['user_name']
+                    			var user_id = result_get_user[0]['user_id']
+                    			if(type_forget == 'username'){
+                    				var mailOpts = {
+                                        from:'forgot@vierve.com',
+                                        to: user_email,
+                                        subject: 'Vierve - Forgot Username',
+                                        html : '<h1>You indicated that you forgot your username!</h1> <p>Here is your username : @'+user_name+'</p>'
+                                    };
+                                    transporter.sendMail(mailOpts, function (err2, response) {
+                                        if (err2) {
+                                            console.log("Email sending error :"+err2)
+
+                                        } else {
+                                            console.log("Forgot Username sent to "+ user_email)
+                                        }
+                                    })
+                                    res.json({code:1});
+                    			}
+                    			else if(type_forget== 'password'){
+                    				generateNewPassword(function(newPassword){
+                    					bcrypt.genSalt(10, function(salt_err, salt) {
+						                    bcrypt.hash(user_id+""+newPassword, salt, function(has_err, hash) {
+						                        var query_update_user = "UPDATE `"+table_user_prim + "` SET `user_password`= '"+hash+"' WHERE `user_id`='"+user_id+"'";
+						                        connection.query(query_update_user,function(err,result){
+						                        	if(err){
+						                        		console.log("Error updating User SQLUpdate : "+err)
+						                        		console.log(query_update_user)
+						                        		res.json({code:0,message:"Error with DB Query"});
+						                        	}
+						                        	else{
+						                        		var mailOpts = {
+					                                        from:'forgot@vierve.com',
+					                                        to: user_email,
+					                                        subject: 'Vierve - Forgot Password',
+					                                        html : '<h1>You indicated that you forgot your password!</h1> <p>Here is your new password  : '+newPassword+'</p><p>Make sure to Reset your password after logging in</p>'
+					                                    };
+					                                    transporter.sendMail(mailOpts, function (err2, response) {
+					                                        if (err2) {
+					                                            console.log("Email sending error :"+err2)
+
+					                                        } else {
+					                                            console.log("Forgot Password sent to "+ user_email)
+					                                        }
+					                                    })
+						                        		res.json({code:1})
+						                        	}
+						                        })
+						                    });
+						                });
+                    				});
+                    			}
+                    		}
+                    		
+                    	}
+                    }
+            	});
+                connection.release()
+            }
+        });
+    	
+    }
+});
+
+
+function generateNewPassword(callback){
+	var number = (Math.floor(Math.random()+160000000)).toString(19);
+	callback(number)
+}
+
 app.get('/createUser',function (req,res) {
     var data = {}
     if(req.query.user_name == undefined ||req.query.user_password == undefined ||req.query.user_email == undefined  ){
-        res.json({code: 1});
+        res.json({code: 0, message: "Parameters not meet"});
     }
     else{
 
@@ -531,7 +636,7 @@ app.get('/checkVersion',function (req,res) {
         
     }
     else{
-       res.json({code:0,message:"Protocol Injunction"});
+       res.json({code: 0, message: "Parameters not meet"});
     }});
 
 io.sockets.on('connection', newConnection);
