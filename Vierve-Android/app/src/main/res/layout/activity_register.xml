@@ -29,17 +29,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
         <LinearLayout
-            android:id="@+id/email_login_form"
+            android:id="@+id/main_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="Enter a Username:"
                 android:textSize="20dp"/>
-
-
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
@@ -116,5 +114,13 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progress_form"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
 
 </LinearLayout>

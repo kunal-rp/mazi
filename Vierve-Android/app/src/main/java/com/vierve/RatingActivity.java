@@ -58,24 +58,40 @@ public class RatingActivity extends AppCompatActivity {
         overview.setText("@"+parker_user_name +" picked up @"+ rider_user_name);
         TextView match_type = (TextView) findViewById(R.id.match_type);
         match_type.setTextColor(getResources().getColor(android.R.color.white));
-        if(match_end_type.equals("0")){
-            match_type.setText("A Fair Pickup Occured");
-            ratingBar.setRating(Float.valueOf("4.5"));
-            match_type.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+        String[] array = match_end_type.split("\\|");
+        switch (array[0]){
+            case "0":
+                match_type.setText("A Fair Pickup Occured");
+                ratingBar.setRating(Float.valueOf("4.5"));
+                match_type.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+                break;
+            case "1":
+
+                if(array[1] == rider_user_id){
+                    match_type.setText("@"+rider_user_name+" disconnected");
+                }
+                else{
+                    match_type.setText("@"+parker_user_name+" disconnected");
+                }
+                match_type.setBackgroundColor(getResources().getColor(R.color.error_red));
+
+                ratingBar.setRating(Float.valueOf("3.0"));
+                break;
+            case "2":
+                array = match_end_type.split("\\|");
+                if(array[1] == rider_user_id){
+                    match_type.setText("@"+rider_user_name+" canceled");
+                }
+                else{
+                    match_type.setText("@"+parker_user_name+" canceled");
+                }
+                match_type.setBackgroundColor(getResources().getColor(R.color.error_red));
+                ratingBar.setRating(Float.valueOf("3.0"));
+                break;
+
 
         }
-        else{
-           String[] array = match_end_type.split("\\|");
-            if(array[1] == rider_user_id){
-                match_type.setText("@"+rider_user_name+" disconnected");
-            }
-            else{
-                match_type.setText("@"+parker_user_name+" disconnected");
-            }
-            match_type.setBackgroundColor(getResources().getColor(R.color.error_red));
 
-            ratingBar.setRating(Float.valueOf("3.0"));
-        }
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

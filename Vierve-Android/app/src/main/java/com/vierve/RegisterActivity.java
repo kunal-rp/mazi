@@ -1,6 +1,10 @@
 package com.vierve;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.JsonReader;
@@ -19,6 +23,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.security.Key;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 /**
  * Created by kunal on 9/10/17.
@@ -40,6 +51,9 @@ public class RegisterActivity extends AppCompatActivity {
     EditText password_view;
     EditText confirm_password_view;
 
+    View mainForm;
+    View progressForm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -52,6 +66,9 @@ public class RegisterActivity extends AppCompatActivity {
         password_view  = (EditText) findViewById(R.id.password_view);
         confirm_password_view = (EditText) findViewById(R.id.confirm_password_view);
 
+
+        mainForm = findViewById(R.id.main_view);
+        progressForm = findViewById(R.id.progress_view);
 
         super.onCreate(savedInstanceState);
 
@@ -138,16 +155,22 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         String message;
+
+        byte[] encodeData = new String(socketHandler.getDefaultKey()).getBytes();
+        Key key_data = new SecretKeySpec(encodeData, SignatureAlgorithm.HS256.getJcaName());
+
         @Override
         protected Void doInBackground(Object... args) {
             try {
+                String token_data = Jwts.builder().claim("user_name",user_name).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = socketHandler.getURL() + "/checkUsername?user_name=" + user_name ;
+                String urlstring = socketHandler.getURL() + "/checkUsername" ;
                 Log.d("KTag",urlstring);
                 Log.d("KTag", "Check Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
-                myConnection.setRequestProperty("User-Agent", "android-client");
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token", token_data);
                 if (myConnection.getResponseCode() == 200) {
                     InputStream responseBody = myConnection.getInputStream();
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
@@ -181,6 +204,7 @@ public class RegisterActivity extends AppCompatActivity {
             return null;
         }
 
+
         @Override
         protected void onPostExecute(Void aVoid) {
 
@@ -213,17 +237,23 @@ public class RegisterActivity extends AppCompatActivity {
         int code;
         String message;
 
+        byte[] encodeData = new String(socketHandler.getDefaultKey()).getBytes();
+        Key key_data = new SecretKeySpec(encodeData, SignatureAlgorithm.HS256.getJcaName());
+
+
         @Override
         protected Void doInBackground(Object... params) {
 
             try {
+                String token_data = Jwts.builder().claim("user_name",user_name).claim("user_password",password).claim("user_email",email).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = socketHandler.getURL() + "/createUser?user_name=" + user_name +"&user_password="+password + "&user_email="+email;
+                String urlstring = socketHandler.getURL() + "/createUser";
                 Log.d("KTag",urlstring);
                 Log.d("KTag", "Create User REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
-                myConnection.setRequestProperty("User-Agent", "android-client");
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token", token_data);
                 if (myConnection.getResponseCode() == 200) {
                     InputStream responseBody = myConnection.getInputStream();
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
@@ -304,6 +334,43 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         return sb.toString();
-
     }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mainForm.setVisibility(show ? View.GONE : View.VISIBLE);
+            mainForm.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mainForm.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            progressForm.setVisibility(show ? View.VISIBLE : View.GONE);
+            progressForm.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    progressForm.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            progressForm.setVisibility(show ? View.VISIBLE : View.GONE);
+            mainForm.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+
 }

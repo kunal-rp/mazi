@@ -1,44 +1,31 @@
 package com.vierve;
 
-import android.*;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
 
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.TextUtils;
 import android.util.JsonReader;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,9 +35,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
+import java.net.URLEncoder;
+
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.security.Key;
+
+import javax.crypto.spec.SecretKeySpec;
+
 
 /**
  * A login screen that offers login via email/password.
@@ -61,7 +58,7 @@ public class LoginActivity extends AppCompatActivity  {
 
     private SocketHandler socketHandler;
 
-    String url = "http://192.168.5.135:3000";
+    String url = "http://192.168.1.204:3000";
 
     // UI references.
     private EditText mUserNameView;
@@ -79,8 +76,7 @@ public class LoginActivity extends AppCompatActivity  {
     private String user_name;
     private String user_password;
 
-    //Stores the JSON Object After each REST API Call
-    private JSONObject resultJSON;
+
 
 
     //holds the permissions needed for the app to function
@@ -208,7 +204,8 @@ public class LoginActivity extends AppCompatActivity  {
             focusView.requestFocus();
         } else {
             showProgress(true);
-            new LoginActivity.CheckUser().execute();
+            new GetCodes().execute();
+
         }
     }
 
@@ -259,21 +256,96 @@ public class LoginActivity extends AppCompatActivity  {
         }
     }
 
+    private class GetCodes extends AsyncTask<Object, Object, Void> {
+
+        JSONObject results;
+
+        byte[] encodedKey = new String("vierve_device_KRP").getBytes();
+        Key k = new SecretKeySpec(encodedKey, SignatureAlgorithm.HS256.getJcaName());
+        @Override
+        protected Void doInBackground(Object... args) {
+            try {
+
+                String token = Jwts.builder().claim("user_type","vierve_android").signWith(SignatureAlgorithm.HS256, k).compact();
+                String urlstring = socketHandler.getURL() + "/getCodes"  ;
+                Log.d("KTag",urlstring);
+                Log.d("KTag", "Get Codes REST API check");
+                URL versionUrl = new URL(urlstring);
+                HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
+                myConnection.setRequestProperty("token",token);
+                if (myConnection.getResponseCode() == 200) {
+                    InputStream responseBody = myConnection.getInputStream();
+                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
+                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+                    String var = getStringFromInputStream(responseBody);
+                    Log.d("KTag",var);
+                    results = new JSONObject(var);
+                    Log.d("KTag", "Sucsessful http REST API");
+                } else {
+                    Log.d("KTag", Integer.toString(myConnection.getResponseCode()));
+                }
+
+            } catch (IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Cannot establish connection to Server for Check User",Toast.LENGTH_LONG).show();
+
+                    }
+                });
+                e.printStackTrace();
+            } catch (JSONException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Can't put Check User results into JSON Object",Toast.LENGTH_LONG).show();
+                    }
+                });
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            try {
+                String token  =results.getString("token");
+                Object claims =  Jwts.parser().setSigningKey(new String("vierve_device_KRP").getBytes()).parse(token).getBody();
+                JSONObject obj = new JSONObject(claims.toString());
+                socketHandler.setDefaultKey(obj.getString("vierve_android"));
+                Log.d("KTag","Default JWT Key:"+ socketHandler.getDefaultKey());
+                new LoginActivity.CheckUser().execute();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /*
    Async task that calles REST API to first get the current data version number from db_helper_data
    Then passes that into the 'checkVersion' URL
     */
     private class CheckUser extends AsyncTask<Object, Object, Void> {
-        @Override
+
+
+        JSONObject resultJSON;
+
+        byte[] encodedKey = new String(socketHandler.getDefaultKey()).getBytes();
+        Key k = new SecretKeySpec(encodedKey, SignatureAlgorithm.HS256.getJcaName());
+
         protected Void doInBackground(Object... args) {
             try {
-                //REST API url ; calls db method to get the largest verison
-                String urlstring = socketHandler.getURL() + "/checkUser?user_name=" + user_name + "&user_password="+user_password;
+                String token = Jwts.builder().claim("user_name",user_name).claim("user_password",user_password).signWith(SignatureAlgorithm.HS256, k).compact();
+
+                String urlstring = socketHandler.getURL() + "/checkUser";
                 Log.d("KTag",urlstring);
                 Log.d("KTag", "Check User REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
-                myConnection.setRequestProperty("User-Agent", "android-client");
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token", token);
                 if (myConnection.getResponseCode() == 200) {
                     InputStream responseBody = myConnection.getInputStream();
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
@@ -286,7 +358,7 @@ public class LoginActivity extends AppCompatActivity  {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            new LoginActivity.PushNewData().execute();
+                            new LoginActivity.PushNewData().execute(resultJSON);
                         }
                     });
 
@@ -354,10 +426,11 @@ public class LoginActivity extends AppCompatActivity  {
 
         int code;
         String message;
+        JSONObject resultJSON;
 
         @Override
-        protected Void doInBackground(Object... params) {
-
+        protected Void doInBackground(Object... args) {
+            resultJSON = (JSONObject) args[0];
             try {
                 code = resultJSON.getInt("code");
 
@@ -380,6 +453,8 @@ public class LoginActivity extends AppCompatActivity  {
 
                 JSONObject obj = new JSONObject();
                 try {
+                    socketHandler.setUserKey(resultJSON.getString("auth_code"));
+                    Log.d("KTag","User Key Set:"+socketHandler.getUserKey());
                     obj.put("user_id", resultJSON.getString("user_id"));
                     obj.put("user_name", user_name);
                     obj.put("user_password", user_password);
@@ -395,12 +470,11 @@ public class LoginActivity extends AppCompatActivity  {
                     db_helper_user.setRemember(false);
                 }
 
-                if (askPermissions() == true) {
+                if (askPermissions() == true && isLocationEnabled(getApplicationContext()) == true) {
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
                 } else {
-
-                    Toast.makeText(getApplicationContext(), "Need GPS Access to Continue", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Need GPS Permiccion Access and Location Service Enabled to Continue", Toast.LENGTH_LONG).show();
                 }
             } else if (code == 0) {
                 try {
@@ -435,7 +509,28 @@ public class LoginActivity extends AppCompatActivity  {
         return true;
     }
 
+    public static boolean isLocationEnabled(Context context) {
+        int locationMode = 0;
+        String locationProviders;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            try {
+                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+
+            } catch (Settings.SettingNotFoundException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+
+        }else{
+            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+            return !TextUtils.isEmpty(locationProviders);
+        }
+
+
+    }
 
 }
 

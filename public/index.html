@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Map</title>
+  <meta name="viewport" content="initial-scale=1.0">
+  <meta charset="utf-8">
+  <style>
+      /* Always set the map height explicitly to define the size of the div
+      * element that contains the map. */
+      #map {
+        height: 80%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 80%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div id="control">
+      <button onclick="loadData()">Click</button>
+      <button onclick="addMarker({lat: -34.397, lng: 150.644},'start')">Click</button>
+      <div id="demo">
+        <div id='college_area'></div>
+        <div id='parkinglot_area'></div>
+      </div>
+    </div>
+    <div id="map"/>
+    <script>
+      var map;
+      var markers = [];
+      var college_data = {};
+      var parking_data = {};
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -34.397, lng: 150.644},
+          zoom: 8
+        });
+
+
+      }
+
+      function update(){
+        window.alert("Update");
+      }
+
+
+      function setAllMap(map){
+        console.log(markers)
+        for (var i = 0; i < markers.length; i++) {
+          markers[i].setMap(map);
+        }
+        markers = [];
+
+      }
+      
+      function loadData() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', "http://localhost:3000/checkVersion?ver=0", true);
+        xhr.send();
+
+        xhr.onreadystatechange = processRequest;
+        function processRequest(e) {
+          if (xhr.readyState == 4 && xhr.status == 200) {
+            var response = JSON.parse(xhr.responseText);
+            console.log(response)
+            college_data = response.college_data;
+            parkinglot_data = response.parking_data;
+            updateCollege();
+          }
+        }
+      }
+
+      function addMarker(myLatLng,color,title,id){
+        var marker = new google.maps.Marker({
+          position: myLatLng,
+          map: map,
+          title: title,
+          color : color,
+          draggable:true,
+        });
+        markers.push(marker)
+
+        marker.set("parkinglot_id",id);
+
+        google.maps.event.addListener(marker, 'dragend', function(marker){
+        
+          console.log(marker.latLng.lat() + ","+marker.latLng.lng())
+          var parkinglot_id = id;
+          console.log(parkinglot_id)
+          document.getElementById(parkinglot_id+"lat").value = marker.latLng.lat() ;
+          document.getElementById(parkinglot_id+"lng").value = marker.latLng.lng() ;
+          
+    
+        }); 
+      }
+
+      function addCircle(myLatLng,title,radius,color){
+       var cityCircle = new google.maps.Circle({
+        strokeColor: color,
+        strokeWeight: 2,
+        map: map,
+        center: myLatLng,
+        title:title,
+        radius: radius *1609.34
+      });
+     }
+
+     function updateCollege(){
+      var newDiv = document.createElement('div');
+      var selectHTML ="";
+      
+      selectHTML = "<select id=\"select_college\" onchange=\" updateParkingLot_display_data()\">";
+      var array = college_data['ids'];
+      for(i = 0; i < array.length; i++){
+        var temp = array[i];
+        selectHTML += "<option  value ='"+temp+"'>"+college_data[temp]["college_name"]+" </option>";
+      } 
+
+
+      selectHTML += "</select>";
+      document.getElementById('college_area').innerHTML = selectHTML;
+      updateParkingLot_display_data();
+    }
+
+    function updateParkingLot_display_data(){
+      current_college_id = document.getElementById("select_college").value;
+      map.panTo({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']})
+      current_college_id = document.getElementById("select_college").value;
+      addCircle({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'ride limit',college_data[current_college_id]['college_park_limit'],'#h62lb8')
+      addCircle({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'park limit',college_data[current_college_id]['college_ride_limit'],'#h28ak8')
+      var newDiv = document.createElement('div');
+      var selectHTML ="";
+      
+      addMarker({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'#001eff',college_data[current_college_id]["college_name"],current_college_id)
+      
+      var array = parkinglot_data['ids'];
+      for(i = 0; i < array.length; i++){
+        var temp = array[i];
+        if(parkinglot_data[temp]['college_id'] == current_college_id){
+         selectHTML += "<h4>"+parkinglot_data[temp]["parkinglot_name"]+"|"+temp+"</h4><p>" + "Lat : <input id=\""+temp+"lat\" type=\"text\" value="+ parkinglot_data[temp]["coor_lat"]+" />" + "Lng : <input id=\""+temp+"lng\" type=\"text\" value="+ parkinglot_data[temp]["coor_lng"]+" /> </p>";
+
+         addMarker({lat : parkinglot_data[temp]["coor_lat"],lng : parkinglot_data[temp]["coor_lng"]},'#FF0000',parkinglot_data[temp]["parkinglot_name"],temp)
+       } 
+     } 
+
+     document.getElementById('parkinglot_area').innerHTML = selectHTML;
+
+   }
+
+
+
+
+ </script>
+ <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"
+ async defer></script>
+</body>
+</html>

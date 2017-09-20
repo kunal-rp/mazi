@@ -1,14 +1,18 @@
 package com.vierve;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -83,7 +87,27 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         mSocket = socketHandler.getSocket();
 
 
+        Button btn_cancel = (Button) findViewById(R.id.btn_cancel);
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MatchActivity.this);
+                alertDialogBuilder.setMessage("You May recieve a bad rating.");
+                alertDialogBuilder.setTitle("Do you Really Want to Cancel This Match?");
+                alertDialogBuilder.setPositiveButton("Confirm",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                mSocket.emit("cancelMatch", new JSONObject());
+                            }
+                        });
 
+
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
+        });
         new GPSTracker(MatchActivity.this);
 
 

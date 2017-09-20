@@ -1,10 +1,15 @@
 package com.vierve;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -14,8 +19,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -49,7 +57,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.Key;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.logging.Handler;
+
+import javax.crypto.spec.SecretKeySpec;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 
 public class MainActivity extends AppCompatActivity implements parking_fragment.OnHeadlineSelectedListener, college_fragment.OnHeadlineSelectedListener, pickup_fragment.OnHeadlineSelectedListener, OnMapReadyCallback {
@@ -106,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
 
 
+
     //connects to the server
     {
         try {
@@ -142,19 +161,12 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        Button btn = (Button) findViewById(R.id.btn_logOff);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                db_helper_user.clearAllTables();
-                try {
-                    Log.d("KTag","DBUSER "+db_helper_user.getInfo().toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                finish();
-            }
-        });
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setOverflowIcon(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_settings_icon));
+
+
+
 
         ImageView profile = (ImageView) findViewById(R.id.profile);
         profile.setOnClickListener(new View.OnClickListener() {
@@ -164,6 +176,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 startActivity(intent);
             }
         });
+
+
 
 
 
@@ -187,13 +201,19 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     }
 
-    /*
-   Sets up the map
-   When a marker is clicked, the markers title (i.e. Parking Lot A) is used to correlate the marker with the value in the spinner
-   Spinner then changes value accordingly to match the marker clicked
-    */
-    public void onMapReady(GoogleMap googleMap) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_mainacivity, menu);
+        return true;
+    }
 
+    /*
+       Sets up the map
+       When a marker is clicked, the markers title (i.e. Parking Lot A) is used to correlate the marker with the value in the spinner
+       Spinner then changes value accordingly to match the marker clicked
+        */
+    public void onMapReady(GoogleMap googleMap) {
+        new GPSTracker(MainActivity.this);
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.style_json));
         mMap = googleMap;
         LatLng college_selected = new LatLng(27.380469, 33.632096);
@@ -201,19 +221,42 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                new GPSTracker(MainActivity.this);
-                new EstablishWebSocket().execute();
-                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(Marker marker) {
-                        for(int i = 0; i < markers.size(); i++){
-                            markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
+
+                new CountDownTimer(10000, 100) {
+
+                    public void onTick(long millisUntilFinished) {
+                        if(Math.abs(GPSTracker.time - Calendar.getInstance().getTimeInMillis()) < 1000 * 300 ){
+                            this.cancel();
+                            new EstablishWebSocket().execute();
+                            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(Marker marker) {
+                                    for(int i = 0; i < markers.size(); i++){
+                                        markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
+                                    }
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
+                                    return false;
+                                }
+                            });
                         }
-                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
-                        return false;
                     }
-                });
+
+                    public void onFinish() {
+                        new EstablishWebSocket().execute();
+                        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                            @Override
+                            public boolean onMarkerClick(Marker marker) {
+                                for(int i = 0; i < markers.size(); i++){
+                                    markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
+                                }
+                                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
+                                return false;
+                            }
+                        });
+                    }
+                }.start();
             }
         });
 
@@ -241,11 +284,27 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.log_off:
+                db_helper_user.clearAllTables();
+                finish();
+                break;
+            case R.id.sug_report:
+                Intent intent = new Intent(getApplicationContext(),SuggestionBugActivity.class);
+                startActivity(intent);
+                break;
+        }
+
+        return true;
+    }
+
     /*
-    Async Task
-    Emits the set user event, which correlates socket connection with the user id
-    For now, random user_id is generated by random number and converted to hex
-    */
+        Async Task
+        Emits the set user event, which correlates socket connection with the user id
+        For now, random user_id is generated by random number and converted to hex
+        */
     private class SetUser extends AsyncTask<JSONObject, Void, Void> {
         @Override
         protected Void doInBackground(JSONObject... params) {
@@ -253,11 +312,12 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             Log.d("KTag", "Set User Event Called");
 
             try {
-                JSONObject obj = db_helper_user.getInfo();
+                user = db_helper_user.getInfo();
 
-                user.put("user_id", obj.get("user_id"));
-                user.put("user_name", obj.get("user_name"));
+                user.put("user_id", user.get("user_id"));
+                user.put("user_name", user.get("user_name"));
                 mSocket.emit("setUser", user);
+
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -268,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            Log.d("KTag","User Key:"+socketHandler.getUserKey());
             new MainActivity.GetVersionData().execute();
         }
     }
@@ -277,16 +338,28 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
    Then passes that into the 'checkVersion' URL
     */
     private class GetVersionData extends AsyncTask<Object, Object, Void> {
+
+        byte[] encodeUserID = new String(socketHandler.getDefaultKey()).getBytes();
+        byte[] encodeData = new String(socketHandler.getUserKey()).getBytes();
+        Key key_userid = new SecretKeySpec(encodeUserID, SignatureAlgorithm.HS256.getJcaName());
+        Key key_data = new SecretKeySpec(encodeData, SignatureAlgorithm.HS256.getJcaName());
+
         @Override
         protected Void doInBackground(Object... args) {
             try {
+
+                String token_user = Jwts.builder().claim("user_id",user.getString("user_id")).signWith(SignatureAlgorithm.HS256, key_userid).compact();
+
+                String token_data = Jwts.builder().claim("ver",db_helper_data.getAllCollegeVersion()).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
-                String urlstring = socketHandler.getURL() + "/checkVersion?ver=" + db_helper_data.getAllCollegeVersion();
+                String urlstring = socketHandler.getURL() + "/checkVersion";
                 Log.d("KTag", Integer.toString(db_helper_data.getAllCollegeVersion()));
                 Log.d("KTag", "GetVersionData REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
-                myConnection.setRequestProperty("User-Agent", "android-client");
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token_user", token_user);
+                myConnection.setRequestProperty("token_data", token_data);
                 if (myConnection.getResponseCode() == 200) {
                     InputStream responseBody = myConnection.getInputStream();
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
@@ -378,7 +451,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             } else if (code == 1) {
                 //in case local db had up to date data
                 Log.d("KTag", "checkVersion : NO New Data");
-
                 startCollegeFragment();
             }
             else if(code == 0){
@@ -443,7 +515,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            new GPSTracker(MainActivity.this);
             startCollegeFragment();
         }
     }
@@ -458,7 +529,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
         current_lat = GPSTracker.latitude;
         current_lng = GPSTracker.longitude;
-        Log.d("KTag",current_lat+","+current_lng);
+
+        Log.d("KTag",current_lat+","+current_lng  +" | "+ Calendar.getInstance().getTimeInMillis() +" . " +GPSTracker.time );
 
 
         Bundle bundle = new Bundle();
@@ -734,7 +806,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         }
         try {
             if(user.get("status") != null){
-                Log.d("KTag","getUserStatus on REsume");
+                Log.d("KTag","getUserStatus on Resume");
                 mSocket.emit("getUserStatus", new JSONObject());
             }
         } catch (JSONException e) {
@@ -779,4 +851,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             e.printStackTrace();
         }
     }
+
+
+
 }
