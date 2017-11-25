@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -127,7 +128,17 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         parker_user_name = bundle.getString("parker_user_name");
         start_timestamp = bundle.getInt("start_timestamp");
         try {
+            Bundle bundle_options = new Bundle();
+            bundle_options.putString("type","ride");
             current_user = db_helper_user.getInfo();
+            if(current_user.getString("user_id").equals(rider_user_id)){
+                bundle_options.putString("type","ride");
+            }
+            else{
+                bundle_options.putString("type","park");
+            }
+            match_options_fragment = new match_options_fragment();
+            match_options_fragment.setArguments(bundle_options);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -155,6 +166,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         rider_transaction.addToBackStack(null);
         rider_transaction.commit();
 
+
         final FragmentTransaction mo_transaction = fm.beginTransaction();
         mo_transaction.replace(R.id.verificationSpace, match_options_fragment, "match options fragment");
         mo_transaction.addToBackStack(null);
@@ -176,7 +188,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             e.printStackTrace();
         }
 
-        Button btn = (Button) findViewById(R.id.zoomFit);
+        ImageButton btn = (ImageButton) findViewById(R.id.zoomFit);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -186,7 +198,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                 builder.include(pu_marker.getPosition());
                 LatLngBounds bounds = builder.build();
 
-                int padding = 20; // offset from edges of the map in pixels
+                int padding = 50; // offset from edges of the map in pixels
                 CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
                 matchMap.animateCamera(cu);
             }
@@ -235,8 +247,6 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                                 } else {
                                     obj.put("atPickup", false);
                                 }
-
-
                                 mSocket.emit("updateLocation", obj);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -247,6 +257,8 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             }
         }, 0, 1000);
 
+        socketHandler.setTimer(timer);
+
 
 
         emitJoinRoom();
@@ -255,7 +267,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             @Override
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
-                Log.d("KTag", "Joined Room : " + obj.toString());
+                MyLogger.d("KTag", "Joined Room : " + obj.toString());
 
                 JSONObject userObj = null;
                 try {
@@ -270,7 +282,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             @Override
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
-                Log.d("KTag", "Joined Room : " + obj.toString());
+                MyLogger.d("KTag", "Joined Room : " + obj.toString());
 
                 JSONObject userObj = null;
                 try {
@@ -300,7 +312,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
             public void call(Object... args) {
                 JSONObject obj = (JSONObject) args[0];
                 verification_fragment = new verification_fragment();
-                Log.d("KTag","confirmation issued");
+                MyLogger.d("KTag","confirmation issued");
                 Bundle bundle1 = new Bundle();
                 try {
                     bundle1.putString("confirmationNumber",obj.getString("confirmationNumber"));
@@ -321,7 +333,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         mSocket.on("revertConfirmation", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.d("KTag", "confirmation reverted");
+                MyLogger.d("KTag", "confirmation reverted");
                 FragmentManager fm = getSupportFragmentManager();
                 FragmentTransaction mo_transaction = fm.beginTransaction();
                 mo_transaction.replace(R.id.verificationSpace, match_options_fragment, "match options fragment");
@@ -363,7 +375,7 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
                             BitmapDescriptor icon;
 
-                            Log.d("KTag",obj.getString("user_id")+ " updateLocation");
+                            MyLogger.d("KTag",obj.getString("user_id")+ " updateLocation");
 
                             //Makes fragment connected for that user of it was previously in disconnected
                             if(((match_profile)userObj.get("fragment")).getDisconnected()){
@@ -415,14 +427,12 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Log.d("KTag","Parker Marker: "+ parker_marker.getPosition());
-                        Log.d("KTag","Rider Marker: "+ rider_marker.getPosition());
+
 
                     }
                 });
             }
         });
-
 
     }
 
@@ -473,12 +483,11 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
         matchMap.setMyLocationEnabled(true);
 
 
-
     }
 
     @Override
     protected void onDestroy() {
-        timer.cancel();
+        MyLogger.d("KTag","MatchActivity Destroy");
         mSocket.off("joined_room_confirm");
         mSocket.off("issueConfirmation");
         mSocket.off("updateCurrentLocation");
@@ -489,12 +498,12 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
     @Override
     public void onBackPressed() {
-        Toast.makeText(getApplicationContext(),"Cannot Cancel Match",Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(),"Click'Cancel Match'",Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void sendConfirmation() {
-        Log.d("KTag","send confirmation");
+        MyLogger.d("KTag","send confirmation");
         mSocket.emit("confirmPickUp", new JSONObject());
     }
 
@@ -516,7 +525,23 @@ public class MatchActivity extends AppCompatActivity implements verification_fra
 
     @Override
     public void manualClose() {
-        manualPickup = true;
 
+        Location pu_location = new Location("pickup");
+        pu_location.setLatitude(pu_lat);
+        pu_location.setLongitude(pu_lng);
+        Location user_location = new Location("user");
+        user_location.setLatitude(current_lat);
+        user_location.setLongitude(current_lng);
+
+        //current distance from the user to the pickup spot
+        float distance = pu_location.distanceTo(user_location);
+        if(distance >DISTANCE_MINIMUM ){
+            manualPickup = true;
+        }
+        else{
+            Toast.makeText(getApplicationContext(),"Already at the Pickup Location",Toast.LENGTH_SHORT).show();
+        }
     }
+
+
 }

@@ -87,7 +87,7 @@ public class Waiting_Activity extends AppCompatActivity {
 
     public void matchMade(JSONObject obj) throws JSONException {
         Intent intent = new Intent(this, MatchActivity.class);
-        Log.d("KTag","Match : "+ obj.toString());
+        MyLogger.d("KTag","Match : "+ obj.toString());
         intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
         intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
         intent.putExtra("rider_user_id", (String) obj.getString("rider_user_id"));

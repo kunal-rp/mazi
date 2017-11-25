@@ -26,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -97,6 +98,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     private GoogleMap mMap;
 
+    //Progress Circle Objects
+    private View mProgressView;
+
+
     //local db to store data for college and parking lot data
     //Future use : hold user credential data
     private DB_Helper_Data db_helper_data;
@@ -117,12 +122,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
 
     //hodls user's current coordinates
-    private double current_lat, current_lng,college_lat, college_lng;
-    private double ride_limit,park_limit;
+    private double current_lat, current_lng, college_lat, college_lng;
+    private double ride_limit, park_limit;
 
+    college_fragment college_fragment;
     parking_fragment parking_fragment;
 
+    private boolean finishedSetUp = false;
 
+    private JSONObject eventData;
 
 
     //connects to the server
@@ -142,14 +150,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d("KTag","Main Activity onCreate");
+        MyLogger.d("KTag", "Main Activity onCreate");
+
 
 
         user = new JSONObject();
 
         //Initializes local db
         db_helper_data = new DB_Helper_Data(this, null);
-        db_helper_user = new Db_Helper_User(this,null);
+        db_helper_user = new Db_Helper_User(this, null);
         try {
             user = db_helper_user.getInfo();
         } catch (JSONException e) {
@@ -163,38 +172,46 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setOverflowIcon(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_settings_icon));
-
-
+        toolbar.setOverflowIcon(ContextCompat.getDrawable(getApplicationContext(), R.drawable.ic_settings_icon));
 
 
         ImageView profile = (ImageView) findViewById(R.id.profile);
         profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(),UserOverviewActivity.class );
+                Intent intent = new Intent(getApplicationContext(), UserOverviewActivity.class);
                 startActivity(intent);
             }
         });
 
 
-
-
-
         mSocket.off("updateStatus");
+
 
         mSocket.on("updateStatus", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
 
                 JSONObject obj = (JSONObject) args[0];
-                Log.d("KTag", "Status Update : " + obj.toString());
+                MyLogger.d("KTag", "Status Update : " + obj.toString());
                 try {
-                    user.put("status",obj.getString("status"));
+                    user.put("status", obj.getString("status"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 checkStatus(obj);
+            }
+        });
+
+        mSocket.on("ping", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSocket.emit("pong", "pong");
+                    }
+                });
             }
         });
 
@@ -213,50 +230,35 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
        Spinner then changes value accordingly to match the marker clicked
         */
     public void onMapReady(GoogleMap googleMap) {
+        mProgressView = findViewById(R.id.progress_view);
+        showProgress(true);
         new GPSTracker(MainActivity.this);
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.style_json));
         mMap = googleMap;
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         LatLng college_selected = new LatLng(27.380469, 33.632096);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(college_selected, 18));
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(getApplicationContext(),"Need Location Access",Toast.LENGTH_LONG).show();
+            finish();
+        }
+        mMap.setMyLocationEnabled(true);
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-
-                new CountDownTimer(10000, 100) {
-
-                    public void onTick(long millisUntilFinished) {
-                        if(Math.abs(GPSTracker.time - Calendar.getInstance().getTimeInMillis()) < 1000 * 300 ){
-                            this.cancel();
-                            new EstablishWebSocket().execute();
-                            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                                @Override
-                                public boolean onMarkerClick(Marker marker) {
-                                    for(int i = 0; i < markers.size(); i++){
-                                        markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
-                                    }
-                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
-                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
-                                    return false;
-                                }
-                            });
+                new EstablishWebSocket().execute();
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        for(int i = 0; i < markers.size(); i++){
+                            markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
                         }
+                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
+                        parking_fragment.updateSpinnerSelected(marker.getTitle());
+                        return false;
                     }
-
-                    public void onFinish() {
-                        new EstablishWebSocket().execute();
-                        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                            @Override
-                            public boolean onMarkerClick(Marker marker) {
-                                for(int i = 0; i < markers.size(); i++){
-                                    markers.get(i).setIcon(BitmapDescriptorFactory.fromResource(R.drawable.other_marker));
-                                }
-                                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker));
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 17));
-                                return false;
-                            }
-                        });
-                    }
-                }.start();
+                });
             }
         });
 
@@ -309,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected Void doInBackground(JSONObject... params) {
 
-            Log.d("KTag", "Set User Event Called");
+            MyLogger.d("KTag", "Set User Event Called");
 
             try {
                 user = db_helper_user.getInfo();
@@ -317,6 +319,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 user.put("user_id", user.get("user_id"));
                 user.put("user_name", user.get("user_name"));
                 mSocket.emit("setUser", user);
+                finishedSetUp = true;
 
 
             } catch (JSONException e) {
@@ -328,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.d("KTag","User Key:"+socketHandler.getUserKey());
+            MyLogger.d("KTag","User Key:"+socketHandler.getUserKey());
             new MainActivity.GetVersionData().execute();
         }
     }
@@ -353,8 +356,8 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 String token_data = Jwts.builder().claim("ver",db_helper_data.getAllCollegeVersion()).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
                 String urlstring = socketHandler.getURL() + "/checkVersion";
-                Log.d("KTag", Integer.toString(db_helper_data.getAllCollegeVersion()));
-                Log.d("KTag", "GetVersionData REST API check");
+                MyLogger.d("KTag", Integer.toString(db_helper_data.getAllCollegeVersion()));
+                MyLogger.d("KTag", "GetVersionData REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -366,10 +369,10 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     version_data = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {
@@ -446,15 +449,16 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             super.onPostExecute(aVoid);
             if (code == 2) {
                 //in case version data is not up to date
-                Log.d("KTag", "checkVersion : New Data");
+                MyLogger.d("KTag", "checkVersion : New Data");
                 new PushNewData().execute();
             } else if (code == 1) {
                 //in case local db had up to date data
-                Log.d("KTag", "checkVersion : NO New Data");
-                startCollegeFragment();
+                MyLogger.d("KTag", "checkVersion : NO New Data");
+                new GetEvents().execute();
             }
             else if(code == 0){
                 try {
+                    showProgress(false);
                     message = version_data.getString("message");
                     runOnUiThread(new Runnable() {
                         @Override
@@ -478,7 +482,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected Void doInBackground(Object... args) {
 
-            Log.d("KTag", "PushNewData");
+            MyLogger.d("KTag", "PushNewData");
             //first will clear all of the data from both local db tables for colleges and parking
             db_helper_data.clearAllTables();
 
@@ -515,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            startCollegeFragment();
+            new GetEvents().execute();
         }
     }
 
@@ -523,21 +527,22 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     Clears the map of all markers and adds the fragment to the view
      */
     public void startCollegeFragment() {
-
+        showProgress(false);
         mMap.clear();
         markers.clear();
 
         current_lat = GPSTracker.latitude;
         current_lng = GPSTracker.longitude;
 
-        Log.d("KTag",current_lat+","+current_lng  +" | "+ Calendar.getInstance().getTimeInMillis() +" . " +GPSTracker.time );
+        MyLogger.d("KTag",current_lat+","+current_lng  +" | "+ Calendar.getInstance().getTimeInMillis() +" . " +GPSTracker.time );
 
 
         Bundle bundle = new Bundle();
         bundle.putDouble("current_lat",current_lat);
         bundle.putDouble("current_lng",current_lng);
-        Log.d("KTag","Location Main:"+current_lat + ","+current_lng);
-        college_fragment college_fragment = new college_fragment();
+        bundle.putString("json",eventData.toString());
+        MyLogger.d("KTag","Location Main:"+current_lat + ","+current_lng);
+        college_fragment = new college_fragment();
         college_fragment.setArguments(bundle);
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
@@ -559,7 +564,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
         college_lng = lng;
         ride_limit = ridel;
         park_limit = parkl;
-        Log.d("KTag","College Selected: "+ college_lat + ","+ college_lng + " | Ride Limits : "+ ride_limit + ","+park_limit);
+        MyLogger.d("KTag","College Selected: "+ college_lat + ","+ college_lng + " | Ride Limits : "+ ride_limit + ","+park_limit);
         LatLng college = new LatLng(lat, lng);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(college, 14));
         selected_college_id = college_id;
@@ -575,10 +580,9 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             mMap.clear();
             current_lat = GPSTracker.latitude;
             current_lng = GPSTracker.longitude;
-            Log.d("KTag","PR:"+current_lat+","+current_lng);
+            MyLogger.d("KTag","PR:"+current_lat+","+current_lng);
 
             type=t;
-
             Location college = new Location("college");
             college.setLatitude(college_lat);
             college.setLongitude(college_lng);
@@ -590,7 +594,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             if((type.equals("ride") && distance > (ride_limit * METERS_IN_MILE)) || (type.equals("park") && distance > (park_limit * METERS_IN_MILE)) ){
                 Toast.makeText(this,"User is too far away from college.\nUser needs to be in the circle" ,Toast.LENGTH_SHORT).show();
                 Circle circle;
-                Marker marker = mMap.addMarker(new MarkerOptions().position( new LatLng(current_lat,current_lng)).title("current location").icon(BitmapDescriptorFactory.fromResource(R.drawable.user_marker)));
                 if((type.equals("ride") && distance > (ride_limit * METERS_IN_MILE))){
 
                     circle = mMap.addCircle(new CircleOptions()
@@ -606,7 +609,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                 }
 
                 LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                builder.include(marker.getPosition());
+                builder.include(new LatLng(current_lat,current_lng));
                 builder.include(circle.getCenter());
                 LatLngBounds bounds = builder.build();
 
@@ -622,6 +625,15 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
                     e.printStackTrace();
                 }
             }
+
+    }
+
+    @Override
+    public void focusCurrentPosition() {
+        current_lat = GPSTracker.latitude;
+        current_lng = GPSTracker.longitude;
+        LatLng current_loc = new LatLng(current_lat, current_lng);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(current_loc, 20));
 
     }
 
@@ -722,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             Toast.makeText(this,"Pick Up Location is too far away from college" ,Toast.LENGTH_SHORT).show();
         }
         else{
-            Log.d("KTag", Double.toString(lat) + " " + Double.toString(lng));
+            MyLogger.d("KTag", Double.toString(lat) + " " + Double.toString(lng));
             submitRequest();
         }
 
@@ -743,7 +755,6 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     All of the necessary information to make the request is passed to the activity
      */
     public void submitRequest() {
-        startCollegeFragment();
         JSONObject obj = new JSONObject();
         try {
             obj.put("college_id", selected_college_id);
@@ -752,14 +763,16 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             obj.put("pickup_lat",pu_lat);
             obj.put("pickup_lng",pu_lng);
             mSocket.emit("register",obj);
-            Log.d("KTag","Register Event : "+ obj.toString());
+            MyLogger.d("KTag","Register Event : "+ obj.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        startCollegeFragment();
+        showProgress(true);
     }
 
     public void startWaitingActivity(String college_id, String parkinglot_id, String client_type){
-        Log.d("KTag","Start Waiting Activity");
+        MyLogger.d("KTag","Start Waiting Activity");
         Intent intent = new Intent(this, Waiting_Activity.class);
         intent.putExtra("selected_college_id", college_id);
         intent.putExtra("selected_parkinglot_id", parkinglot_id);
@@ -769,7 +782,7 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     public void startMatchActivity(JSONObject obj) throws JSONException {
         Intent intent = new Intent(this, MatchActivity.class);
-        Log.d("KTag","Match : "+ obj.toString());
+        MyLogger.d("KTag","Match : "+ obj.toString());
         intent.putExtra("pu_lat",obj.getDouble("pu_lat"));
         intent.putExtra("pu_lng", obj.getDouble("pu_lng"));
         intent.putExtra("rider_user_id", (String) obj.getString("rider_user_id"));
@@ -800,13 +813,14 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
 
     @Override
     protected void onResume() {
+        socketHandler.stopTimer();
         FragmentManager fm = this.getSupportFragmentManager();
         for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
             fm.popBackStack();
         }
         try {
-            if(user.get("status") != null){
-                Log.d("KTag","getUserStatus on Resume");
+            if(user.get("status") != null && finishedSetUp == true){
+                MyLogger.d("KTag","getUserStatus on Resume");
                 mSocket.emit("getUserStatus", new JSONObject());
             }
         } catch (JSONException e) {
@@ -831,13 +845,20 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
     //Socket Connection is disconnected after the activity cancels out to the login activity
     @Override
     protected void onDestroy() {
-
+        MyLogger.d("KTag","Main Activity Destroyed");
+        socketHandler.stopTimer();
         mSocket.disconnect();
         super.onDestroy();
     }
 
     private void checkStatus(JSONObject obj){
         try {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showProgress(false);
+                }
+            });
             if(obj.getString("status").equals("waiting_match")){
                 startWaitingActivity(obj.getString("selected_college"),obj.getString("selected_parkinglot"),obj.getString("client_type"));
             }
@@ -847,10 +868,138 @@ public class MainActivity extends AppCompatActivity implements parking_fragment.
             else if(obj.get("status").equals("finish")){
                 startRatingActivity(obj);
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+
+        final FrameLayout contentFrag = (FrameLayout) findViewById(R.id.contentFragment);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            contentFrag.setVisibility(show ? View.GONE : View.VISIBLE);
+            contentFrag.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    contentFrag.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            contentFrag.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    /*
+ Async task that calles REST API to first get the current data version number from db_helper_data
+ Then passes that into the 'checkVersion' URL
+  */
+    private class GetEvents extends AsyncTask<Object, Object, Void> {
+
+
+        JSONObject resultJSON;
+
+        byte[] encodedKey = new String(socketHandler.getDefaultKey()).getBytes();
+        Key k = new SecretKeySpec(encodedKey, SignatureAlgorithm.HS256.getJcaName());
+
+        protected Void doInBackground(Object... args) {
+            try {
+                String token = Jwts.builder().claim("name","name").signWith(SignatureAlgorithm.HS256, k).compact();
+
+                String urlstring = socketHandler.getURL() + "/getEvents";
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "GetEvents REST API check");
+                URL versionUrl = new URL(urlstring);
+                HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token", token);
+                if (myConnection.getResponseCode() == 200) {
+                    InputStream responseBody = myConnection.getInputStream();
+                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
+                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+                    String var = getStringFromInputStream(responseBody);
+                    MyLogger.d("KTag",var);
+                    resultJSON = new JSONObject(var);
+                    MyLogger.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "JSON Response Object : " +resultJSON.toString());
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            MyLogger.d("KTag","GetEvents:"+resultJSON.toString());
+                            new MainActivity.SetEventData().execute(resultJSON);
+                        }
+                    });
+
+                } else {
+                    MyLogger.d("KTag", Integer.toString(myConnection.getResponseCode()));
+                }
+
+            } catch (IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Cannot establish connection to Server for Check User",Toast.LENGTH_LONG).show();
+
+                    }
+                });
+                e.printStackTrace();
+            } catch (JSONException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Can't put Check User results into JSON Object",Toast.LENGTH_LONG).show();
+                    }
+                });
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    /*
+    Async Task
+    Uses the results from the REST API to determine whether to update the local db with the correct information or to move along
+     */
+    private class SetEventData extends AsyncTask<Object, Object, Void> {
+
+
+        @Override
+        protected Void doInBackground(Object... args) {
+            eventData = (JSONObject) args[0];
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            startCollegeFragment();
+        }
+    }
+
+
 
 
 

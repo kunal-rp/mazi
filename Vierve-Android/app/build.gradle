@@ -5,10 +5,10 @@ android {
     buildToolsVersion "25.0.0"
     defaultConfig {
         applicationId 'com.vierve'
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 17
+        versionName "1.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -37,12 +37,12 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    compile('com.github.nkzawa:socket.io-client:0.6.0') {
+        exclude group: 'org.json', module: 'json'
+    }
     compile 'io.jsonwebtoken:jjwt:0.7.0'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.0.0'
-    compile ('com.github.nkzawa:socket.io-client:0.6.0'){
-        exclude group: 'org.json', module: 'json'
-    }
     compile 'com.google.android.gms:play-services:9.8.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:support-v4:25.3.1'

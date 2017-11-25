@@ -91,7 +91,7 @@ public class ForgotActivity extends AppCompatActivity {
             new ResetCredential().execute(email_view.getText().toString(),type_forget);
         }
         else{
-            Log.d("KTag","Invalid Email");
+            MyLogger.d("KTag","Invalid Email");
             email_view.setError("Invalid Email");
             email_view.requestFocus();
         }
@@ -117,8 +117,8 @@ public class ForgotActivity extends AppCompatActivity {
                 String token = Jwts.builder().claim("user_email",args[0]).claim("type_forget",args[1]).signWith(SignatureAlgorithm.HS256, k).compact();
 
                 String urlstring = socketHandler.getURL() + "/resetCredential" ;
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Check Username REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -129,10 +129,10 @@ public class ForgotActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {

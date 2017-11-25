@@ -11,6 +11,7 @@ import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -44,12 +45,15 @@ public class RegisterActivity extends AppCompatActivity {
     String email;
     String password;
     String confirm_password;
+    String promo_user;
     Boolean validEmail;
 
     EditText userName_view;
     EditText email_view;
     EditText password_view;
     EditText confirm_password_view;
+    EditText promo_user_view;
+    CheckBox privacy;
 
     View mainForm;
     View progressForm;
@@ -65,6 +69,8 @@ public class RegisterActivity extends AppCompatActivity {
         email_view = (EditText) findViewById(R.id.email_view);
         password_view  = (EditText) findViewById(R.id.password_view);
         confirm_password_view = (EditText) findViewById(R.id.confirm_password_view);
+        privacy = (CheckBox) findViewById(R.id.privacy);
+        promo_user_view = (EditText) findViewById(R.id.promo_user_view);
 
 
         mainForm = findViewById(R.id.main_view);
@@ -80,6 +86,7 @@ public class RegisterActivity extends AppCompatActivity {
                 email =  email_view.getText().toString();
                 password = password_view.getText().toString();
                 confirm_password =  confirm_password_view.getText().toString();
+                promo_user = promo_user_view.getText().toString();
                 runCheckUsername();
             }
         });
@@ -87,23 +94,25 @@ public class RegisterActivity extends AppCompatActivity {
 
 
     public static boolean isValidEmail(String target) {
-        Log.d("KTag", String.valueOf(target.length()));
-        Log.d("KTag", String.valueOf(android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches()));
+        MyLogger.d("KTag", String.valueOf(target.length()));
+        MyLogger.d("KTag", String.valueOf(android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches()));
         return target.length() != 0 && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
     }
 
     public static boolean isvalidUsername(String username) {
-        Log.d("KTag","Username length : "+username.length());
-        Log.d("KTag","Username "+username);
+        MyLogger.d("KTag","Username length : "+username.length());
+        MyLogger.d("KTag","Username "+username);
         for(int i =0 ; i < username.length(); i++){
             if(!Character.isLetter(username.charAt(i)) && !Character.isDigit(username.charAt(i)) && username.charAt(i) != '.' && username.charAt(i) != '_'){
-                Log.d("KTag","Punc @ "+i);
+                MyLogger.d("KTag","Punc @ "+i);
                 return false;
             }
         }
 
         return username.length() > 2 && username.length() <16;
     }
+
+
 
     public static boolean isValidPasswordMatch(String password1, String password2) {
         return password1.equals(password2);
@@ -118,31 +127,41 @@ public class RegisterActivity extends AppCompatActivity {
         email_view.setError(null);
         confirm_password_view.setError(null);
         password_view.setError(null);
-        if(isValidEmail(email) && isvalidUsername(user_name)&& isValidPasswordMatch(password,confirm_password)){
-
-            Log.d("KTag","All valid credentials");
+        promo_user_view.setError(null);
+        if((promo_user.length() == 0 || isvalidUsername(promo_user)) && isValidEmail(email) && isvalidUsername(user_name)&& isValidPassword(password) && isValidPasswordMatch(password,confirm_password) && privacy.isChecked()){
+            showProgress(true);
+            MyLogger.d("KTag","All valid credentials");
             new RegisterActivity.CheckUsername().execute();
         }
         else{
             if(!isvalidUsername(user_name)){
-                Log.d("KTag","Invalid Username");
+                MyLogger.d("KTag","Invalid Username");
                 userName_view.setError("Invalid Username");
                 userName_view.requestFocus();
             }
+            else if(!(promo_user.length() == 0 || isvalidUsername(promo_user))){
+                MyLogger.d("KTag","Invalid Promo Username");
+                promo_user_view.setError("Invalid Promo Username");
+                promo_user_view.requestFocus();
+            }
             else if(!isValidEmail(email)){
-                Log.d("KTag","Invalid Email");
+                MyLogger.d("KTag","Invalid Email");
                 email_view.setError("Invalid Email");
                 email_view.requestFocus();
             }
-            else if(isValidPassword(password)){
-                Log.d("KTag","Invalid Password");
+            else if(!isValidPassword(password)){
+                MyLogger.d("KTag","Invalid Password");
                 password_view.setError("Invalid Password ");
                 password_view.requestFocus();
             }
             else if(!isValidPasswordMatch(password,confirm_password)){
-                Log.d("KTag","Passwords don't match");
+                MyLogger.d("KTag","Passwords don't match");
                 confirm_password_view.setError("Passwords don't match");
                 confirm_password_view.requestFocus();
+            }
+            else if(privacy.isChecked() == false){
+                Toast.makeText(getApplicationContext(),"Please Agree to Privacy Policy",Toast.LENGTH_LONG).show();
+
             }
         }
     }
@@ -165,8 +184,8 @@ public class RegisterActivity extends AppCompatActivity {
                 String token_data = Jwts.builder().claim("user_name",user_name).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
                 String urlstring = socketHandler.getURL() + "/checkUsername" ;
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Check Username REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -177,10 +196,10 @@ public class RegisterActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {
@@ -213,10 +232,18 @@ public class RegisterActivity extends AppCompatActivity {
                     switch(resultJSON.getInt("code")){
                         case 0 :
                             message = resultJSON.getString("message");
-                            Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(),"User Name:"+message,Toast.LENGTH_SHORT).show();
+                            showProgress(false);
                             break;
                         case 1:
-                            new RegisterActivity.CreateUser().execute();
+                            if(promo_user.length() == 0){
+                                new CreateUser().execute();
+                            }
+                            else{
+                                new CheckPromoUser().execute();
+
+                            }
+
                             break;
                     }
                 } catch (JSONException e) {
@@ -225,6 +252,87 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
     }
+
+    /*
+       Async task that calles REST API to first get the current data version number from db_helper_data
+       Then passes that into the 'checkVersion' URL
+        */
+    private class CheckPromoUser extends AsyncTask<Object, Object, Void> {
+
+
+        String message;
+
+        byte[] encodeData = new String(socketHandler.getDefaultKey()).getBytes();
+        Key key_data = new SecretKeySpec(encodeData, SignatureAlgorithm.HS256.getJcaName());
+
+        @Override
+        protected Void doInBackground(Object... args) {
+            try {
+                String token_data = Jwts.builder().claim("user_name",promo_user).signWith(SignatureAlgorithm.HS256, key_data).compact();
+                //REST API url ; calls db method to get the largest verison
+                String urlstring = socketHandler.getURL() + "/checkUsername" ;
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check Username REST API check");
+                URL versionUrl = new URL(urlstring);
+                HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
+                myConnection.setRequestProperty("user_type", "vierve_android");
+                myConnection.setRequestProperty("token", token_data);
+                if (myConnection.getResponseCode() == 200) {
+                    InputStream responseBody = myConnection.getInputStream();
+                    InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
+                    JsonReader jsonReader = new JsonReader(responseBodyReader);
+                    String var = getStringFromInputStream(responseBody);
+                    resultJSON = new JSONObject(var);
+                    MyLogger.d("KTag", "Sucsessful http REST API");
+
+                } else {
+                    MyLogger.d("KTag", "Error");
+                }
+
+            } catch (IOException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Cannot establish connection to Server for Check User",Toast.LENGTH_LONG).show();
+
+                    }
+                });
+                e.printStackTrace();
+            } catch (JSONException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(),"Can't put Check User results into JSON Object",Toast.LENGTH_LONG).show();
+                    }
+                });
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+
+
+            try {
+                switch(resultJSON.getInt("code")){
+                    case 0 :
+                        new CreateUser().execute();
+                        break;
+                    case 1:
+                        Toast.makeText(getApplicationContext(),"Promo User: username doesn't exist",Toast.LENGTH_LONG).show();
+                        showProgress(false);
+                        break;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
 
 
 
@@ -245,11 +353,12 @@ public class RegisterActivity extends AppCompatActivity {
         protected Void doInBackground(Object... params) {
 
             try {
-                String token_data = Jwts.builder().claim("user_name",user_name).claim("user_password",password).claim("user_email",email).signWith(SignatureAlgorithm.HS256, key_data).compact();
+
+                String token_data = Jwts.builder().claim("promo_user",(promo_user.length() == 0)?"-":promo_user).claim("user_name",user_name).claim("user_password",password).claim("user_email",email).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
                 String urlstring = socketHandler.getURL() + "/createUser";
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Create User REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Create User REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -260,10 +369,10 @@ public class RegisterActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {
@@ -295,9 +404,11 @@ public class RegisterActivity extends AppCompatActivity {
                     case 0:
                         message = resultJSON.getString("message");
                         Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
+                        showProgress(false);
                         break;
                     case 1:
                         Toast.makeText(getApplicationContext(),"Registered.\n Verify given Email",Toast.LENGTH_SHORT).show();
+                        showProgress(false);
                         finish();
                         break;
                 }

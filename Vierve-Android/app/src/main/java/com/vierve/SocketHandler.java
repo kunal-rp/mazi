@@ -2,6 +2,8 @@ package com.vierve;
 
 import com.github.nkzawa.socketio.client.Socket;
 
+import java.util.Timer;
+
 /**
  * Created by kunal on 7/26/17.
  */
@@ -11,6 +13,7 @@ public class SocketHandler {
     private static String url;
     private static String defaultKey;
     private static String userKey;
+    private Timer timer;
 
     public static synchronized Socket getSocket(){
         return socket;
@@ -43,6 +46,16 @@ public class SocketHandler {
     public static synchronized String getUserKey(){
         return userKey;
     }
+
+    public synchronized void setTimer(Timer t){
+        timer = t;
+    }
+
+    public synchronized void stopTimer(){
+        if(timer != null){timer.cancel();}
+    }
+
+
 
 
 

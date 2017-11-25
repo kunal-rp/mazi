@@ -96,7 +96,7 @@ public class UserOverviewActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                showProgress(true);
+
                 runCheckUsername();
             }
         });
@@ -105,8 +105,8 @@ public class UserOverviewActivity extends AppCompatActivity {
         updatePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 try {
-                    showProgress(true);
                     runCheckPassword();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -133,20 +133,22 @@ public class UserOverviewActivity extends AppCompatActivity {
         new_password.setError(null);
         confirm_new_password.setError(null);
         if(isCorrectPassword(current_password.getText().toString()) && isValidPassword(new_password.getText().toString()) && isValidPasswordMatch(new_password.getText().toString(),confirm_new_password.getText().toString())){
+            showProgress(true);
             new Updateuser().execute(user.getString("user_name"),current_password.getText().toString(),new_password.getText().toString(),user.getString("user_email"),user.getString("user_id"));
         }
         else{
+            showProgress(false);
             if(!isCorrectPassword(current_password.getText().toString())){
-                Log.d("KTag","Wrong Password");
+                MyLogger.d("KTag","Wrong Password");
                 current_password.setError("Wrong Password");
                 current_password.requestFocus();
             }else if(!isValidPassword(new_password.getText().toString())){
-                Log.d("KTag","Invalid New Password");
+                MyLogger.d("KTag","Invalid New Password");
                 new_password.setError("Invalid Password");
                 new_password.requestFocus();
             }
             else if(isValidPasswordMatch(new_password.getText().toString(),confirm_new_password.getText().toString())){
-                Log.d("KTag","Password Don't match");
+                MyLogger.d("KTag","Password Don't match");
                 confirm_new_password.setError("Invalid Password");
                 confirm_new_password.requestFocus();
             }
@@ -154,11 +156,11 @@ public class UserOverviewActivity extends AppCompatActivity {
     }
 
     public  boolean isvalidUsername(String username)  {
-        Log.d("KTag","Username length : "+username.length());
-        Log.d("KTag","Username "+username);
+        MyLogger.d("KTag","Username length : "+username.length());
+        MyLogger.d("KTag","Username "+username);
         for(int i =0 ; i < username.length(); i++){
             if(!Character.isLetter(username.charAt(i)) && !Character.isDigit(username.charAt(i)) && username.charAt(i) != '.' && username.charAt(i) != '_'){
-                Log.d("KTag","Punc @ "+i);
+                MyLogger.d("KTag","Punc @ "+i);
                 return false;
             }
         }
@@ -173,10 +175,12 @@ public class UserOverviewActivity extends AppCompatActivity {
         username_view.setError(null);
 
         if (isvalidUsername(username_view.getText().toString()) ) {
-            Log.d("KTag", "Valid Username credentials");
+            MyLogger.d("KTag", "Valid Username credentials");
+            showProgress(true);
             new CheckUsername().execute(username_view.getText().toString());
         } else {
-            Log.d("KTag", "Invalid Username");
+            showProgress(false);
+            MyLogger.d("KTag", "Invalid Username");
             username_view.setError("Invalid Username");
             username_view.requestFocus();
 
@@ -201,12 +205,12 @@ public class UserOverviewActivity extends AppCompatActivity {
         protected Void doInBackground(Object... args) {
             try {
                 new_user_name = args[0].toString();
-                Log.d("KTag",new String(socketHandler.getDefaultKey()));
+                MyLogger.d("KTag",new String(socketHandler.getDefaultKey()));
                 String token_data = Jwts.builder().claim("user_name",new_user_name).signWith(SignatureAlgorithm.HS256, key_data).compact();
                 //REST API url ; calls db method to get the largest verison
                 String urlstring = socketHandler.getURL() + "/checkUsername" ;
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Check Username REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -217,10 +221,10 @@ public class UserOverviewActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {
@@ -251,11 +255,13 @@ public class UserOverviewActivity extends AppCompatActivity {
             try {
                 switch(resultJSON.getInt("code")){
                     case 0 :
+                        showProgress(false);
                         message = resultJSON.getString("message");
                         Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
                         showProgress(false);
                         break;
                     case 1:
+                        showProgress(true);
                         new Updateuser().execute(new_user_name,user.getString("user_password"),user.getString("user_password"),user.getString("user_email"),user.getString("user_id"));
                         break;
                 }
@@ -289,8 +295,8 @@ public class UserOverviewActivity extends AppCompatActivity {
 
                 //REST API url ; calls db method to get the largest verison
                 String urlstring = socketHandler.getURL() + "/updateUser";
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Update Username REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Update Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -302,10 +308,10 @@ public class UserOverviewActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {
@@ -331,19 +337,19 @@ public class UserOverviewActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            showProgress(false);
 
             try {
                 switch(resultJSON.getInt("code")){
                     case 0 :
+                        showProgress(false);
                         message = resultJSON.getString("message");
                         Toast.makeText(getApplicationContext(),message,Toast.LENGTH_SHORT).show();
-
                         break;
                     case 1:
                         user.put("user_name",resultJSON.getString("new_user_name"));
                         user.put("user_password",resultJSON.getString("new_user_password"));
                         db_helper_user.setUserInfo(user);
+                        showProgress(false);
                         finish();
                         Toast.makeText(getApplicationContext(),"Profile Updated",Toast.LENGTH_SHORT).show();
                         break;

@@ -37,7 +37,7 @@ public class RatingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_rating);
 
-        Log.d("KTag","RatingActivity started");
+        MyLogger.d("KTag","RatingActivity started");
 
         socketHandler = new SocketHandler();
         mSocket = socketHandler.getSocket();

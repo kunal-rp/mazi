@@ -55,7 +55,7 @@ public class SuggestionBugActivity extends AppCompatActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d("KTag","SuggestionActivity");
+        MyLogger.d("KTag","SuggestionActivity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_suggest_report);
 
@@ -132,8 +132,8 @@ public class SuggestionBugActivity extends AppCompatActivity {
 
 
                 String urlstring = socketHandler.getURL() + "/addSuggestion";
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Check Username REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check Username REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -145,10 +145,10 @@ public class SuggestionBugActivity extends AppCompatActivity {
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
 
                 } else {
-                    Log.d("KTag", "Error");
+                    MyLogger.d("KTag", "Error");
                 }
 
             } catch (IOException e) {

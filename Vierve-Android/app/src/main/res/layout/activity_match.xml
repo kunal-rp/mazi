@@ -77,13 +77,14 @@
 
     </LinearLayout>
 
-    <Button
+    <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_mylocation"
         android:layout_below="@+id/ll"
-        android:text="Zoom Fit"
-        android:layout_centerHorizontal="true"
-        android:background="@color/colorPrimary"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:backgroundTint="@color/colorPrimary"
         android:id="@+id/zoomFit"/>
 
     <FrameLayout

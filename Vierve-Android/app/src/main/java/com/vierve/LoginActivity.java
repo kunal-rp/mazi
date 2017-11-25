@@ -1,5 +1,7 @@
 package com.vierve;
 
+import android.*;
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -58,7 +60,8 @@ public class LoginActivity extends AppCompatActivity  {
 
     private SocketHandler socketHandler;
 
-    String url = "http://192.168.1.204:3000";
+    //String url = "http://192.168.1.204:3000";
+    String url = "http://server.vierve.com";
 
     // UI references.
     private EditText mUserNameView;
@@ -76,11 +79,8 @@ public class LoginActivity extends AppCompatActivity  {
     private String user_name;
     private String user_password;
 
-
-
-
     //holds the permissions needed for the app to function
-    String[] permissions = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION};
+    String[] permissions = new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +92,8 @@ public class LoginActivity extends AppCompatActivity  {
          */
         socketHandler.setURL(url);
 
+
+
         //DB User Info handler
         db_helper_user = new Db_Helper_User(this,null);
 
@@ -101,6 +103,9 @@ public class LoginActivity extends AppCompatActivity  {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        showProgress(true);
+        new GetCodes().execute();
 
 
         TextView forgot_username = (TextView) findViewById(R.id.forgot_username);
@@ -123,26 +128,6 @@ public class LoginActivity extends AppCompatActivity  {
             }
         });
 
-        /*
-        If currently stored data has remembered selected,
-        automatically pulls data and attempts to log in
-         */
-        if(db_helper_user.getRemember() == true){
-            JSONObject obj;
-            try {
-                obj = db_helper_user.getInfo();
-                showProgress(true);
-                user_name = obj.getString("user_name");
-                user_password = obj.getString("user_password");
-                mUserNameView.setText(user_name);
-                mPasswordView.setText(user_password);
-                mRemember.setChecked(true);
-                attemptLogin();
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
 
         Button signInButton = (Button) findViewById(R.id.sign_in);
         signInButton.setOnClickListener(new OnClickListener() {
@@ -172,6 +157,7 @@ public class LoginActivity extends AppCompatActivity  {
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
+
         // Reset errors.
         mUserNameView.setError(null);
         mPasswordView.setError(null);
@@ -202,9 +188,10 @@ public class LoginActivity extends AppCompatActivity  {
 
         if (cancel) {
             focusView.requestFocus();
+
         } else {
             showProgress(true);
-            new GetCodes().execute();
+            new LoginActivity.CheckUser().execute();
 
         }
     }
@@ -268,8 +255,8 @@ public class LoginActivity extends AppCompatActivity  {
 
                 String token = Jwts.builder().claim("user_type","vierve_android").signWith(SignatureAlgorithm.HS256, k).compact();
                 String urlstring = socketHandler.getURL() + "/getCodes"  ;
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Get Codes REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Get Codes REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("token",token);
@@ -278,11 +265,11 @@ public class LoginActivity extends AppCompatActivity  {
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
-                    Log.d("KTag",var);
+                    MyLogger.d("KTag",var);
                     results = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "Sucsessful http REST API");
                 } else {
-                    Log.d("KTag", Integer.toString(myConnection.getResponseCode()));
+                    MyLogger.d("KTag", Integer.toString(myConnection.getResponseCode()));
                 }
 
             } catch (IOException e) {
@@ -315,8 +302,26 @@ public class LoginActivity extends AppCompatActivity  {
                 Object claims =  Jwts.parser().setSigningKey(new String("vierve_device_KRP").getBytes()).parse(token).getBody();
                 JSONObject obj = new JSONObject(claims.toString());
                 socketHandler.setDefaultKey(obj.getString("vierve_android"));
-                Log.d("KTag","Default JWT Key:"+ socketHandler.getDefaultKey());
-                new LoginActivity.CheckUser().execute();
+                MyLogger.d("KTag","Default JWT Key:"+ socketHandler.getDefaultKey());
+                showProgress(false);
+                if(db_helper_user.getRemember() == true){
+                    JSONObject user_data;
+                    try {
+                        user_data = db_helper_user.getInfo();
+                        user_name = user_data.getString("user_name");
+                        user_password = user_data.getString("user_password");
+                        mUserNameView.setText(user_name);
+                        mPasswordView.setText(user_password);
+                        mRemember.setChecked(true);
+                        attemptLogin();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -340,8 +345,8 @@ public class LoginActivity extends AppCompatActivity  {
                 String token = Jwts.builder().claim("user_name",user_name).claim("user_password",user_password).signWith(SignatureAlgorithm.HS256, k).compact();
 
                 String urlstring = socketHandler.getURL() + "/checkUser";
-                Log.d("KTag",urlstring);
-                Log.d("KTag", "Check User REST API check");
+                MyLogger.d("KTag",urlstring);
+                MyLogger.d("KTag", "Check User REST API check");
                 URL versionUrl = new URL(urlstring);
                 HttpURLConnection myConnection = (HttpURLConnection) versionUrl.openConnection();
                 myConnection.setRequestProperty("user_type", "vierve_android");
@@ -351,10 +356,10 @@ public class LoginActivity extends AppCompatActivity  {
                     InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
                     JsonReader jsonReader = new JsonReader(responseBodyReader);
                     String var = getStringFromInputStream(responseBody);
-                    Log.d("KTag",var);
+                    MyLogger.d("KTag",var);
                     resultJSON = new JSONObject(var);
-                    Log.d("KTag", "Sucsessful http REST API");
-                    Log.d("KTag", "JSON Response Object : " +resultJSON.toString());
+                    MyLogger.d("KTag", "Sucsessful http REST API");
+                    MyLogger.d("KTag", "JSON Response Object : " +resultJSON.toString());
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -363,7 +368,7 @@ public class LoginActivity extends AppCompatActivity  {
                     });
 
                 } else {
-                    Log.d("KTag", Integer.toString(myConnection.getResponseCode()));
+                    MyLogger.d("KTag", Integer.toString(myConnection.getResponseCode()));
                 }
 
             } catch (IOException e) {
@@ -454,7 +459,7 @@ public class LoginActivity extends AppCompatActivity  {
                 JSONObject obj = new JSONObject();
                 try {
                     socketHandler.setUserKey(resultJSON.getString("auth_code"));
-                    Log.d("KTag","User Key Set:"+socketHandler.getUserKey());
+                    MyLogger.d("KTag","User Key Set:"+socketHandler.getUserKey());
                     obj.put("user_id", resultJSON.getString("user_id"));
                     obj.put("user_name", user_name);
                     obj.put("user_password", user_password);
@@ -531,6 +536,7 @@ public class LoginActivity extends AppCompatActivity  {
 
 
     }
+
 
 }
 

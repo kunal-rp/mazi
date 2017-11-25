@@ -131,7 +131,7 @@ public class parking_fragment extends Fragment {
     private void GetParkingData() {
         face_parkinglots = new ArrayList<>();
         hidden_parkinglots = new ArrayList<ArrayList<String>>();
-        Log.d("KTag", "ParkingLots data retrieved for college id : " + selected_college_id);
+        MyLogger.d("KTag", "ParkingLots data retrieved for college id : " + selected_college_id);
         ArrayList<ArrayList<String>> temp = db_helper_data.getAllParkingLotsFromCollege(selected_college_id);
         for (int i = 0; i < temp.size(); i++) {
             ArrayList<String> temp2 = new ArrayList<>();
@@ -160,16 +160,14 @@ public class parking_fragment extends Fragment {
         mCallback.setMarkers(markers,face);
     }
 
-    public void updateSpinnerSelected(String id){
+    public void updateSpinnerSelected(String title){
 
-        int index = face_parkinglots.indexOf(id);
-        Log.d("KTag",id + "|"+Integer.toString(index) + "|"+ hidden_parkinglots.toString());
-        mParkingSpinner.setSelection(index);
+        for(int i = 0; i < hidden_parkinglots.size(); i++){
+            if(hidden_parkinglots.get(i).get(1).equals(title)){
+                MyLogger.d("KTag",title + "|"+Integer.toString(i) + "|"+ hidden_parkinglots.toString());
+                mParkingSpinner.setSelection(i);
+            }
+        }
     }
-
-
-
-
-
 
 }

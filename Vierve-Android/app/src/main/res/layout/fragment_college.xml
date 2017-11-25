@@ -19,6 +19,29 @@
         android:popupTheme="@android:style/ThemeOverlay.Material.Light"
         />
 
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_menu_mylocation"
+        android:layout_below="@+id/collegeMenu"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:id="@+id/currentPosition"
+        android:backgroundTint="@color/colorPrimary"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/collegeMenu"
+        android:id="@+id/college_event"
+        android:text="Example Event"
+        android:textSize="15dp"
+        android:background="@drawable/rounded_textview"
+        android:layout_centerHorizontal="true" />
+
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/requestRideButton"
         android:layout_width="wrap_content"
@@ -29,7 +52,8 @@
         app:fabSize="auto"
         android:onClick="requestRide"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true"
+        android:elevation="0dp"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/requestParkingButton"
@@ -40,7 +64,8 @@
         android:onClick="requestParking"
         android:layout_alignTop="@+id/requestRideButton"
         android:layout_alignParentLeft="true"
-        android:layout_marginStart="32dp" />
+        android:layout_marginStart="32dp"
+        android:elevation="0dp"/>
 
 
 </RelativeLayout>

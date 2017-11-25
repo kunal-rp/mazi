@@ -83,7 +83,7 @@ public class DB_Helper_Data extends SQLiteOpenHelper {
     }
 
     public void addCollege(int id, JSONObject object) throws JSONException {
-        Log.d("KTag", object.toString());
+        MyLogger.d("KTag", object.toString());
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -96,7 +96,7 @@ public class DB_Helper_Data extends SQLiteOpenHelper {
         values.put(COL_COLLEGE_PARK_LIMIT, object.getDouble("college_park_limit"));
 
         db.insert(TABLE_COLLEGE_INFO, null, values);
-        Log.d("KTag", "Add College: "+values.toString());
+        MyLogger.d("KTag", "Add College: "+values.toString());
         db.close();
     }
 
@@ -167,7 +167,7 @@ public class DB_Helper_Data extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String results = "";
         String query = "Select * from `" + TABLE_COLLEGE_INFO + "` where `college_id` = " + id;
-        Log.d("KTag","Query to Local DB : "+ query);
+        MyLogger.d("KTag","Query to Local DB : "+ query);
         Cursor c = db.rawQuery(query, null);
         c.moveToFirst();
         if (c.getString(c.getColumnIndex(COL_COLLEGE_NAME)) != null) {
@@ -190,7 +190,7 @@ public class DB_Helper_Data extends SQLiteOpenHelper {
     }
 
     public void addParkingLot(int id, JSONObject object) throws JSONException {
-        Log.d("KTag", object.toString());
+        MyLogger.d("KTag", object.toString());
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -201,7 +201,7 @@ public class DB_Helper_Data extends SQLiteOpenHelper {
         values.put(COL_PARKINGLOT_COOR_LNG, object.getDouble("coor_lng"));
 
         db.insert(TABLE_PARKINGLOT_INFO, null, values);
-        Log.d("KTag", "Add ParkingLot: "+values.toString());
+        MyLogger.d("KTag", "Add ParkingLot: "+values.toString());
         db.close();
     }
 

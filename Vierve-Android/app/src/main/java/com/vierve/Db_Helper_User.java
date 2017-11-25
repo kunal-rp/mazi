@@ -76,7 +76,7 @@ public class Db_Helper_User extends SQLiteOpenHelper{
     public void setRemember(Boolean value){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        Log.d("KTag","SET Remember "+value);
+        MyLogger.d("KTag","SET Remember "+value);
 
         if(value == true){
             values.put(COL_REMEMBER, "1");
@@ -104,7 +104,7 @@ public class Db_Helper_User extends SQLiteOpenHelper{
             c.close();
 
         }
-        Log.d("KTag","OBJ:"+obj.toString());
+        MyLogger.d("KTag","OBJ:"+obj.toString());
         return obj;
     }
 
@@ -119,7 +119,7 @@ public class Db_Helper_User extends SQLiteOpenHelper{
         clearAllTables();
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
-        Log.d("KTag","SET USER "+object.toString());
+        MyLogger.d("KTag","SET USER "+object.toString());
 
         values.put(COL_USER_ID, object.getString("user_id"));
         values.put(COL_USER_NAME, object.getString("user_name"));
@@ -128,7 +128,7 @@ public class Db_Helper_User extends SQLiteOpenHelper{
         values.put(COL_REMEMBER, object.getInt("remember"));
 
         long result = db.insert(TABLE_USER_INFO, null, values);
-        Log.d("KTag","Insert Results:"+result);
+        MyLogger.d("KTag","Insert Results:"+result);
         getRemember();
         db.close();
 

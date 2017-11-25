@@ -1,6 +1,9 @@
 package com.vierve;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -15,9 +18,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.nio.BufferUnderflowException;
 import java.util.ArrayList;
@@ -45,6 +57,8 @@ public class college_fragment extends Fragment {
     public float lat;
     public float lng;
     private double current_lat, current_lng;
+    private TextView event;
+    private JSONObject eventData;
 
 
     OnHeadlineSelectedListener mCallback;
@@ -53,6 +67,7 @@ public class college_fragment extends Fragment {
     public interface OnHeadlineSelectedListener {
         public void onCollegeSpinnerItemSelected(float lat, float lng,float ride_limit, float park_limit, String college_id);
         public void onPRActionRequest(String type);
+        public void focusCurrentPosition();
     }
 
 
@@ -86,6 +101,29 @@ public class college_fragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
+        event = (TextView) view.findViewById(R.id.college_event);
+        event.setVisibility(View.INVISIBLE);
+
+        event.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(event.getVisibility() == View.VISIBLE){
+                    try {
+                        JSONObject obj = (JSONObject) eventData.get(selected);
+                        Intent intent = new Intent(getContext(), EventDetails.class);
+                        intent.putExtra("html",  obj.get("event_html").toString());
+
+                        startActivity(intent);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }
+        });
+
+
 
         //Sets floating buttons
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.requestRideButton);
@@ -94,13 +132,25 @@ public class college_fragment extends Fragment {
         FloatingActionButton fab2 = (FloatingActionButton) view.findViewById(R.id.requestParkingButton);
         fab2.setImageBitmap(textAsBitmap("PARK", 40, Color.WHITE ));
 
+        ImageButton cp = (ImageButton) view.findViewById(R.id.currentPosition);
+        cp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.focusCurrentPosition();
+            }
+        });
+
         //setup for the two spinners for college and parking lot selection
         mCollegeSpinner = (Spinner) view.findViewById(R.id.collegeMenu);
 
         Bundle bundle = getArguments();
         current_lat = bundle.getDouble("current_lat");
         current_lng = bundle.getDouble("current_lng");
-
+        try {
+            eventData = new JSONObject(bundle.getString("json"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
         mCollegeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -113,6 +163,10 @@ public class college_fragment extends Fragment {
                 Float ride_limit = Float.parseFloat(hidden_college.get(i).get(4));//ride_limit
                 Float park_limit = Float.parseFloat(hidden_college.get(i).get(5));//park_limit
                 mCallback.onCollegeSpinnerItemSelected(lat,lng,ride_limit,park_limit, hidden_college.get(i).get(0));
+
+                updateEvent();
+
+
             }
 
             @Override
@@ -140,7 +194,7 @@ public class college_fragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.d("KTag","College Fragment Detach");
+        MyLogger.d("KTag","College Fragment Detach");
         mCallback = null;
 
     }
@@ -181,14 +235,15 @@ public class college_fragment extends Fragment {
         protected Void doInBackground(Object... params) {
             db_helper_data = new DB_Helper_Data(getActivity(), null);
 
-            Log.d("KTag","Location CF:"+current_lat + ","+current_lng);
+            MyLogger.d("KTag","Location CF:"+current_lat + ","+current_lng);
             ArrayList<ArrayList<String>> temp= db_helper_data.getAllCollegesInformation();
             for(int i = 0; i < temp.size(); i++){
                 ArrayList<String> temp2 = new ArrayList<>();
                 temp2.add (temp.get(i).get(0));//id
                 temp2.add (temp.get(i).get(1));//name
                 temp2.add (temp.get(i).get(2));//lat
-                temp2.add (temp.get(i).get(3));//lng
+                temp2.
+                        add (temp.get(i).get(3));//lng
                 temp2.add (temp.get(i).get(4));//ride_limit
                 temp2.add (temp.get(i).get(5));//park_limit
 
@@ -226,6 +281,25 @@ public class college_fragment extends Fragment {
 
             PopulateSpinner(mCollegeSpinner,hidden_college);
 
+        }
+    }
+
+    public void updateEvent()  {
+        try {
+
+            event.setVisibility(View.VISIBLE);
+            JSONObject selected_event = (JSONObject) eventData.get(selected);
+            event.setText(selected_event.getString("event_title"));
+            // Animation
+            Animation animBlink = AnimationUtils.loadAnimation(getContext(),
+                    R.anim.blink);
+
+            event.setAnimation(animBlink);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            event.setVisibility(View.INVISIBLE);
+            event.clearAnimation();
         }
     }
 

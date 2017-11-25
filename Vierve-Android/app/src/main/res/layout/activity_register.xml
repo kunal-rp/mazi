@@ -27,7 +27,9 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:id="@+id/main_view">
 
         <LinearLayout
             android:id="@+id/main_form"
@@ -37,11 +39,14 @@
 
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="Enter a Username:"
-                android:textSize="20dp"/>
+                android:textSize="20dp"
+                />
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"
                 >
                 <EditText
                     android:id="@+id/username_view"
@@ -58,6 +63,8 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"
                 >
 
 
@@ -66,7 +73,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Email"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:inputType="textEmailAddress"/>
 
             </android.support.design.widget.TextInputLayout>
             <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -76,6 +84,8 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"
                 >
                 <EditText
                     android:id="@+id/password_view"
@@ -92,6 +102,8 @@
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"
                 >
                 <EditText
                     android:id="@+id/confirm_password_view"
@@ -102,6 +114,37 @@
                     android:inputType="textPassword"/>
 
             </android.support.design.widget.TextInputLayout>
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Referral User:"
+                android:textColor="@color/colorAccent"
+                android:textSize="20dp"/>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Username that recommended Vierve to you"
+                android:textColor="@color/colorAccent"
+                android:textStyle="italic"
+                android:textSize="15dp"/>
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="10dp"
+                >
+                <EditText
+                    android:id="@+id/promo_user_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Leave empty if needed"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <CheckBox
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="I Agree to the Privacy Policy(www.vierve.com/privacy)"
+                android:id="@+id/privacy"/>
+
             <Button
                 android:id="@+id/register_btn"
                 style="?android:textAppearanceSmall"
@@ -116,7 +159,7 @@
     </ScrollView>
 
     <ProgressBar
-        android:id="@+id/progress_form"
+        android:id="@+id/progress_view"
         style="?android:attr/progressBarStyleLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
