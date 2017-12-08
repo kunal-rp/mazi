@@ -9,6 +9,7 @@
   "author": "KRP",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.16.2",
     "jsonwebtoken": "^8.0.1"
   }
 }

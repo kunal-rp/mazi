@@ -1,0 +1,24 @@
+{
+  "name": "vierve",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": " node server.js"
+  },
+  "author": "KRP",
+  "license": "ISC",
+  "description": "vierve simple server for heroku",
+  "dependencies": {
+    "bcrypt": "^1.0.3",
+    "express": "^4.15.4",
+    "jsonwebtoken": "^8.0.1",
+    "mailgun-email-validation": "0.0.3",
+    "mysql": "^2.14.1",
+    "nodemailer": "^4.1.0",
+    "socket.io": "^2.0.3"
+  },
+  "engines": {
+    "node": "6.9.5"
+  }
+}

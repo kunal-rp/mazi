@@ -1,0 +1,54 @@
+
+
+<DOCTYPE! html>
+    <html>
+
+        <head>
+        </head>
+        <body>
+            <button onclick="runTest()">Run Test</button>
+            <div id="area">
+            </div>
+            <script>
+                var max_calls = 100;
+                var seperate_time = 1;
+                var i = 0;
+                var j = 0;
+                function runTest(){
+                  var start = Date.now();
+                  var end;
+                  var interval = setInterval(function(){
+
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.onreadystatechange = function() {
+                    if(this.readyState == 4 && this.status == 200) {
+                        console.log("Recieved #"+j)
+                        document.getElementById('area').innerHTML += " --- "+j +"|"+xmlHttp.responseText+"<br>";
+                        j++;
+                        if(j >= max_calls) {
+                          clearInterval(interval);
+                          end = Date.now();
+                          document.getElementById('area').innerHTML = end - start+"<br>"+document.getElementById('area').innerHTML;
+                        }
+                      }
+                      if(this.readyState == 2){
+                        console.log("Sent #"+j);
+                      }
+                      if(this.readyState == 3){
+                        console.log("Loading #"+j);
+                      }
+
+                    };
+                    document.getElementById('area').innerHTML += i +" | Request Sent<br>";
+                    xmlHttp.open( "GET", "http://localhost:3000/update?t="+i, true ); // false for synchronous request
+                    xmlHttp.send( null );
+                    i++;
+                  }, seperate_time);
+
+
+
+                }
+            </script>
+
+        </body>
+    </html>
