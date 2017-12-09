@@ -5,16 +5,25 @@
 
         <head>
         </head>
+
         <body>
-            <button onclick="runTest()">Run Test</button>
-            <div id="area">
-            </div>
+          <div>
+              <button onclick="runTest()">Run Test</button>
+            <button onclick="longPolling()">LongPolling</button>
+          </div>
+          <div>
+            <div id = "mysqlarea" style="width: 50%; height: 100%; background-color: green; float:left;"/>
+            <div id = "longpollingarea" style="width: 50%; height: 100%; background-color: blue; float:right;"/>
+          </div>
+
+
             <script>
-                var max_calls = 100;
-                var seperate_time = 1;
+
                 var i = 0;
                 var j = 0;
                 function runTest(){
+                  var max_calls = 100;
+                  var seperate_time = 1;
                   var start = Date.now();
                   var end;
                   var interval = setInterval(function(){
@@ -23,12 +32,12 @@
                     xmlHttp.onreadystatechange = function() {
                     if(this.readyState == 4 && this.status == 200) {
                         console.log("Recieved #"+j)
-                        document.getElementById('area').innerHTML += " --- "+j +"|"+xmlHttp.responseText+"<br>";
+                        document.getElementById('mysqlarea').innerHTML += " --- "+j +"|"+xmlHttp.responseText+"<br>";
                         j++;
                         if(j >= max_calls) {
                           clearInterval(interval);
                           end = Date.now();
-                          document.getElementById('area').innerHTML = end - start+"<br>"+document.getElementById('area').innerHTML;
+                          document.getElementById('mysqlarea').innerHTML = end - start+"<br>"+document.getElementById('mysqlarea').innerHTML;
                         }
                       }
                       if(this.readyState == 2){
@@ -39,15 +48,29 @@
                       }
 
                     };
-                    document.getElementById('area').innerHTML += i +" | Request Sent<br>";
+                    document.getElementById('mysqlarea').innerHTML += i +" | Request Sent<br>";
                     xmlHttp.open( "GET", "http://localhost:3000/update?t="+i, true ); // false for synchronous request
                     xmlHttp.send( null );
                     i++;
                   }, seperate_time);
+                }
 
+                function longPolling(){
+                  //longpollingarea
 
+var               xmlHttp = new XMLHttpRequest();
+                  xmlHttp.onreadystatechange = function() {
+                  if(this.readyState == 4 && this.status == 200) {
+                    document.getElementById('longpollingarea').innerHTML += "New Token :"+xmlHttp.responseText + "<br>";
+                    }
+                  };
+                  xmlHttp.open( "GET", "http://localhost:3000/lpcode", true ); // false for synchronous request
+                  xmlHttp.send( null);
+                  console.log("LP Req Sent")
 
                 }
+
+
             </script>
 
         </body>

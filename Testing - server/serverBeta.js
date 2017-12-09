@@ -30,18 +30,19 @@ app.use(express.static('public'));
 
 var table_server = "server"
 var table_gen = "user_gen"
+var table_college_info = "college_info"
+var table_parkinglot_info = "parkinglot_info"
 
 //generates the custom keys for jwt authentication
 function generateCodes(callback){
-    generateCustomKey(20,function(v_a){
-        generateCustomKey(20,function(v_i){
-            generateCustomKey(20,function(v_w){
+    generateCustomKey(function(v_a){
+        generateCustomKey(function(v_i){
+            generateCustomKey(function(v_w){
             	var codes =
             		{android_key:v_a,
                     ios_key:v_i,
                     web_key:v_w};
-            	updateServerinfo(codes,function(){callback(codes)})
-
+            	//updateServerinfo(codes,function(){callback(codes)})
             })
         })
     })
@@ -52,19 +53,44 @@ generateCodes(function(data){
     codes = data;
 });
 
+
+
+app.get('/',function(req,res){
+  res.sendFile(path.join(__dirname, '/public', 'index.html'));
+})
+/*
 //testing the 'ws' library
 //still have to test the concurrent websocket connection limits
 app.get('/ws',function(req,res){
   res.sendFile(path.join(__dirname, '/public', 'ws.html'));
 });
+*/
+
+
 
 //testing the mysql concurrent data
 app.get('/test',function(req,res){
   res.sendFile(path.join(__dirname, '/public', 'testing.html'));
 });
+
+//testing the mysql concurrent data
+app.get('/data',function(req,res){
+
+  getData(function(code, collegeData,parkinglotData){
+    res.send(JSON.stringify({code:code, cd : collegeData,pd:parkinglotData},null,'\n'));
+  });
+});
+
 app.get('/codes',function(req,res){
    res.json(codes)
 });
+
+var responses = []
+
+app.get('/lpcode',function(req,res){
+    responses.push(res)
+    console.log(responses.toString())
+})
 
 app.get('/update',function(req, res){
   updateUserAuth('9D8FD0',function(error,token){
@@ -101,7 +127,7 @@ function updateUserAuth(user_id, callback){
 //updates the 'auth_token' value of the user with a newly generated tokens
 //call
 
-  generateCustomKey(20,function(token){
+  generateCustomKey(function(token){
     var update_user_auth_token = "Update `"+table_gen + "` set `auth_token` = '"+token+"' where `user_id`='"+user_id+"'"
     connectionPool.query(update_user_auth_token,function(update_uat_error){
 
@@ -120,22 +146,81 @@ function updateUserAuth(user_id, callback){
 
 }
 
-function generateCustomKey(size,callback){
+function generateCustomKey(callback){
 
     var max = Number.MAX_SAFE_INTEGER
     var min = 0
-
-    setTimeout(function(){
-      callback(Math.random() * (max - min) + min)
-    }, 30);
-
-
-    //callback(Math.random() * (max - min) + min)
-
-
-
+    callback(Math.random() * (max - min) + min)
 }
 
+
+function getData(callback){
+  var initial_data = {};
+  var college_data;
+  var parkinglot_data;
+  var code;
+  var query_getCollegeData = "Select * From "+ table_college_info;
+  connectionPool.query( query_getCollegeData , function(err,results) {
+      if(err){
+          console.log("ERROR | checkVersion |  sql query |"+err+"|"+query)
+
+      }
+      else{
+          var final = {};
+          var array = [];
+          for(i=0;i < results.length; i++){
+              array.push(results[i]['college_id']);
+              final[results[i]['college_id']] =
+              {
+                  college_name : results[i]['college_name'],
+                  college_version: results[i]['college_version'],
+                  college_coor_lat : results[i]['college_coor_lat'],
+                  college_coor_lng : results[i]['college_coor_lng'],
+                  college_ride_limit : results[i]['ride_limit'],
+                  college_park_limit : results[i]['park_limit']
+              };
+          }
+          final['ids'] = array;
+          initial_data['college_data'] = final;
+          college_data = final
+
+          var query_getParkingdata = "Select * from "+table_parkinglot_info;
+          connectionPool.query(query_getParkingdata, function(err2,results2){
+              if(err2){
+                  console.log("ERROR | checkVersion |  sql query |"+err2+"|"+query2)
+              }
+              else{
+                  var final2 = {};
+                  var array2 = [];
+                  for(i=0;i < results2.length; i++){
+                      array2.push(results2[i]['parkinglot_id']);
+
+                      var ci = results2[i]['college_id'];
+                      var pi = parseInt(results2[i]['parkinglot_id']);
+
+                      var temp2 = {};
+                      temp2 =
+                      {parkinglot_name : results2[i]['parkinglot_name'],
+                      coor_lat : results2[i]['coor_lat'],
+                      coor_lng : results2[i]['coor_lng'],
+                      college_id : results2[i]['college_id']};
+                      final2[pi] = temp2;
+                  }
+                  final2['ids'] = array2;
+                  initial_data['parking_data'] = final2;
+                  parkinglot_data = final2;
+                  initial_data['code'] = 2;
+                  code = 2;
+                  callback(code, college_data,parkinglot_data)
+              }
+          });
+      }
+  });
+}
+
+
+
+/*
 var wss = new WebSocketServer({server: server})
 console.log("websocket server created")
 
@@ -151,3 +236,4 @@ wss.on("connection", function(ws) {
     clearInterval(id)
   })
 })
+*/
