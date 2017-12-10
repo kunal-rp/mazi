@@ -21,15 +21,17 @@
 <body>
 
   <button onclick="calcRoute({lat:34.057112000,lng:-117.8165950000},{lat:parkinglot_data['2001']['coor_lat'],lng:parkinglot_data['2001']['coor_lng']},[{location:{lat:34.058134000,lng:-117.8264490000},stopover:true}],'blue')">Route 1</button>
-  <button onclick="calcRoute({lat:34.050450000,lng:-117.818698000},{lat:parkinglot_data['2002']['coor_lat'],lng:parkinglot_data['2002']['coor_lng']},[{location:{lat:34.059539000,lng:-117.82401500},stopover:true}],'red')">Route 2</button>
+  <button onclick="calcRoute({lat:34.050450000,lng:-117.818698000},{lat:parkinglot_data['2006']['coor_lat'],lng:parkinglot_data['2006']['coor_lng']},[{location:{lat:34.059539000,lng:-117.82401500},stopover:true}],'red')">Route 2</button>
 
   <div id="map"/>
   <script>
   var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
 
 
-  var directionsService ;
+  var directionsService
   var map;
+  var current ;
+  var polylines = []
 
   var college_data = {};
   var parking_data = {};
@@ -44,6 +46,7 @@
       }
       map = new google.maps.Map(document.getElementById('map'),mapOptions);
       directionsDisplay.setMap(map);
+
     })
 
   }
@@ -70,9 +73,6 @@
 
   function calcRoute(origin,des,waypoints,color) {
     var directionsDisplay = new google.maps.DirectionsRenderer({
-      polylineOptions: {
-       strokeColor: color
-     },
       suppressMarkers: true,
       suppressInfoWindows: false
     });
@@ -86,12 +86,103 @@
       travelMode:google.maps.TravelMode.DRIVING
     }
     directionsService.route(request, function(response, status) {
-      if (status == 'OK') {
-        directionsDisplay.setDirections(response);
+      if (status == google.maps.DirectionsStatus.OK) {
+        //directionsDisplay.setDirections(response);
+        if(current != null){
+          current = null
+          fadeOut(polylines,1000,function(){
+            for(i = 0; i < polylines.length; i++){
+              polylines[i].setMap(null)
+            }
+            polylines = []
+            customDirectionsRenderer(response);
+
+          })
+        }
+        else{
+          customDirectionsRenderer(response);
+        }
+
       }
     });
+  }
+
+  function customDirectionsRenderer(response) {
+    var bounds = new google.maps.LatLngBounds();
+    var legs = response.routes[0].legs;
+    for (i = 0; i < legs.length; i++) {
+      current = new google.maps.Polyline({
+        map: map,
+        strokeColor: "#3aa1dd",
+        path: [],
+        strokeOpacity:0,
+        tag:"The Beginning"
+
+      })
+      polylines.push(current)
+      if (i%2 == 1 ) {
+        current.setOptions({
+          strokeColor: "#2f4858",
+          tag:"the end"
+        });
+      }
+
+      var steps = legs[i].steps;
+      for (j = 0; j < steps.length; j++) {
+        var nextSegment = steps[j].path;
+        for (k = 0; k < nextSegment.length; k++) {
+          current.getPath().push(nextSegment[k]);
+          bounds.extend(nextSegment[k]);
+        }
+      }
+    }
+    current.setMap(map)
+    map.fitBounds(bounds);
+    fadeIn(polylines,1000,function(){ })
+
+  }
 
 
+  function fadeIn(line, fadeDuration,callback){
+      var targetOpacity = 0.0,
+      startTime = (new Date()).getTime();
+      function step(){
+        targetOpacity = targetOpacity + .1;
+
+        for(i = 0; i < line.length; i++){
+          line[i].setOptions({
+            strokeOpacity: targetOpacity
+          });
+        }
+        if(targetOpacity <1.1){
+          setTimeout(step,fadeDuration/10)
+        }
+        else{
+          callback()
+        }
+      }
+      step()
+  }
+
+  function fadeOut(line, fadeDuration,callback){
+      var targetOpacity = 1.0,
+      startTime = (new Date()).getTime();
+      function step(){
+        targetOpacity = targetOpacity - .1;
+        
+        for(i = 0; i < line.length; i++){
+          line[i].setOptions({
+            strokeOpacity: targetOpacity
+          });
+        }
+        if(targetOpacity >0){
+          setTimeout(step,fadeDuration/10)
+        }
+        else{
+          callback()
+        }
+      }
+      step()
   }
 
   function getDirections(){
