@@ -20,22 +20,35 @@
 </head>
 <body>
 
+  <button onclick="calcRoute({lat:34.057112000,lng:-117.8165950000},{lat:parkinglot_data['2001']['coor_lat'],lng:parkinglot_data['2001']['coor_lng']},[{location:{lat:34.058134000,lng:-117.8264490000},stopover:true}],'blue')">Route 1</button>
+  <button onclick="calcRoute({lat:34.050450000,lng:-117.818698000},{lat:parkinglot_data['2002']['coor_lat'],lng:parkinglot_data['2002']['coor_lng']},[{location:{lat:34.059539000,lng:-117.82401500},stopover:true}],'red')">Route 2</button>
 
   <div id="map"/>
   <script>
+  var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
+
+
+  var directionsService ;
   var map;
-  var markers = [];
+
   var college_data = {};
   var parking_data = {};
 
-  function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: -34.397, lng: 150.644},
-      zoom: 8
-    });
+  function initMap(){
+    loadData(function(){
+      directionsService = new google.maps.DirectionsService()
+      var directionsDisplay = new google.maps.DirectionsRenderer()
+      var mapOptions = {
+        zoom: 14,
+        center: {lat:college_data['100010']['college_coor_lat'] , lng: college_data['100010']['college_coor_lng']}
+      }
+      map = new google.maps.Map(document.getElementById('map'),mapOptions);
+      directionsDisplay.setMap(map);
+    })
+
   }
 
-  function loadData() {
+  function loadData(callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', "http://localhost:3000/data", true);
     xhr.send();
@@ -47,87 +60,55 @@
         if(response.code == 2){
           college_data = response.cd;
           parkinglot_data = response.pd;
+          console.log(parkinglot_data)
+          callback()
         }
 
       }
     }
   }
 
-  function addMarker(myLatLng,color,title,id){
-    var marker = new google.maps.Marker({
-      position: myLatLng,
-      map: map,
-      title: title,
-      color : color,
-      draggable:true,
+  function calcRoute(origin,des,waypoints,color) {
+    var directionsDisplay = new google.maps.DirectionsRenderer({
+      polylineOptions: {
+       strokeColor: color
+     },
+      suppressMarkers: true,
+      suppressInfoWindows: false
     });
-    markers.push(marker)
-
-    marker.set("parkinglot_id",id);
-
-    google.maps.event.addListener(marker, 'dragend', function(marker){
-
-      console.log(marker.latLng.lat() + ","+marker.latLng.lng())
-      var parkinglot_id = id;
-      console.log(parkinglot_id)
-      document.getElementById(parkinglot_id+"lat").value = marker.latLng.lat() ;
-      document.getElementById(parkinglot_id+"lng").value = marker.latLng.lng() ;
+    directionsDisplay.setMap(map);
 
 
-    });
-  }
-
-  function addCircle(myLatLng,title,radius,color){
-    var cityCircle = new google.maps.Circle({
-      strokeColor: color,
-      strokeWeight: 2,
-      map: map,
-      center: myLatLng,
-      title:title,
-      radius: radius *1609.34
-    });
-  }
-
-  function updateCollege(){
-    var newDiv = document.createElement('div');
-    var selectHTML ="";
-
-    selectHTML = "<select id=\"select_college\" onchange=\" updateParkingLot_display_data()\">";
-    var array = college_data['ids'];
-    for(i = 0; i < array.length; i++){
-      var temp = array[i];
-      selectHTML += "<option  value ='"+temp+"'>"+college_data[temp]["college_name"]+" </option>";
+    var request = {
+      origin: origin,
+      destination: des,
+      waypoints:waypoints,
+      travelMode:google.maps.TravelMode.DRIVING
     }
+    directionsService.route(request, function(response, status) {
+      if (status == 'OK') {
+        directionsDisplay.setDirections(response);
+      }
+    });
 
 
-    selectHTML += "</select>";
-    document.getElementById('college_area').innerHTML = selectHTML;
-    updateParkingLot_display_data();
   }
 
-  function updateParkingLot_display_data(){
-    current_college_id = document.getElementById("select_college").value;
-    map.panTo({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']})
-    current_college_id = document.getElementById("select_college").value;
-    addCircle({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'ride limit',college_data[current_college_id]['college_park_limit'],'#h62lb8')
-    addCircle({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'park limit',college_data[current_college_id]['college_ride_limit'],'#h28ak8')
-    var newDiv = document.createElement('div');
-    var selectHTML ="";
-
-    addMarker({lat:college_data[current_college_id]['college_coor_lat'],lng:college_data[current_college_id]['college_coor_lng']},'#001eff',college_data[current_college_id]["college_name"],current_college_id)
-
-    var array = parkinglot_data['ids'];
-    for(i = 0; i < array.length; i++){
-      var temp = array[i];
-      if(parkinglot_data[temp]['college_id'] == current_college_id){
-        selectHTML += "<h4>"+parkinglot_data[temp]["parkinglot_name"]+"|"+temp+"</h4><p>" + "Lat : <input id=\""+temp+"lat\" type=\"text\" value="+ parkinglot_data[temp]["coor_lat"]+" />" + "Lng : <input id=\""+temp+"lng\" type=\"text\" value="+ parkinglot_data[temp]["coor_lng"]+" /> </p>";
-
-        addMarker({lat : parkinglot_data[temp]["coor_lat"],lng : parkinglot_data[temp]["coor_lng"]},'#FF0000',parkinglot_data[temp]["parkinglot_name"],temp)
-      } 
+  function getDirections(){
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', "https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key="+api_key, true);
+    xhr.send();
+    xhr.onreadystatechange = processRequest;
+    function processRequest(e) {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        var response = JSON.parse(xhr.responseText);
+        console.log(response)
+      }
     }
-
-    document.getElementById('parkinglot_area').innerHTML = selectHTML;
   }
+
+  //https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=
+
 
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"

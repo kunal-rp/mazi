@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes fo
 var path = require('path');
 var jwt = require('jsonwebtoken')
 var WebSocketServer = require("ws").Server
+var cors = require('cors');
 
 //Ensures server continues to run if any exception occurs. Will have to come up with a better system in the future
 process.on('uncaughtException', function (err) {
@@ -11,6 +12,8 @@ process.on('uncaughtException', function (err) {
 });
 var port = 3000
 app = express();
+
+
 
 var server = app.listen(port,'0.0.0.0');
 
@@ -54,8 +57,11 @@ generateCodes(function(data){
 });
 
 
+//app.use(cors({origin: 'http://localhost:3000'}));
 
-app.get('/',function(req,res){
+
+app.get('/',function(req,res, next){
+
   res.sendFile(path.join(__dirname, '/public', 'index.html'));
 })
 /*
@@ -76,7 +82,7 @@ app.get('/test',function(req,res){
 //testing the mysql concurrent data
 app.get('/data',function(req,res){
 
-  getData(function(code, collegeData,parkinglotData){
+  getCollegeParkingData(function(code, collegeData,parkinglotData){
     res.send(JSON.stringify({code:code, cd : collegeData,pd:parkinglotData},null,'\n'));
   });
 });
@@ -154,7 +160,7 @@ function generateCustomKey(callback){
 }
 
 
-function getData(callback){
+function getCollegeParkingData(callback){
   var initial_data = {};
   var college_data;
   var parkinglot_data;
@@ -216,6 +222,10 @@ function getData(callback){
           });
       }
   });
+}
+
+function getSampleData(){
+  funtion
 }
 
 
