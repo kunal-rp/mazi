@@ -235,9 +235,7 @@ function getCollegeParkingData(callback){
   });
 }
 
-function getSampleData(){
-  funtion
-}
+
 
 function getPropData(callback){
   var final = {}
