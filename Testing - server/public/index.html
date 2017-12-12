@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
+<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
+
   <title>Vierve</title>
   <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
@@ -163,12 +165,12 @@
 
         <div id="social" >
           <div class="block" >
-            <a href="https://www.facebook.com/vierveapp" style="height:100%;width:100%">
+            <a href="http://www.facebook.com/vierveapp" style="height:100%;width:100%">
               <img id="gpb" src="FB.png"/>
             </a>
           </div>
           <div class="block" >
-            <a href="https://www.twitter.com/vierveapp" style="height:100%;width:100%;">
+            <a href="http://www.twitter.com/vierveapp" style="height:100%;width:100%;">
               <img id="gpb" src="Twitter.png"/>
             </a>
           </div>
@@ -182,7 +184,7 @@
     </div>
     <div id="second">
       <div id="mapTitle">
-        <h3>Recent Matches Made:</h3>
+        <h3>Stats & Recent Matches Made[During BETA]:</h3>
       </div>
       <div id="map-container">
         <div id="map"></div>
@@ -236,6 +238,7 @@
     var propData = []
     var index = 0;
     var responses = [];
+    var cycle;
 
     function initMap(){
       loadCollegeData(
@@ -257,8 +260,22 @@
           )
         }
       )
-
     }
+
+    window.addEventListener("focus", function(event) {
+      startCycle(timePerEx)
+    }, false);
+
+    window.addEventListener("blur", function(event) {
+      message.close()
+      if(current != null){
+        current = null
+        fadeOut(polylines,1000,function(){
+          polylines=[]
+          clearInterval(cycle)
+        })
+      }
+    }, false);
 
     function loadPropData(callback) {
       var xhr = new XMLHttpRequest();
@@ -295,7 +312,7 @@
 
     function loadCollegeData(callback){
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', "http://localhost:3000/data", true);
+      xhr.open('GET', "http://server.vierve.com/data", true);
       xhr.send();
       xhr.onreadystatechange = processRequest;
       function processRequest(e) {
@@ -313,359 +330,362 @@
 
     function startCycle(time){
       calcRoute(0,propData[0].origin,propData[0].des,propData[0].waypoints,propData[0].time_saved)
-      setInterval(function(){
-      index++
-      calcRoute(index,propData[index].origin,propData[index].des,propData[index].waypoints,propData[index].time_saved)
-      if(index == propData.length-1){
-      index = 0
+
+      cycle = setInterval(function(){
+        index++
+        calcRoute(index,propData[index].origin,propData[index].des,propData[index].waypoints,propData[index].time_saved)
+        if(index == propData.length-1){
+          index = 0
+        }
+      },time)
+
+
+
+
     }
-  },time)
-  
 
-
-}
-
-function calcRoute(index,origin,des,waypoints,ts) {
-  var directionsDisplay = new google.maps.DirectionsRenderer({
-    suppressMarkers: true,
-    suppressInfoWindows: false
-  });
-  directionsDisplay.setMap(map);
-
-
-  var request = {
-    origin: origin,
-    destination: des,
-    waypoints: waypoints,
-    travelMode:google.maps.TravelMode.DRIVING
-  }
-  if(responses[index] == undefined){
-    directionsService.route(request, function(response, status) {
-      if (status == google.maps.DirectionsStatus.OK) {
-        responses[index] = response
-        //directionsDisplay.setDirections(response);
-        if(current != null){
-          current = null
-          fadeOut(polylines,1000,function(){
-            customDirectionsRenderer(origin, des, response,ts);
-          })
-        }
-        else{
-          customDirectionsRenderer(origin, des, response,ts);
-        }
-      }
-    });
-  }
-  else{
-
-    fadeOut(polylines,1000,function(){
-      customDirectionsRenderer(origin, des, responses[index],ts);
-    })
-  }
-
-}
-
-
-
-function customDirectionsRenderer(origin , des, response,ts) {
-  polylines = []
-  var polylineLength = 0
-  var bounds = new google.maps.LatLngBounds();
-  var legs = response.routes[0].legs;
-  for (i = 0; i < legs.length; i++) {
-    current = new google.maps.Polyline({
-      map: map,
-      strokeColor: colorAccent,
-      path: [],
-      strokeOpacity:0
-
-    })
-
-    polylines.push(current)
-    if (i%2 == 1 ) {
-      current.setOptions({
-        strokeColor: colorPrim
-
+    function calcRoute(index,origin,des,waypoints,ts) {
+      var directionsDisplay = new google.maps.DirectionsRenderer({
+        suppressMarkers: true,
+        suppressInfoWindows: false
       });
-    }
+      directionsDisplay.setMap(map);
 
-    var steps = legs[i].steps;
-    for (j = 0; j < steps.length; j++) {
-      var nextSegment = steps[j].path;
-      for (k = 0; k < nextSegment.length; k++) {
-        current.getPath().push(nextSegment[k]);
-        bounds.extend(nextSegment[k]);
+
+      var request = {
+        origin: origin,
+        destination: des,
+        waypoints: waypoints,
+        travelMode:google.maps.TravelMode.DRIVING
       }
-    }
-    polylineLength += google.maps.geometry.spherical.computeLength(current.getPath().getArray())
-  }
-  current.setMap(map)
-  //map.fitBounds(bounds)
-  map.panTo(bounds.getCenter(), 13);
-  fadeIn(polylines,1000,function(){
-
-    message = null
-    message = new google.maps.InfoWindow({
-      content: "Distance Saved: "+Math.round(polylineLength * 100) / 100+" meters <br> Time Saved : "+ts+" minutes"});
-      message.open(map)
-      message.setPosition(origin);
-
-    })
-
-
-
-  }
-
-
-  function fadeIn(line, fadeDuration,callback){
-    var parts = 100;
-    var targetOpacity = 0.0,
-    startTime = (new Date()).getTime();
-    function step(){
-      targetOpacity = targetOpacity + (1/parts);
-      for(i = 0; i < line.length; i++){
-        line[i].setOptions({
-          strokeOpacity: targetOpacity
+      if(responses[index] == undefined){
+        directionsService.route(request, function(response, status) {
+          if (status == google.maps.DirectionsStatus.OK) {
+            responses[index] = response
+            //directionsDisplay.setDirections(response);
+            if(current != null){
+              current = null
+              fadeOut(polylines,1000,function(){
+                customDirectionsRenderer(origin, des, response,ts);
+              })
+            }
+            else{
+              customDirectionsRenderer(origin, des, response,ts);
+            }
+          }
         });
       }
-      if(targetOpacity <=1){
-        setTimeout(step,fadeDuration/parts)
-      }
       else{
-        callback()
+
+        fadeOut(polylines,1000,function(){
+          customDirectionsRenderer(origin, des, responses[index],ts);
+        })
       }
+
     }
-    step()
-  }
 
-  function fadeOut(line, fadeDuration,callback){
-    message.close()
-    var parts = 100;
-    var targetOpacity = 1.0,
-    startTime = (new Date()).getTime();
 
-    function step(){
-      targetOpacity = targetOpacity - (1/parts);
 
-      for(i = 0; i < line.length; i++){
-        line[i].setOptions({
-          strokeOpacity: targetOpacity
-        });
+    function customDirectionsRenderer(origin , des, response,ts) {
+      polylines = []
+      message = null
+      var polylineLength = 0
+      var bounds = new google.maps.LatLngBounds();
+      var legs = response.routes[0].legs;
+      for (i = 0; i < legs.length; i++) {
+        current = new google.maps.Polyline({
+          map: map,
+          strokeColor: colorAccent,
+          path: [],
+          strokeOpacity:0
+
+        })
+
+        polylines.push(current)
+        if (i%2 == 1 ) {
+          current.setOptions({
+            strokeColor: colorPrim
+
+          });
+        }
+
+        var steps = legs[i].steps;
+        for (j = 0; j < steps.length; j++) {
+          var nextSegment = steps[j].path;
+          for (k = 0; k < nextSegment.length; k++) {
+            current.getPath().push(nextSegment[k]);
+            bounds.extend(nextSegment[k]);
+          }
+        }
+        polylineLength += google.maps.geometry.spherical.computeLength(current.getPath().getArray())
       }
-      if(targetOpacity >0){
-        setTimeout(step,fadeDuration/parts)
+      current.setMap(map)
+      //map.fitBounds(bounds)
+      map.panTo(bounds.getCenter(), 13);
+      fadeIn(polylines,1000,function(){
+
+        message = null
+        message = new google.maps.InfoWindow({
+          content: "Distance Saved: "+Math.round(polylineLength * 100) / 100+" meters <br> Time Saved : "+ts+" minutes"});
+          message.open(map)
+          message.setPosition(origin);
+
+        })
+
+
+
       }
-      else{
-        for(i = 0; i < polylines.length; i++){
-          polylines[i].setMap(null)
+
+
+      function fadeIn(line, fadeDuration,callback){
+        var parts = 100;
+        var targetOpacity = 0.0,
+        startTime = (new Date()).getTime();
+        function step(){
+          targetOpacity = targetOpacity + (1/parts);
+          for(i = 0; i < line.length; i++){
+            line[i].setOptions({
+              strokeOpacity: targetOpacity
+            });
+          }
+          if(targetOpacity <=1){
+            setTimeout(step,fadeDuration/parts)
+          }
+          else{
+            callback()
+          }
         }
-        callback()
+        step()
       }
-    }
-    step()
-  }
+
+      function fadeOut(line, fadeDuration,callback){
+        message.close()
+        var parts = 100;
+        var targetOpacity = 1.0,
+        startTime = (new Date()).getTime();
+
+        function step(){
+          targetOpacity = targetOpacity - (1/parts);
+
+          for(i = 0; i < line.length; i++){
+            line[i].setOptions({
+              strokeOpacity: targetOpacity
+            });
+          }
+          if(targetOpacity >0){
+            setTimeout(step,fadeDuration/parts)
+          }
+          else{
+            for(i = 0; i < polylines.length; i++){
+              polylines[i].setMap(null)
+            }
+            callback()
+          }
+        }
+        step()
+      }
 
 
-  var style =
-  [
-    {
-      "elementType": "geometry",
-      "stylers": [
+      var style =
+      [
         {
-          "color": "#212121"
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#212121"
+            }
+          ]
+        },
+        {
+          "elementType": "labels.icon",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#757575"
+            }
+          ]
+        },
+        {
+          "elementType": "labels.text.stroke",
+          "stylers": [
+            {
+              "color": "#212121"
+            }
+          ]
+        },
+        {
+          "featureType": "administrative",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#757575"
+            }
+          ]
+        },
+        {
+          "featureType": "administrative.country",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#9e9e9e"
+            }
+          ]
+        },
+        {
+          "featureType": "administrative.locality",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#bdbdbd"
+            }
+          ]
+        },
+        {
+          "featureType": "poi",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#757575"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.business",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#181818"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "labels.text",
+          "stylers": [
+            {
+              "visibility": "off"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#616161"
+            }
+          ]
+        },
+        {
+          "featureType": "poi.park",
+          "elementType": "labels.text.stroke",
+          "stylers": [
+            {
+              "color": "#1b1b1b"
+            }
+          ]
+        },
+        {
+          "featureType": "road",
+          "elementType": "geometry.fill",
+          "stylers": [
+            {
+              "color": "#2c2c2c"
+            }
+          ]
+        },
+        {
+          "featureType": "road",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#8a8a8a"
+            }
+          ]
+        },
+        {
+          "featureType": "road.arterial",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#373737"
+            }
+          ]
+        },
+        {
+          "featureType": "road.highway",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#3c3c3c"
+            }
+          ]
+        },
+        {
+          "featureType": "road.highway.controlled_access",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#4e4e4e"
+            }
+          ]
+        },
+        {
+          "featureType": "road.local",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#616161"
+            }
+          ]
+        },
+        {
+          "featureType": "transit",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#757575"
+            }
+          ]
+        },
+        {
+          "featureType": "water",
+          "elementType": "geometry",
+          "stylers": [
+            {
+              "color": "#000000"
+            }
+          ]
+        },
+        {
+          "featureType": "water",
+          "elementType": "labels.text.fill",
+          "stylers": [
+            {
+              "color": "#3d3d3d"
+            }
+          ]
         }
       ]
-    },
-    {
-      "elementType": "labels.icon",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
-    },
-    {
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#757575"
-        }
-      ]
-    },
-    {
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {
-          "color": "#212121"
-        }
-      ]
-    },
-    {
-      "featureType": "administrative",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#757575"
-        }
-      ]
-    },
-    {
-      "featureType": "administrative.country",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#9e9e9e"
-        }
-      ]
-    },
-    {
-      "featureType": "administrative.locality",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#bdbdbd"
-        }
-      ]
-    },
-    {
-      "featureType": "poi",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#757575"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.business",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#181818"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "labels.text",
-      "stylers": [
-        {
-          "visibility": "off"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#616161"
-        }
-      ]
-    },
-    {
-      "featureType": "poi.park",
-      "elementType": "labels.text.stroke",
-      "stylers": [
-        {
-          "color": "#1b1b1b"
-        }
-      ]
-    },
-    {
-      "featureType": "road",
-      "elementType": "geometry.fill",
-      "stylers": [
-        {
-          "color": "#2c2c2c"
-        }
-      ]
-    },
-    {
-      "featureType": "road",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#8a8a8a"
-        }
-      ]
-    },
-    {
-      "featureType": "road.arterial",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#373737"
-        }
-      ]
-    },
-    {
-      "featureType": "road.highway",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#3c3c3c"
-        }
-      ]
-    },
-    {
-      "featureType": "road.highway.controlled_access",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#4e4e4e"
-        }
-      ]
-    },
-    {
-      "featureType": "road.local",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#616161"
-        }
-      ]
-    },
-    {
-      "featureType": "transit",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#757575"
-        }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [
-        {
-          "color": "#000000"
-        }
-      ]
-    },
-    {
-      "featureType": "water",
-      "elementType": "labels.text.fill",
-      "stylers": [
-        {
-          "color": "#3d3d3d"
-        }
-      ]
-    }
-  ]
 
-  //logomakr.com/4H3zAM
-  </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"
-  async defer></script>
-</body>
-</html>
+      //logomakr.com/4H3zAM
+      </script>
+      <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"
+      async defer></script>
+    </body>
+    </html>
