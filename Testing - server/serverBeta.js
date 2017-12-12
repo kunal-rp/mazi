@@ -35,6 +35,7 @@ var table_server = "server"
 var table_gen = "user_gen"
 var table_college_info = "college_info"
 var table_parkinglot_info = "parkinglot_info"
+var table_connect = "_connect"
 
 //generates the custom keys for jwt authentication
 function generateCodes(callback){
@@ -64,6 +65,10 @@ app.get('/',function(req,res, next){
 
   res.sendFile(path.join(__dirname, '/public', 'index.html'));
 })
+app.get('/cover',function(req,res, next){
+
+  res.sendFile(path.join(__dirname, '/public', 'cover.html'));
+})
 /*
 //testing the 'ws' library
 //still have to test the concurrent websocket connection limits
@@ -81,9 +86,15 @@ app.get('/test',function(req,res){
 
 //testing the mysql concurrent data
 app.get('/data',function(req,res){
-
   getCollegeParkingData(function(code, collegeData,parkinglotData){
     res.send(JSON.stringify({code:code, cd : collegeData,pd:parkinglotData},null,'\n'));
+  });
+});
+
+//testing the mysql concurrent data
+app.get('/getPropData',function(req,res){
+  getPropData(function(ids, data){
+    res.send(JSON.stringify({ids:ids , data : data},null,'\n'));
   });
 });
 
@@ -226,6 +237,33 @@ function getCollegeParkingData(callback){
 
 function getSampleData(){
   funtion
+}
+
+function getPropData(callback){
+  var final = {}
+  var ids = []
+  var query_get_prop_data = "SELECT * FROM `"+table_connect+"` ORDER BY RAND() LIMIT 10"
+  connectionPool.query(query_get_prop_data, function(error,results){
+      if(error){
+          console.log("ERROR | getPropData | sql query \n "+error+" \n"+query_get_prop_data)
+          callback(null, null)
+      }
+      else{
+        for(i=0;i < results.length; i++){
+          ids.push(results[i]['index_room_name'])
+          final[results[i]['index_room_name']] = {
+            parkinglot_id : results[i]['parkinglot_id'],
+            parker_lat:results[i]['parker_lat'],
+            parker_lng:results[i]['parker_lng'],
+            pu_lat:results[i]['pu_lat'],
+            pu_lng:results[i]['pu_lng'],
+            time_saved:10 + Math.round(Math.random()+1)
+          }
+        }
+        callback(ids, final)
+      }
+    })
+
 }
 
 

@@ -1,206 +1,670 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simple Map</title>
+  <title>Vierve</title>
   <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
   <style>
   /* Always set the map height explicitly to define the size of the div
   * element that contains the map. */
+
+  @font-face {
+    font-family:SigReg;
+    src: url("Signika-Regular.otf")
+  }
+  @font-face {
+    font-family:SigLig;
+    src: url("Signika-Light.otf")
+  }
+
+  h1,h2,h3{
+    font-family: SigReg;
+    color:#FFFFFF;
+  }
+
+  html,body {
+    background-color: #3aa1dd;
+    height:99%;
+    width:99%;
+  }
+  #header {
+    width: 100%;
+    height: 15%;
+    margin:1%;
+  }
+
+  #container {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+  }
+  #first {
+    width: 40%;
+    float: left;
+    height: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+    color:#FFFFFF;
+
+  }
+  #second {
+    width: 50%;
+    float: left;
+    height: 90%;
+  }
+  #logo{
+    height:30%;
+    width:auto;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+  #logo_img{
+    height:90%;
+    width:auto;
+    float:left;
+    text-align:center;
+    position:relative;
+  }
+  #logo_title{
+    height:100%;
+    width:auto;
+    float:right;
+    font-size: 400%;
+    position: relative;
+  }
+  #subtitle{
+    font-family: SigLig;
+    height:10%;
+    margin-left: 20%;
+    margin-right: 20%;
+    width:auto;
+    white-space: nowrap ;
+    text-align: :center;
+  }
+  #text{
+    height:20%;
+    width:auto;
+    margin-left: 10%;
+    margin-right: 10%;
+    font-family: SigLig;
+    background-color: :green;
+  }
+  #download{
+    height:15%;
+    width:auto;
+    margin-left: 20%;
+    margin-right: 20%;
+    font-family: SigLig;
+  }
+  #gpb{
+    height:100%;
+    width:auto;
+  }
+  #social{
+    margin-top:10%;
+    height:40%;
+    width:100%;
+  }
+  #mapTitle{
+    height:5%;
+    width:100%;
+  }
+  #map-container{
+    height:80%;
+    width:100%;
+  }
   #map {
-    height: 80%;
+    height: 90%;
+    width: 90%;
+    position: relative;
+
   }
-  /* Optional: Makes the sample page fill the window. */
-  html, body {
-    height: 80%;
-    margin: 0;
-    padding: 0;
+  #statistics{
+    height:15%;
+    width:90%;
+    background-color:#2f4858;
+    font-family:SigReg;
   }
+  .block{
+    width:33%;
+    height:100%;
+    float:left;
+  }
+  .blockTitle{
+    width:100%;
+    height:40%;
+    text-align:center;
+    color:#FFFFFF
+  }
+  .blockValue{
+
+    width:100%;
+    height:60%;
+    text-align:center;
+    font-size:x-large;
+    color:#3aa1dd
+  }
+
   </style>
 </head>
 <body>
+  <div id="container">
+    <div id="first">
+      <div id="logo" >
+        <img id="logo_img" src="VierveLogo_DB_2.png"/>
+        <h1 id="logo_title">Vierve</h1>
+      </div>
+      <h2 id="subtitle" >College Parking Made Simple</h2>
+      <h3 id="text">Spend less time, save money, and connect with new friends from your college using Vierve! Get a ride to your car, or give a ride to a student for their parking spot, all with a few clicks.</h3>
+      <div id="download">
+        <a href="http://play.google.com/store/apps/details?id=com.vierve" style="height:100%;width:100%">
+          <img id="gpb" src="gpb.png"/>
+        </a>
 
-  <button onclick="calcRoute({lat:34.057112000,lng:-117.8165950000},{lat:parkinglot_data['2001']['coor_lat'],lng:parkinglot_data['2001']['coor_lng']},[{location:{lat:34.058134000,lng:-117.8264490000},stopover:true}],'blue')">Route 1</button>
-  <button onclick="calcRoute({lat:34.050450000,lng:-117.818698000},{lat:parkinglot_data['2006']['coor_lat'],lng:parkinglot_data['2006']['coor_lng']},[{location:{lat:34.059539000,lng:-117.82401500},stopover:true}],'red')">Route 2</button>
+        <div id="social" >
+          <div class="block" >
+            <a href="https://www.facebook.com/vierveapp" style="height:100%;width:100%">
+              <img id="gpb" src="FB.png"/>
+            </a>
+          </div>
+          <div class="block" >
+            <a href="https://www.twitter.com/vierveapp" style="height:100%;width:100%;">
+              <img id="gpb" src="Twitter.png"/>
+            </a>
+          </div>
+          <div class="block" >
+            <a href="https://krpnet.com/" style="height:100%;width:100%;font-size:xx-large;color:#FFFFFF">
+              KRP
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="second">
+      <div id="mapTitle">
+        <h3>Recent Matches Made:</h3>
+      </div>
+      <div id="map-container">
+        <div id="map"></div>
+      </div>
+      <div id="statistics">
+        <div class="block" >
+          <div class="blockTitle">
+            Total Unique Users
+          </div>
+          <div class="blockValue">
+            50+
+          </div>
+        </div>
+        <div class="block">
+          <div class="blockTitle">
+            Total Time Saved
+          </div>
+          <div class="blockValue">
+            7+ Hours
+          </div>
+        </div>
+        <div class="block" >
+          <div class="blockTitle">
+            Total Gas Money Saved
+          </div>
+          <div class="blockValue">
+            $500
+          </div>
 
-  <div id="map"/>
-  <script>
-  var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
+        </div>
+      </div>
+    </div>
+    <script>
+    var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
 
+    var colorPrim = "#2f4858"
+    var colorAccent = "#3aa1dd"
+    var colorGreen = "#8EA604"
+    var colorRed = "#C20114"
 
-  var directionsService
-  var map;
-  var current ;
-  var polylines = []
+    var timePerEx = 7500
 
-  var college_data = {};
-  var parking_data = {};
+    var directionsService
+    var map;
+    var current ;
+    var polylines = []
+    var message
 
-  function initMap(){
-    loadData(function(){
-      directionsService = new google.maps.DirectionsService()
-      var directionsDisplay = new google.maps.DirectionsRenderer()
-      var mapOptions = {
-        zoom: 14,
-        center: {lat:college_data['100010']['college_coor_lat'] , lng: college_data['100010']['college_coor_lng']}
-      }
-      map = new google.maps.Map(document.getElementById('map'),mapOptions);
-      directionsDisplay.setMap(map);
+    var college_data = {};
+    var parking_data = {};
 
-    })
+    var propData = []
+    var index = 0;
+    var responses = [];
 
-  }
-
-  function loadData(callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', "http://localhost:3000/data", true);
-    xhr.send();
-
-    xhr.onreadystatechange = processRequest;
-    function processRequest(e) {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        var response = JSON.parse(xhr.responseText);
-        if(response.code == 2){
-          college_data = response.cd;
-          parkinglot_data = response.pd;
-          console.log(parkinglot_data)
-          callback()
+    function initMap(){
+      loadCollegeData(
+        function(){
+          loadPropData(
+            function(){
+              directionsService = new google.maps.DirectionsService()
+              var directionsDisplay = new google.maps.DirectionsRenderer()
+              var mapOptions = {
+                zoom: 14,
+                styles:style,
+                disableDefaultUI: true,
+                draggable:false
+              }
+              map = new google.maps.Map(document.getElementById('map'),mapOptions);
+              directionsDisplay.setMap(map);
+              startCycle(timePerEx)
+            }
+          )
         }
+      )
 
+    }
+
+    function loadPropData(callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', "http://localhost:3000/getPropData", true);
+      xhr.send();
+      xhr.onreadystatechange = processRequest;
+      function processRequest(e) {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+
+          var response = JSON.parse(xhr.responseText);
+          for(i = 0; i <= response.ids.length ; i++){
+            if(i == response.ids.length){
+
+              callback()
+            }
+            else{
+
+              var id = response.ids[i]
+              var obj = response.data[id]
+
+              propData.push({
+                origin:{lat:obj.parker_lat,lng:obj.parker_lng},
+                des:{lat:parkinglot_data[obj.parkinglot_id.toString()]['coor_lat'],lng:parkinglot_data[obj.parkinglot_id.toString()]['coor_lng']},
+                waypoints:[{location:{lat:obj.pu_lat,lng:obj.pu_lng},stopover:true}],
+                time_saved:obj.time_saved
+              })
+            }
+
+          }
+
+        }
       }
     }
-  }
 
-  function calcRoute(origin,des,waypoints,color) {
-    var directionsDisplay = new google.maps.DirectionsRenderer({
-      suppressMarkers: true,
-      suppressInfoWindows: false
-    });
-    directionsDisplay.setMap(map);
+    function loadCollegeData(callback){
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', "http://localhost:3000/data", true);
+      xhr.send();
+      xhr.onreadystatechange = processRequest;
+      function processRequest(e) {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          var response = JSON.parse(xhr.responseText);
+          if(response.code == 2){
+            college_data = response.cd;
+            parkinglot_data = response.pd;
+            callback()
+          }
 
-
-    var request = {
-      origin: origin,
-      destination: des,
-      waypoints:waypoints,
-      travelMode:google.maps.TravelMode.DRIVING
+        }
+      }
     }
+
+    function startCycle(time){
+      calcRoute(0,propData[0].origin,propData[0].des,propData[0].waypoints,propData[0].time_saved)
+      /*setInterval(function(){
+      index++
+      calcRoute(index,propData[index].origin,propData[index].des,propData[index].waypoints,propData[index].time_saved)
+      if(index == propData.length-1){
+      index = 0
+    }
+  },time)
+  */
+
+
+}
+
+function calcRoute(index,origin,des,waypoints,ts) {
+  var directionsDisplay = new google.maps.DirectionsRenderer({
+    suppressMarkers: true,
+    suppressInfoWindows: false
+  });
+  directionsDisplay.setMap(map);
+
+
+  var request = {
+    origin: origin,
+    destination: des,
+    waypoints: waypoints,
+    travelMode:google.maps.TravelMode.DRIVING
+  }
+  if(responses[index] == undefined){
     directionsService.route(request, function(response, status) {
       if (status == google.maps.DirectionsStatus.OK) {
+        responses[index] = response
         //directionsDisplay.setDirections(response);
         if(current != null){
           current = null
           fadeOut(polylines,1000,function(){
-            for(i = 0; i < polylines.length; i++){
-              polylines[i].setMap(null)
-            }
-            polylines = []
-            customDirectionsRenderer(response);
-
+            customDirectionsRenderer(origin, des, response,ts);
           })
         }
         else{
-          customDirectionsRenderer(response);
+          customDirectionsRenderer(origin, des, response,ts);
         }
-
       }
     });
   }
+  else{
 
-  function customDirectionsRenderer(response) {
-    var bounds = new google.maps.LatLngBounds();
-    var legs = response.routes[0].legs;
-    for (i = 0; i < legs.length; i++) {
-      current = new google.maps.Polyline({
-        map: map,
-        strokeColor: "#3aa1dd",
-        path: [],
-        strokeOpacity:0,
-        tag:"The Beginning"
+    fadeOut(polylines,1000,function(){
+      customDirectionsRenderer(origin, des, responses[index],ts);
+    })
+  }
 
-      })
-      polylines.push(current)
-      if (i%2 == 1 ) {
-        current.setOptions({
-          strokeColor: "#2f4858",
-          tag:"the end"
-        });
-      }
+}
 
-      var steps = legs[i].steps;
-      for (j = 0; j < steps.length; j++) {
-        var nextSegment = steps[j].path;
-        for (k = 0; k < nextSegment.length; k++) {
-          current.getPath().push(nextSegment[k]);
-          bounds.extend(nextSegment[k]);
-        }
+
+
+function customDirectionsRenderer(origin , des, response,ts) {
+  polylines = []
+  var polylineLength = 0
+  var bounds = new google.maps.LatLngBounds();
+  var legs = response.routes[0].legs;
+  for (i = 0; i < legs.length; i++) {
+    current = new google.maps.Polyline({
+      map: map,
+      strokeColor: colorAccent,
+      path: [],
+      strokeOpacity:0
+
+    })
+
+    polylines.push(current)
+    if (i%2 == 1 ) {
+      current.setOptions({
+        strokeColor: colorPrim
+
+      });
+    }
+
+    var steps = legs[i].steps;
+    for (j = 0; j < steps.length; j++) {
+      var nextSegment = steps[j].path;
+      for (k = 0; k < nextSegment.length; k++) {
+        current.getPath().push(nextSegment[k]);
+        bounds.extend(nextSegment[k]);
       }
     }
-    current.setMap(map)
-    map.fitBounds(bounds);
-    fadeIn(polylines,1000,function(){ })
+    polylineLength += google.maps.geometry.spherical.computeLength(current.getPath().getArray())
+  }
+  current.setMap(map)
+  //map.fitBounds(bounds)
+  map.panTo(bounds.getCenter(), 13);
+  fadeIn(polylines,1000,function(){
+
+    message = null
+    message = new google.maps.InfoWindow({
+      content: "Distance Saved: "+Math.round(polylineLength * 100) / 100+" meters <br> Time Saved : "+ts+" minutes"});
+      message.open(map)
+      message.setPosition(origin);
+
+    })
+
+
 
   }
 
 
   function fadeIn(line, fadeDuration,callback){
-      var targetOpacity = 0.0,
-      startTime = (new Date()).getTime();
-      function step(){
-        targetOpacity = targetOpacity + .1;
-
-        for(i = 0; i < line.length; i++){
-          line[i].setOptions({
-            strokeOpacity: targetOpacity
-          });
-        }
-        if(targetOpacity <1.1){
-          setTimeout(step,fadeDuration/10)
-        }
-        else{
-          callback()
-        }
+    var parts = 100;
+    var targetOpacity = 0.0,
+    startTime = (new Date()).getTime();
+    function step(){
+      targetOpacity = targetOpacity + (1/parts);
+      for(i = 0; i < line.length; i++){
+        line[i].setOptions({
+          strokeOpacity: targetOpacity
+        });
       }
-      step()
+      if(targetOpacity <=1){
+        setTimeout(step,fadeDuration/parts)
+      }
+      else{
+        callback()
+      }
+    }
+    step()
   }
 
   function fadeOut(line, fadeDuration,callback){
-      var targetOpacity = 1.0,
-      startTime = (new Date()).getTime();
-      function step(){
-        targetOpacity = targetOpacity - .1;
-        
-        for(i = 0; i < line.length; i++){
-          line[i].setOptions({
-            strokeOpacity: targetOpacity
-          });
-        }
-        if(targetOpacity >0){
-          setTimeout(step,fadeDuration/10)
-        }
-        else{
-          callback()
-        }
-      }
-      step()
-  }
+    message.close()
+    var parts = 100;
+    var targetOpacity = 1.0,
+    startTime = (new Date()).getTime();
 
-  function getDirections(){
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', "https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key="+api_key, true);
-    xhr.send();
-    xhr.onreadystatechange = processRequest;
-    function processRequest(e) {
-      if (xhr.readyState == 4 && xhr.status == 200) {
-        var response = JSON.parse(xhr.responseText);
-        console.log(response)
+    function step(){
+      targetOpacity = targetOpacity - (1/parts);
+
+      for(i = 0; i < line.length; i++){
+        line[i].setOptions({
+          strokeOpacity: targetOpacity
+        });
+      }
+      if(targetOpacity >0){
+        setTimeout(step,fadeDuration/parts)
+      }
+      else{
+        for(i = 0; i < polylines.length; i++){
+          polylines[i].setMap(null)
+        }
+        callback()
       }
     }
+    step()
   }
 
-  //https://maps.googleapis.com/maps/api/directions/json?origin=Disneyland&destination=Universal+Studios+Hollywood4&key=
 
+  var style =
+  [
+    {
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.icon",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#212121"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.country",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#9e9e9e"
+        }
+      ]
+    },
+    {
+      "featureType": "administrative.locality",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#bdbdbd"
+        }
+      ]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.business",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#181818"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text",
+      "stylers": [
+        {
+          "visibility": "off"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "poi.park",
+      "elementType": "labels.text.stroke",
+      "stylers": [
+        {
+          "color": "#1b1b1b"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "geometry.fill",
+      "stylers": [
+        {
+          "color": "#2c2c2c"
+        }
+      ]
+    },
+    {
+      "featureType": "road",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#8a8a8a"
+        }
+      ]
+    },
+    {
+      "featureType": "road.arterial",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#373737"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#3c3c3c"
+        }
+      ]
+    },
+    {
+      "featureType": "road.highway.controlled_access",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#4e4e4e"
+        }
+      ]
+    },
+    {
+      "featureType": "road.local",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#616161"
+        }
+      ]
+    },
+    {
+      "featureType": "transit",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#757575"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [
+        {
+          "color": "#000000"
+        }
+      ]
+    },
+    {
+      "featureType": "water",
+      "elementType": "labels.text.fill",
+      "stylers": [
+        {
+          "color": "#3d3d3d"
+        }
+      ]
+    }
+  ]
 
+  //logomakr.com/4H3zAM
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"
   async defer></script>
