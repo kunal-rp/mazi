@@ -331,6 +331,7 @@
     function startCycle(time){
       calcRoute(0,propData[0].origin,propData[0].des,propData[0].waypoints,propData[0].time_saved)
 
+      /*
       cycle = setInterval(function(){
         index++
         calcRoute(index,propData[index].origin,propData[index].des,propData[index].waypoints,propData[index].time_saved)
@@ -338,10 +339,7 @@
           index = 0
         }
       },time)
-
-
-
-
+      */
     }
 
     function calcRoute(index,origin,des,waypoints,ts) {
