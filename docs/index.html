@@ -4,10 +4,10 @@
   <title>Vierve</title>
   <meta name="viewport" content="initial-scale=1.0">
   <meta charset="utf-8">
+  
   <style>
   /* Always set the map height explicitly to define the size of the div
   * element that contains the map. */
-
   @font-face {
     font-family:SigReg;
     src: url("Signika-Regular.otf")
@@ -16,12 +16,10 @@
     font-family:SigLig;
     src: url("Signika-Light.otf")
   }
-
   h1,h2,h3{
     font-family: SigReg;
     color:#FFFFFF;
   }
-
   html,body {
     background-color: #3aa1dd;
     height:99%;
@@ -32,7 +30,6 @@
     height: 15%;
     margin:1%;
   }
-
   #container {
     width: 100%;
     height: 100%;
@@ -45,7 +42,6 @@
     margin-left: 5%;
     margin-right: 5%;
     color:#FFFFFF;
-
   }
   #second {
     width: 50%;
@@ -117,7 +113,6 @@
     height: 90%;
     width: 90%;
     position: relative;
-
   }
   #statistics{
     height:15%;
@@ -137,16 +132,93 @@
     color:#FFFFFF
   }
   .blockValue{
-
     width:100%;
     height:60%;
     text-align:center;
     font-size:x-large;
     color:#3aa1dd
   }
-
+    /* The below CSS is for smaller screen sizes (tablet and mobile version) */
+  @media screen and (max-width: 768px) {
+  
+      #first {
+        width: 100%;
+        height: 100%;
+      }
+      #second {
+        width: 100%;
+        height: 100%;
+      }
+      #logo{
+        height:20%;
+      }
+      #logo_img{
+        height:80%;
+        text-align: left;
+      }
+      #logo_title{
+        float: none;
+        font-size: 350%;
+        margin-left: 40%;
+        padding-top: 5%;
+      }
+      #subtitle{
+        height: 4%;
+        font-size: 165%;
+        margin-top: 0%;
+        margin-left: 4%;
+        margin-right: 4%;
+        text-align:left;
+      }
+      #text{
+        margin-left: 8%;
+        margin-right: 10%;
+      }
+      #download{
+        height:15%;
+        margin-left: 20%;
+        margin-right: 20%;
+      }
+      #gpb{
+        height:100%;
+        width: 100%;
+      }
+      #social{
+        margin-top:0%;
+        height: auto;
+        width: 110%;
+      }
+/*
+      #mapTitle{
+      }
+*/
+/*
+      #map-container{
+      }
+*/
+/*
+      #map {
+      }
+*/
+      #statistics{
+        height:15%;
+        width:100%;
+        margin-left: 1%;
+        margin-right: 6%;
+      }
+/*
+      .block{
+      }
+      .blockTitle{
+      }
+      .blockValue{
+      }
+*/
+}
+     
   </style>
 </head>
+
 <body>
   <div id="container">
     <div id="first">
@@ -216,27 +288,21 @@
     </div>
     <script>
     var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
-
     var colorPrim = "#2f4858"
     var colorAccent = "#3aa1dd"
     var colorGreen = "#8EA604"
     var colorRed = "#C20114"
-
     var timePerEx = 7500
-
     var directionsService
     var map;
     var current ;
     var polylines = []
     var message
-
     var college_data = {};
     var parking_data = {};
-
     var propData = []
     var index = 0;
     var responses = [];
-
     function initMap(){
       loadCollegeData(
         function(){
@@ -257,9 +323,7 @@
           )
         }
       )
-
     }
-
     function loadPropData(callback) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', "http://server.vierve.com/getPropData", true);
@@ -267,18 +331,14 @@
       xhr.onreadystatechange = processRequest;
       function processRequest(e) {
         if (xhr.readyState == 4 && xhr.status == 200) {
-
           var response = JSON.parse(xhr.responseText);
           for(i = 0; i <= response.ids.length ; i++){
             if(i == response.ids.length){
-
               callback()
             }
             else{
-
               var id = response.ids[i]
               var obj = response.data[id]
-
               propData.push({
                 origin:{lat:obj.parker_lat,lng:obj.parker_lng},
                 des:{lat:parkinglot_data[obj.parkinglot_id.toString()]['coor_lat'],lng:parkinglot_data[obj.parkinglot_id.toString()]['coor_lng']},
@@ -286,13 +346,10 @@
                 time_saved:obj.time_saved
               })
             }
-
           }
-
         }
       }
     }
-
     function loadCollegeData(callback){
       var xhr = new XMLHttpRequest();
       xhr.open('GET', "http://localhost:3000/data", true);
@@ -306,11 +363,9 @@
             parkinglot_data = response.pd;
             callback()
           }
-
         }
       }
     }
-
     function startCycle(time){
       calcRoute(0,propData[0].origin,propData[0].des,propData[0].waypoints,propData[0].time_saved)
       setInterval(function(){
@@ -321,18 +376,13 @@
     }
   },time)
   
-
-
 }
-
 function calcRoute(index,origin,des,waypoints,ts) {
   var directionsDisplay = new google.maps.DirectionsRenderer({
     suppressMarkers: true,
     suppressInfoWindows: false
   });
   directionsDisplay.setMap(map);
-
-
   var request = {
     origin: origin,
     destination: des,
@@ -357,16 +407,11 @@ function calcRoute(index,origin,des,waypoints,ts) {
     });
   }
   else{
-
     fadeOut(polylines,1000,function(){
       customDirectionsRenderer(origin, des, responses[index],ts);
     })
   }
-
 }
-
-
-
 function customDirectionsRenderer(origin , des, response,ts) {
   polylines = []
   var polylineLength = 0
@@ -378,17 +423,13 @@ function customDirectionsRenderer(origin , des, response,ts) {
       strokeColor: colorAccent,
       path: [],
       strokeOpacity:0
-
     })
-
     polylines.push(current)
     if (i%2 == 1 ) {
       current.setOptions({
         strokeColor: colorPrim
-
       });
     }
-
     var steps = legs[i].steps;
     for (j = 0; j < steps.length; j++) {
       var nextSegment = steps[j].path;
@@ -403,20 +444,13 @@ function customDirectionsRenderer(origin , des, response,ts) {
   //map.fitBounds(bounds)
   map.panTo(bounds.getCenter(), 13);
   fadeIn(polylines,1000,function(){
-
     message = null
     message = new google.maps.InfoWindow({
       content: "Distance Saved: "+Math.round(polylineLength * 100) / 100+" meters <br> Time Saved : "+ts+" minutes"});
       message.open(map)
       message.setPosition(origin);
-
     })
-
-
-
   }
-
-
   function fadeIn(line, fadeDuration,callback){
     var parts = 100;
     var targetOpacity = 0.0,
@@ -437,16 +471,13 @@ function customDirectionsRenderer(origin , des, response,ts) {
     }
     step()
   }
-
   function fadeOut(line, fadeDuration,callback){
     message.close()
     var parts = 100;
     var targetOpacity = 1.0,
     startTime = (new Date()).getTime();
-
     function step(){
       targetOpacity = targetOpacity - (1/parts);
-
       for(i = 0; i < line.length; i++){
         line[i].setOptions({
           strokeOpacity: targetOpacity
@@ -464,8 +495,6 @@ function customDirectionsRenderer(origin , des, response,ts) {
     }
     step()
   }
-
-
   var style =
   [
     {
@@ -662,7 +691,6 @@ function customDirectionsRenderer(origin , des, response,ts) {
       ]
     }
   ]
-
   //logomakr.com/4H3zAM
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo&callback=initMap"
