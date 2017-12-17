@@ -2,151 +2,11 @@
 <html>
 <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <head>
-
   <title>Vierve</title>
-  <meta name="viewport" content="initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
   <style>
-  /* Always set the map height explicitly to define the size of the div
-  * element that contains the map. */
-
-  @font-face {
-    font-family:SigReg;
-    src: url("Signika-Regular.otf")
-  }
-  @font-face {
-    font-family:SigLig;
-    src: url("Signika-Light.otf")
-  }
-
-  h1,h2,h3{
-    font-family: SigReg;
-    color:#FFFFFF;
-  }
-
-  html,body {
-    background-color: #3aa1dd;
-    height:99%;
-    width:99%;
-  }
-  #header {
-    width: 100%;
-    height: 15%;
-    margin:1%;
-  }
-
-  #container {
-    width: 100%;
-    height: 100%;
-    margin: auto;
-  }
-  #first {
-    width: 40%;
-    float: left;
-    height: 90%;
-    margin-left: 5%;
-    margin-right: 5%;
-    color:#FFFFFF;
-
-  }
-  #second {
-    width: 50%;
-    float: left;
-    height: 90%;
-  }
-  #logo{
-    height:30%;
-    width:auto;
-    margin-left: 10%;
-    margin-right: 10%;
-  }
-  #logo_img{
-    height:90%;
-    width:auto;
-    float:left;
-    text-align:center;
-    position:relative;
-  }
-  #logo_title{
-    height:100%;
-    width:auto;
-    float:right;
-    font-size: 400%;
-    position: relative;
-  }
-  #subtitle{
-    font-family: SigLig;
-    height:10%;
-    margin-left: 20%;
-    margin-right: 20%;
-    width:auto;
-    white-space: nowrap ;
-    text-align: :center;
-  }
-  #text{
-    height:20%;
-    width:auto;
-    margin-left: 10%;
-    margin-right: 10%;
-    font-family: SigLig;
-    background-color: :green;
-  }
-  #download{
-    height:15%;
-    width:auto;
-    margin-left: 20%;
-    margin-right: 20%;
-    font-family: SigLig;
-  }
-  #gpb{
-    height:100%;
-    width:auto;
-  }
-  #social{
-    margin-top:10%;
-    height:40%;
-    width:100%;
-  }
-  #mapTitle{
-    height:5%;
-    width:100%;
-  }
-  #map-container{
-    height:80%;
-    width:100%;
-  }
-  #map {
-    height: 90%;
-    width: 90%;
-    position: relative;
-
-  }
-  #statistics{
-    height:15%;
-    width:90%;
-    background-color:#2f4858;
-    font-family:SigReg;
-  }
-  .block{
-    width:33%;
-    height:100%;
-    float:left;
-  }
-  .blockTitle{
-    width:100%;
-    height:40%;
-    text-align:center;
-    color:#FFFFFF
-  }
-  .blockValue{
-
-    width:100%;
-    height:60%;
-    text-align:center;
-    font-size:x-large;
-    color:#3aa1dd
-  }
-
   </style>
 </head>
 <body>
@@ -156,32 +16,32 @@
         <img id="logo_img" src="VierveLogo_DB_2.png"/>
         <h1 id="logo_title">Vierve</h1>
       </div>
-      <h2 id="subtitle" >College Parking Made Simple</h2>
+      <h2 id="subtitle">College Parking Made Simple</h2>
       <h3 id="text">Spend less time, save money, and connect with new friends from your college using Vierve! Get a ride to your car, or give a ride to a student for their parking spot, all with a few clicks.</h3>
       <div id="download">
-        <a href="http://play.google.com/store/apps/details?id=com.vierve" style="height:100%;width:100%">
+        <a href="http://play.google.com/store/apps/details?id=com.vierve" >
           <img id="gpb" src="gpb.png"/>
         </a>
-
+      </div>
         <div id="social" >
-          <div class="block" >
-            <a href="http://www.facebook.com/vierveapp" style="height:100%;width:100%">
-              <img id="gpb" src="FB.png"/>
+          <div class="block">
+            <a href="http://www.facebook.com/vierveapp">
+              <img id="sb" src="FB.png"/>
             </a>
           </div>
-          <div class="block" >
-            <a href="http://www.twitter.com/vierveapp" style="height:100%;width:100%;">
-              <img id="gpb" src="Twitter.png"/>
+          <div class="block">
+            <a href="http://www.twitter.com/vierveapp" >
+              <img id="sb" src="Twitter.png"/>
             </a>
           </div>
-          <div class="block" >
-            <a href="https://krpnet.com/" style="height:100%;width:100%;font-size:xx-large;color:#FFFFFF">
-              KRP
+          <div class="block">
+            <a  href="http://krpnet.com">
+              <img id="sb" src="KRPLogo_white.png"/>
             </a>
           </div>
         </div>
       </div>
-    </div>
+
     <div id="second">
       <div id="mapTitle">
         <h3>Stats & Recent Matches Made[During BETA]:</h3>
@@ -216,6 +76,7 @@
         </div>
       </div>
     </div>
+      </div>
     <script>
     var api_key = "AIzaSyCW2WCj-4vyZTrNqWp6qVK1sDGx6UaviJo"
 
