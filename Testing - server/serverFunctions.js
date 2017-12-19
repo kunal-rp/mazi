@@ -3,7 +3,13 @@ var connectionPool = db.getPool();
 
 
 var clients = {}
-var tables = {}
+var tables ={
+  table_server:"server",
+  table_gen:"user_gen",
+  table_college_info:"college_info",
+  table_parkinglot_info:"parkinglot_info",
+  table_connect:"_connect"
+}
 module.exports = {
   tables:tables,
   setVariables:function(t, callback){
@@ -117,7 +123,7 @@ module.exports = {
             callback('Invalid User ID')
           }
           else{
-            clients[user_id] = {auth_code: result[0][auth_token]}
+            clients[user_id] = {auth_code: result[0]['auth_token']}
             callback(false, clients[user_id])
           }
         }
@@ -125,5 +131,17 @@ module.exports = {
     }else{
       callback(false, clients[user_id])
     }
+  },
+  addSuggestion:function(data,callback){
+    var timestamp = Math.round((new Date()).getTime() / 1000);
+    var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
+    connectionPool.query(query_insert_suggestion,function(err, results){
+      if(err){
+        callback(error)
+      }
+      else{
+        callback(false)
+      }
+    });
   }
 };

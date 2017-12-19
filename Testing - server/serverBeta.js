@@ -23,77 +23,68 @@ var server = app.listen(port,'0.0.0.0');
 
 app.use(express.static('public'));
 
-
-var tables = {
-  table_server:"server",
-  table_gen:"user_gen",
-  table_college_info:"college_info",
-  table_parkinglot_info:"parkinglot_info",
-  table_connect:"_connect"
-}
-
 var codes;
-serverFunctions.setVariables(tables,function(){
-
-  gen.generateCodes(function(data){
-    codes = data;
-    gen.setCodes(codes)
-    console.log("Local Codes:")
-    console.log(codes)
-  });
-})
+gen.generateCodes(function(data){
+  codes = data;
+  gen.setCodes(codes)
+  console.log("Local Codes:")
+  console.log(codes)
+});
 
 
 
 app.get('/',function(req,res, next){
-
   res.sendFile(path.join(__dirname, '/public', 'index.html'));
 })
-
-/*
-//testing the 'ws' library
-//still have to test the concurrent websocket connection limits
-app.get('/ws',function(req,res){
-res.sendFile(path.join(__dirname, '/public', 'ws.html'));
-});
-*/
-
 
 //testing the mysql concurrent data
 app.get('/data',function(req,res){
   serverFunctions.getCollegeParkingData(function(code, collegeData,parkinglotData){
-    res.send(JSON.stringify({code:code, cd : collegeData,pd:parkinglotData},null,'\n'));
+    res.json({code:code, cd:collegeData,pd:parkinglotData});
   })
 });
 
-//testing the mysql concurrent data
 app.get('/getPropData',function(req,res){
   gen.checkReqGeneral(req,res,function(){
     getPropData(function(ids, data){
-      res.send(JSON.stringify({ids:ids , data : data},null,'\n'));
+      res.json({ids:ids , data : data});
     })
   })
 });
 
 app.get('/codes',function(req,res){
-  res.json(codes)
-});
-
-app.get('/update',function(req, res){
-  var user_id = '9D8FD0'
-  updateUserAuth(user_id,function(error,token){
-    if(error){
-      res.send("Error Occured")
-    }
-    else{
-      console.log(user_id + " Update Auth Token : "+token )
-      res.send("Update Auth Token" )
-    }
+  gen.checkReqBasic(req, res, function(){
+    res.json(codes)
   })
 });
 
+app.get('/update',function(req, res){
+  gen.checkReqSpecific(req, res, function(user_id, data){
+    updateUserAuth(user_id,function(error,token){
+      if(error){
+        gen.strucuralError(res, "An Error Occured. We apologize!")
+      }
+      else{
+        console.log(user_id + " Update Auth Token : "+token )
+        gen.validResponse(res,"Auth Code Updated" )
+      }
+    })
+  })
+});
 
-
+app.get('/addSuggestion',function(req,res){
+  gen.checkReqSpecific(req,res,function(user_id, data){
+    data['user_id'] = user_id
+    serverFunctions.addSuggestion(data,function(err){
+      if(err){
+        gen.strucuralError(res, "Sorry! An Error Occured")
+      }
+      else{
+        gen.validResponse(res,"Your suggestion has been recorded")
+      }
+    })
+  })
+})
 
 function updateUserAuth(user_id, callback){
   //updates the 'auth_token' value of the user with a newly generated tokens
