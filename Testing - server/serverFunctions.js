@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
 var db = require('./DBPoolConnection.js')
 var connectionPool = db.getPool();
 
@@ -6,6 +7,7 @@ var clients = {}
 var tables ={
   table_server:"server",
   table_gen:"user_gen",
+  table_prim:"user_prim",
   table_college_info:"college_info",
   table_parkinglot_info:"parkinglot_info",
   table_connect:"_connect"
@@ -107,13 +109,15 @@ module.exports = {
         callback(true)
       }
       else{
+        clients[user_id] = {}
+        clients[user_id].auth_code = token
         callback(false, token)
       }
     });
   },
   getUserData:function(user_id, callback){
     if(clients[user_id] == undefined){
-      var getUserData = "Select * From `"+tables['table_gen'] + "`  where `user_id`='"+user_id+"'"
+      var getUserData = "Select * From `"+tables['table_gen'] + "`where `user_id`='"+user_id+"'"
       connectionPool.query(getUserData,function(err, result){
         if(err){
           callback(err)
@@ -137,11 +141,77 @@ module.exports = {
     var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
     connectionPool.query(query_insert_suggestion,function(err, results){
       if(err){
-        callback(error)
+        callback(err)
       }
       else{
         callback(false)
       }
     });
-  }
-};
+  },
+  attemptLogin:function(username, password, callback){
+    var query = "Select * From "+ tables.table_prim  + " Where `user_name` = '"+username+"'";
+    connectionPool.query(query,function(err, results){
+      /*
+      check if error in establishing connections
+      structural error
+      */
+      if(err){
+        callback(error)
+
+      }
+      else{
+        /*
+        check if query does not return nothing
+        simple error
+        */
+        if(results.length == 0){
+          callback(false, 'invalid username')
+        }
+        /*
+        check if query does not return more than one user
+        structural error
+        */
+        else if(results.length > 1){
+          callback('Sorry! an Error Occured')
+        }
+        else{
+          /*
+          check if password is valid
+          user ID + Password  =  stored password
+          */
+          bcrypt.compare(results[0]['user_id']+ ""+password, results[0]['user_password'], function(password_check_error,result) {
+            /*
+            check if password is valid
+            simple error
+            */
+            if(password_check_error){
+              callback(true)
+            }
+            else if(result == false){
+              callback(false, 'invalid password')
+            }
+            /*
+            No errors; the username and password are both valid!
+            */
+            else{
+              console.log("Server Functions")
+              console.log(results[0])
+              callback(false, false,results[0]['user_id'])
+            }
+          })
+        }
+      }
+    });
+  },
+    updateUserStatus(user_id, status,callback){
+      var query = "Update `"+tables.table_gen +"` Set `status`='"+ status +"' Where `user_id` = '"+user_id+"'";
+      connectionPool.query(query,function(err, results){
+        if(err){
+          callback(err)
+        }
+        else{
+          callback(false)
+        }
+      });
+    }
+  };

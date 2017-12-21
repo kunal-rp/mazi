@@ -58,9 +58,28 @@ app.get('/codes',function(req,res){
   })
 });
 
+app.get('/login',function(req,res){
+  //checks if data is encrypted with general codes and user specific token
+  gen.checkReqGeneral(req, res, function(data){
+    //attempts login with the passed username and password values
+    gen.attemptLogin(res,data, function(user_id){
+
+      //updates the user with new auth token
+      gen.updateUserAuth(user_id, function(token){
+        //perform login match Operations
+        gen.loginUser(res,user_id, function(){
+          //return valid response
+          gen.validResponse(res,"Sucsessful Login", {auth_token:token})
+        })
+      })
+    })
+  })
+});
+
 app.get('/update',function(req, res){
-  gen.checkReqSpecific(req, res, function(user_id, data){
-    updateUserAuth(user_id,function(error,token){
+  gen.checkReqSpecific(req, res, function(data){
+    var user_id = data.user_id
+    gen.updateUserAuth(user_id,function(error,token){
       if(error){
         gen.strucuralError(res, "An Error Occured. We apologize!")
       }
@@ -73,8 +92,8 @@ app.get('/update',function(req, res){
 });
 
 app.get('/addSuggestion',function(req,res){
-  gen.checkReqSpecific(req,res,function(user_id, data){
-    data['user_id'] = user_id
+  gen.checkReqSpecific(req,res,function(data){
+    data['user_id'] = data.user_id
     serverFunctions.addSuggestion(data,function(err){
       if(err){
         gen.strucuralError(res, "Sorry! An Error Occured")
@@ -85,15 +104,6 @@ app.get('/addSuggestion',function(req,res){
     })
   })
 })
-
-function updateUserAuth(user_id, callback){
-  //updates the 'auth_token' value of the user with a newly generated tokens
-  //call
-  gen.generateCustomKey(function(token){
-    serverFunctions.updateUserAuth(user_id,token,callback)
-  });
-}
-
 
 function getPropData(callback){
   var final = {}
