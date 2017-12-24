@@ -157,10 +157,10 @@ html,body {
     text-align:center;
   }
   #subtitle{
-    margin-bottom: 10%;
+    margin-bottom:10%;
     font-family: SigLig;
     height:10%;
-    width:100%;
+    width:auto;
     text-align: center;
   }
   #text{
@@ -197,11 +197,11 @@ html,body {
     width:100%;
   }
   #map {
-    height: 90%;
-    width: 90%;
+    height: 100%;
+    width: 100%;
   }
   #statistics{
-    height:20%;
+    height:15%;
     width:100%;
     background-color:#2f4858;
     font-family:SigReg;
@@ -210,25 +210,28 @@ html,body {
 }
 
 .block{
-  width:30%;
+  width:32%;
   height:90%;
-  margin-left: 1.5%;
-  margin-right: 1.5%;
+  margin-left: 0.5%;
+  margin-right: 0.5%;
   margin-top: 5%%;
   margin-bottom: 5%%;
   float:left;
+  position: relative;
 }
 .blockTitle{
   width:100%;
   height:40%;
   text-align:center;
-  color:#FFFFFF
+  color:#FFFFFF;
+  font-size:100%;
 }
 .blockValue{
-
+  margin-top: 30%;
   width:100%;
-  height:60%;
+  height:20%;
   text-align:center;
   font-size:100%;
-  color:#3aa1dd
+  color:#3aa1dd;
+  vertical-align:text-bottom;
 }

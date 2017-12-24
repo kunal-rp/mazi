@@ -63,11 +63,10 @@ app.get('/login',function(req,res){
   gen.checkReqGeneral(req, res, function(data){
     //attempts login with the passed username and password values
     gen.attemptLogin(res,data, function(user_id){
-
-      //updates the user with new auth token
-      gen.updateUserAuth(user_id, function(token){
-        //perform login match Operations
-        gen.loginUser(res,user_id, function(){
+      //perform login match Operations
+      gen.loginUser(res,user_id, function(){
+        //updates the user with new auth token
+        gen.updateUserAuth(res,user_id, function(token){
           //return valid response
           gen.validResponse(res,"Sucsessful Login", {auth_token:token})
         })
@@ -75,6 +74,32 @@ app.get('/login',function(req,res){
     })
   })
 });
+
+app.get('/checkusername',function(req,res){
+  //checks if data is encrypted with general codes and user specific token
+  gen.checkReqGeneral(req, res, function(data){
+    gen.attemptCheckUsername(res, data, function(user_name){
+      gen.checkUsername(res, user_name, function(){
+        gen.validResponse(res, "Username is avalible")
+      })
+    })
+  })
+})
+
+app.get('/reset',function(req,res){
+  gen.checkReqGeneral(req,res,function(data){
+    console.log('attempt reset')
+    gen.attemptReset(res, data, function(){
+      console.log(' reset user')
+      gen.resetUser(res, data, function(){
+        console.log('valid response')
+        gen.validResponse(res, "Reset Confirmed")
+      })
+    })
+  })
+})
+
+
 
 app.get('/update',function(req, res){
   gen.checkReqSpecific(req, res, function(data){

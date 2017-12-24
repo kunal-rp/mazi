@@ -35,7 +35,7 @@
             </a>
           </div>
           <div class="block">
-            <a  href="http://krpnet.com">
+            <a  href="https://www.linkedin.com/in/purohitkunal/">
               <img id="sb" src="KRPLogo_white.png"/>
             </a>
           </div>
@@ -54,7 +54,7 @@
           <div class="blockTitle">
             Total Unique Users
           </div>
-          <div class="blockValue">
+          <div id = "uu" class="blockValue">
             50+
           </div>
         </div>
@@ -62,15 +62,15 @@
           <div class="blockTitle">
             Total Time Saved
           </div>
-          <div class="blockValue">
-            7+ Hours
+          <div id = "ts"class="blockValue">
+            7 hours
           </div>
         </div>
         <div class="block" >
           <div class="blockTitle">
             Total Gas Money Saved
           </div>
-          <div class="blockValue">
+          <div id = "ms" class="blockValue">
             $500
           </div>
         </div>
@@ -86,6 +86,7 @@
     var colorRed = "#C20114"
 
     var timePerEx = 7500
+    var fadetime = 700
 
     var directionsService
     var map;
@@ -102,6 +103,7 @@
     var cycle;
 
     function initMap(){
+
       loadCollegeData(
         function(){
           loadPropData(
@@ -117,6 +119,7 @@
               map = new google.maps.Map(document.getElementById('map'),mapOptions);
               directionsDisplay.setMap(map);
               startCycle(timePerEx)
+
             }
           )
         }
@@ -131,12 +134,13 @@
       message.close()
       if(current != null){
         current = null
-        fadeOut(polylines,1000,function(){
+        fadeOut(polylines,fadetime,function(){
           polylines=[]
           clearInterval(cycle)
         })
       }
     }, false);
+
 
     function loadPropData(callback) {
       var xhr = new XMLHttpRequest();
@@ -191,8 +195,6 @@
 
     function startCycle(time){
       calcRoute(0,propData[0].origin,propData[0].des,propData[0].waypoints,propData[0].time_saved)
-
-      /*
       cycle = setInterval(function(){
         index++
         calcRoute(index,propData[index].origin,propData[index].des,propData[index].waypoints,propData[index].time_saved)
@@ -200,7 +202,7 @@
           index = 0
         }
       },time)
-      */
+
     }
 
     function calcRoute(index,origin,des,waypoints,ts) {
@@ -281,7 +283,7 @@
       current.setMap(map)
       //map.fitBounds(bounds)
       map.panTo(bounds.getCenter(), 13);
-      fadeIn(polylines,1000,function(){
+      fadeIn(polylines,fadetime,function(){
 
         message = null
         message = new google.maps.InfoWindow({

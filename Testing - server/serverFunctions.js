@@ -12,6 +12,7 @@ var tables ={
   table_parkinglot_info:"parkinglot_info",
   table_connect:"_connect"
 }
+
 module.exports = {
   tables:tables,
   setVariables:function(t, callback){
@@ -21,12 +22,11 @@ module.exports = {
   updateServerinfo:function(codes,callback){
     //inserts the new server token values into the server table
     //should only happen when the server starts up
-    var update_server_query = "INSERT INTO "+ tables.table_server + "(`start_time`, `android_key`, `ios_key`, `web_key`) VALUES ("+Math.round((new Date()).getTime() / 1000)+",'"+codes['android_key']+"','"+codes['ios_key']+"','"+codes['web_key']+"')"
-    connectionPool.query(update_server_query,function(update_server_error){
-
-      if(update_server_error){
-        console.log("Error updating the server details")
-        console.log(update_server_error)
+    var localData = {table:tables.table_server, start_time :Math.round((new Date()).getTime() / 1000),general_key:codes['general_key']}
+    var update_server_query = "INSERT INTO "+ localData.table + "(`start_time`, `general_key`) VALUES ("+localData.start_time+",'"+localData.general_key+"')"
+    connectionPool.query(update_server_query,function(err){
+      if(err){
+        module.exports.printError("updateServerinfo","Error updating the server details",err,localData)
       }
       else{
         console.log("Server Details SET")
@@ -100,7 +100,6 @@ module.exports = {
   updateUserAuth:function(user_id, token, callback){
     var update_user_auth_token = "Update `"+tables['table_gen'] + "` set `auth_token` = '"+token+"' where `user_id`='"+user_id+"'"
     connectionPool.query(update_user_auth_token,function(update_uat_error){
-
       if(update_uat_error){
         console.log("Error updating the user auth token")
         console.log("User ID:"+user_id)
@@ -109,12 +108,13 @@ module.exports = {
         callback(true)
       }
       else{
-        clients[user_id] = {}
         clients[user_id].auth_code = token
         callback(false, token)
       }
     });
   },
+
+  //change to callback(struct, simple, data)
   getUserData:function(user_id, callback){
     if(clients[user_id] == undefined){
       var getUserData = "Select * From `"+tables['table_gen'] + "`where `user_id`='"+user_id+"'"
@@ -124,29 +124,36 @@ module.exports = {
         }
         else{
           if(result.length == 0){
-            callback('Invalid User ID')
+            callback(false,'Invalid User ID')
           }
           else{
-            clients[user_id] = {auth_code: result[0]['auth_token']}
-            callback(false, clients[user_id])
+            clients[user_id] = {auth_code: result[0]['auth_token'],status:result[0]['status']}
+            console.log("Got User: "+user_id)
+            callback(false,false, clients[user_id])
           }
         }
       })
     }else{
-      callback(false, clients[user_id])
+      callback(false,false, clients[user_id])
     }
   },
+  //change to callback(struct, simple, data)
   addSuggestion:function(data,callback){
-    var timestamp = Math.round((new Date()).getTime() / 1000);
-    var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
-    connectionPool.query(query_insert_suggestion,function(err, results){
-      if(err){
-        callback(err)
-      }
-      else{
-        callback(false)
-      }
-    });
+    if(clients[data.user_id].status != 'idle'){
+      callback("not active user")
+    }
+    else{
+      var timestamp = Math.round((new Date()).getTime() / 1000);
+      var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
+      connectionPool.query(query_insert_suggestion,function(err, results){
+        if(err){
+          callback(err)
+        }
+        else{
+          callback(false)
+        }
+      });
+    }
   },
   attemptLogin:function(username, password, callback){
     var query = "Select * From "+ tables.table_prim  + " Where `user_name` = '"+username+"'";
@@ -157,7 +164,6 @@ module.exports = {
       */
       if(err){
         callback(error)
-
       }
       else{
         /*
@@ -194,24 +200,95 @@ module.exports = {
             No errors; the username and password are both valid!
             */
             else{
-              console.log("Server Functions")
-              console.log(results[0])
-              callback(false, false,results[0]['user_id'])
+              module.exports.getUserData(results[0]['user_id'], function(){
+                callback(false, false,results[0]['user_id'])
+              })
             }
           })
         }
       }
     });
   },
-    updateUserStatus(user_id, status,callback){
+    updateUserStatus:function(user_id, status,callback){
       var query = "Update `"+tables.table_gen +"` Set `status`='"+ status +"' Where `user_id` = '"+user_id+"'";
       connectionPool.query(query,function(err, results){
         if(err){
           callback(err)
         }
         else{
+          clients[user_id].status = status
           callback(false)
         }
       });
+    },
+    checkUsername:function(user_name,callback){
+      var query = "Select * From "+ tables.table_prim + " Where `user_name` = '"+user_name+"'";
+      connectionPool.query(query,function(err, results){
+        if(err){
+          callback("An Error Occured")
+        }
+        else{
+          if(results.length != 0){
+            callback(false, "Username is taken")
+          }
+          else{
+            callback(false, false)
+          }
+        }
+      })
+    },
+    getUserIDWithEmail:function(email, callback){
+      var query = "Select * From "+ tables.table_prim + " Where `user_email`='"+email+"'"
+      connectionPool.query(query, function(err, results){
+        if(err){
+          callback("An Error Occured")
+        }
+        else{
+          console.log("getUserIDWithEmail result")
+          console.log(results.length)
+          if(results.length === 0){
+            console.log("No account assiociated with that email")
+            callback(false, "No account assiociated with that email")
+          }
+          else{
+            console.log("getUserIDWithEmail done  ")
+            callback(false, false, results[0].user_id)
+          }
+        }
+      })
+    },
+    getUsernameWithUserID:function(user_id, callback){
+      var query = "Select * From "+ tables.table_prim + " Where `user_id`='"+user_id+"'"
+      connectionPool.query(query, function(err, results){
+        if(err){
+          callback("An Error Occured")
+        }
+        else{
+          if(results.length === 0){
+            callback(false, "No account assiciated with that user id")
+          }
+          else{
+            callback(false, false, results[0].user_name)
+          }
+        }
+      })
+    },
+    updatePassword:function(user_id, password, callback){
+      var query = "UPDATE `"+tables.table_prim + "` SET `user_password`= '"+password+"' WHERE `user_id`='"+user_id+"'";
+      connectionPool.query(query, function(err, results){
+        if(err){
+          callback("An Error Occured")
+        }
+        else{
+          callback(false, false)
+        }
+      })
+    },
+    printError:function(func,disc, err,data){
+      console.log()
+      console.log(disc)
+      console.log(func)
+      console.log(err)
+      console.log(data)
     }
   };
