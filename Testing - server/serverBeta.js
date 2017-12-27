@@ -4,6 +4,7 @@ var path = require('path');
 var jwt = require('jsonwebtoken')
 var WebSocketServer = require("ws").Server
 var cors = require('cors');
+var bodyParser = require('body-parser')
 
 var serverFunctions = require('./serverFunctions.js');
 var db = require('./DBPoolConnection.js')
@@ -22,6 +23,12 @@ app = express();
 var server = app.listen(port,'0.0.0.0');
 
 app.use(express.static('public'));
+
+//support parsing of application/json type post data
+app.use(bodyParser.json());
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
 
 var codes;
 gen.generateCodes(function(data){
@@ -58,7 +65,7 @@ app.get('/codes',function(req,res){
   })
 });
 
-app.get('/login',function(req,res){
+app.post('/login',function(req,res){
   //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req, res, function(data){
     //attempts login with the passed username and password values
@@ -75,10 +82,35 @@ app.get('/login',function(req,res){
   })
 });
 
-app.get('/checkusername',function(req,res){
+app.post('/createUser',function(req, res){
+  gen.checkReqGeneral(req, res, function(data){
+    gen.attemptCreateUser(res, data, function(){
+      gen.createUser(res, data, function(){
+        gen.validResponse(res, "User Account created!\nPlease check your email to verify your account!")
+      })
+    })
+  })
+})
+
+app.get('/verify',function(req, res){
+  gen.attemptVerify(req, res, function(data){
+    gen.verify(res, data, function(struct, simple){
+      if(struct || simple){
+        res.sendFile(path.join(__dirname, '/public', 'error.html'));
+      }
+      else{
+        res.sendFile(path.join(__dirname, '/public', 'verifyEmail.html'));
+      }
+    })
+  })
+})
+
+app.post('/checkusername',function(req,res){
   //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req, res, function(data){
+    //checks if request / user has correct permissions
     gen.attemptCheckUsername(res, data, function(user_name){
+      //checks if username is in use
       gen.checkUsername(res, user_name, function(){
         gen.validResponse(res, "Username is avalible")
       })
@@ -86,19 +118,28 @@ app.get('/checkusername',function(req,res){
   })
 })
 
-app.get('/reset',function(req,res){
+app.post('/reset',function(req,res){
+  //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req,res,function(data){
-    console.log('attempt reset')
+    //checks for data strucutre and parameters
     gen.attemptReset(res, data, function(){
-      console.log(' reset user')
+      //resets the user
       gen.resetUser(res, data, function(){
-        console.log('valid response')
-        gen.validResponse(res, "Reset Confirmed")
+        gen.validResponse(res, "User Reset Confirmed")
       })
     })
   })
 })
 
+app.post('/updateUser',function(req, res){
+  gen.checkReqSpecific(req, res, function(data){
+    gen.attemptUpdateUser(res, data, function(){
+      gen.updateUser(res, data, function(){
+        gen.validResponse(res, "User Profile Updated")
+      })
+    })
+  })
+})
 
 
 app.get('/update',function(req, res){
@@ -116,7 +157,7 @@ app.get('/update',function(req, res){
   })
 });
 
-app.get('/addSuggestion',function(req,res){
+app.post('/addSuggestion',function(req,res){
   gen.checkReqSpecific(req,res,function(data){
     data['user_id'] = data.user_id
     serverFunctions.addSuggestion(data,function(err){

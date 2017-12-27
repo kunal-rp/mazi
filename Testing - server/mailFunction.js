@@ -1,6 +1,5 @@
 var nodemailer = require('nodemailer');//sending mail
 var validator = require('mailgun-email-validation');
-const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
 
 
 var transporter = nodemailer.createTransport( {
@@ -44,35 +43,48 @@ validator.check(req.query.user_email , function(valid_email_err, valid) {
 
 */
 
+
+
 module.exports = {
-  sendMail:function(email, subject, html, callback){
-    validator.check(email , function(err, valid) {
+
+  validateEmail:function(email, callback){
+    validator.check(email , function(err, valid){
         if(err){
           callback(err)
         }
         else{
-          if(valid == false){
-            callback(false, "This email is invalid")
-          }
-          else{
-            var mailOpts = {
-                from:'noreply@vierve.com',
-                to: email,
-                subject: subject,
-                html :  html
-            };
-            transporter.sendMail(mailOpts, function (send_mail_err, send_mail_result) {
-                if (send_mail_err) {
-                    callback(send_mail_err)
-
-                } else {
-                  console.log("mail sent")
-                    callback(false, false)
-                }
-            })
-          }
+          callback(false)
         }
+      })
+  },
+  sendMail:function(email, subject, html, callback){
+    module.exports.validateEmail(email, function(err){
+      if(err){
+        callback(false, "This email is invalid")
+      }
+      else{
+        var mailOpts = {
+            from:'noreply@vierve.com',
+            to: email,
+            subject: subject,
+            html :  html
+        }
+        transporter.sendMail(mailOpts, function (send_mail_err, send_mail_result) {
+            if (send_mail_err) {
+                callback(send_mail_err)
+
+            } else {
+              console.log("mail sent")
+                callback(false, false)
+            }
+        })
+      }
     })
+  },
+  sendWelcomeemail:function(data, email, callback){
+    var subject = 'Welcome from Vierve!'
+    var html = '<h1>Welcome to Vierve @'+data.user_name+'!</h1> <p>Click the link below to activate your account.</p><a href="https://server.vierve.com/verifyEmail?user_name='+data.user_name+'&hash='+data.user_verification_key+'">Click Here </a><p></p>'
+    module.exports.sendMail(email,subject, html, callback)
   },
   sendForgotUsernameEmail:function(data, email, callback){
     var subject = 'Vierve - Forgot Username'
