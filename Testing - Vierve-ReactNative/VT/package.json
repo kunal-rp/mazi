@@ -1,0 +1,31 @@
+{
+	"name": "VT",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"start": "node node_modules/react-native/local-cli/cli.js start",
+		"test": "jest"
+	},
+	"dependencies": {
+		"react": "16.0.0",
+		"react-native": "0.50.3",
+		"react-native-maps": "^0.17.1",
+		"react-native-material-textfield": "^0.10.2",
+		"react-native-modal-dropdown": "^0.5.0",
+		"react-native-modest-checkbox": "^2.0.0",
+		"react-native-navigation": "^1.1.281",
+		"react-native-sqlite-storage": "^3.3.4",
+		"react-native-star-rating": "^1.0.8",
+		"react-native-vector-icons": "^4.4.3",
+		"save": "^2.3.2"
+	},
+	"devDependencies": {
+		"babel-jest": "21.2.0",
+		"babel-preset-react-native": "4.0.0",
+		"jest": "21.2.1",
+		"react-test-renderer": "16.0.0"
+	},
+	"jest": {
+		"preset": "react-native"
+	}
+}
