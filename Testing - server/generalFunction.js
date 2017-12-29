@@ -35,9 +35,15 @@ module.exports = {
   primarly used as tokens for general and specific user
   @param {Function} callback - function to call after generating the key
   */
-  generateCustomKey:function(callback){
-    //callback(rs.generate(20))
-    callback('50ILoEorxdyCZBPxjeBl')
+  generateCustomKey:function(size, callback){
+    callback(rs.generate(size))
+    //callback('50ILoEorxdyCZBPxjeBl')
+  },
+  generateID:function(callback){
+    callback(rs.generate({
+      length: 6,
+      capitalization: 'uppercase'
+    }))
   },
   /* Generates all general codes for the server
   three codes:
@@ -47,7 +53,7 @@ module.exports = {
   @param {Function} callback - function to call after generation
   */
   generateCodes:function(callback){
-    module.exports.generateCustomKey(function(gk){
+    module.exports.generateCustomKey(20, function(gk){
       var codes =
       {general_key:gk};
       serverFunctions.updateServerinfo(codes,function(){
@@ -141,44 +147,33 @@ module.exports = {
   @param {Function} callback - function to call IN CASE where then toekn is updated
   */
   updateUserAuth:function(res,user_id, callback){
-    module.exports.generateCustomKey(function(token){
-      serverFunctions.updateUserAuth(user_id,token,function(error, token){
-        if(error){
-          module.exports.structuralError(res, error)
-        }
-        else{
+    module.exports.generateCustomKey(20,function(token){
+      serverFunctions.updateUserAuth(user_id,token,function(st,si,token){
+        module.exports.handleErrors(res,st,si,function(){
           callback(token)
-        }
+        })
       })
     });
   },
-
   attemptLogin:function(res,data, callback){
     if(data.user_name == undefined ||data.user_password == undefined ){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
     }
     else{
-      serverFunctions.attemptLogin(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
-        if(structural_error){
-          module.exports.structuralError(res, structural_error)
-        }
-        else if(simple_error){
-          module.exports.simpleError(res, simple_error)
-        }
-        else{
-          callback(user_id)
-        }
-      })
+      callback()
     }
   },
-  loginUser(res, user_id, callback){
-    serverFunctions.updateUserStatus(user_id, status.idle, function(error){
-      if(error){
-        module.exports.structuralError(res, error)
-      }
-      else{
-        callback()
-      }
+  loginUser(res, data, callback){
+    serverFunctions.login(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
+      module.exports.handleErrors(res,structural_error,simple_error,function(){
+        serverFunctions.updateUserStatus(user_id, status.idle, function(st, si){
+          module.exports.handleErrors(res,st,si,function(){
+            module.exports.updateUserAuth(res, user_id,function(token){
+              callback(token)
+            })
+          })
+        })
+      })
     })
   },
   attemptCheckUsername:function(res, data, callback){
@@ -234,7 +229,7 @@ module.exports = {
               }
               //forgot password
               else{
-                module.exports.generateCustomKey(function(newPassword){
+                module.exports.generateCustomKey(20, function(newPassword){
                   module.exports.updatePassword(res,user_id,newPassword, function(){
                     mail.sendForgotPasswordEmail({newPassword:newPassword},data.user_email, function(sm_struct, sm_simple){
                       module.exports.handleErrors(res, sm_struct, sm_simple, function(){
@@ -319,22 +314,27 @@ module.exports = {
         module.exports.structuralError(res, "An Error occured")
       }
       else if(simple){
-        module.exports.generateUserID(res, function(user_id){
-          bcrypt.genSalt(10, function(salt_err, salt) {
-            bcrypt.hash(user_id+""+data.user_password, salt, function(has_err, hash) {
-              module.exports.generateCustomKey(function(verification_key){
-                var new_user_data = {
-                  user_id:user_id,
-                  user_name:data.user_name,
-                  user_password:hash,
-                  user_email:data.user_email,
-                  user_verification_key:verification_key
-                }
-                serverFunctions.createUser(new_user_data,function(struct_err, simple_err){
-                  module.exports.handleErrors(res, struct_err, simple_err, function(){
-                    mail.sendWelcomeemail(new_user_data,new_user_data.user_email, function(sm_struct, sm_simple){
-                      module.exports.handleErrors(res, sm_struct, sm_simple, function(){
-                        callback()
+
+        serverFunctions.checkUsername(data.user_name,function(cu_st, cu_si){
+          module.exports.handleErrors(res, cu_st, cu_si, function(){
+            module.exports.generateUserID(res, function(user_id){
+              bcrypt.genSalt(10, function(salt_err, salt) {
+                bcrypt.hash(user_id+""+data.user_password, salt, function(has_err, hash) {
+                  module.exports.generateCustomKey(20, function(verification_key){
+                    var new_user_data = {
+                      user_id:user_id,
+                      user_name:data.user_name,
+                      user_password:hash,
+                      user_email:data.user_email,
+                      user_verification_key:verification_key
+                    }
+                    serverFunctions.createUser(new_user_data,function(struct_err, simple_err){
+                      module.exports.handleErrors(res, struct_err, simple_err, function(){
+                        mail.sendWelcomeemail(new_user_data,new_user_data.user_email, function(sm_struct, sm_simple){
+                          module.exports.handleErrors(res, sm_struct, sm_simple, function(){
+                            callback()
+                          })
+                        })
                       })
                     })
                   })
@@ -343,6 +343,7 @@ module.exports = {
             })
           })
         })
+
       }
       else{
         module.exports.simpleError(res, "An account with that email is already registered.")
@@ -350,18 +351,18 @@ module.exports = {
     })
   },
   generateUserID:function(res,callback){
-    var user_id =  (Math.floor(Math.random() * 16777216)+1).toString(16).toUpperCase();
-    serverFunctions.getUserData(false, user_id, function(struct, simple){
-      if(struct){
-        module.exports.structuralError(res, "An Error occured")
-      }
-      else if(simple){
-        callback(user_id)
-      }
-      else{
-        module.exports.generateUserID(res, callback)
-      }
-
+    module.exports.generateID(function(user_id){
+      serverFunctions.getUserData(false, user_id, function(struct, simple){
+        if(struct){
+          module.exports.structuralError(res, "An Error occured")
+        }
+        else if(simple){
+          callback(user_id)
+        }
+        else{
+          module.exports.generateUserID(res, callback)
+        }
+      })
     })
   },
   attemptVerify:function(req, res, callback){
@@ -387,6 +388,13 @@ module.exports = {
           }
         })
       }
+    })
+  },
+  logOff:function(user_id, callback){
+    serverFunctions.updateUserStatus(user_id,status.not, function(st, si){
+      module.exports.handleErrors(res, st, si, function(){
+        callback()
+      })
     })
   },
   /* HTTP response when there is a structural issue with the request

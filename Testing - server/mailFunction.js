@@ -83,7 +83,7 @@ module.exports = {
   },
   sendWelcomeemail:function(data, email, callback){
     var subject = 'Welcome from Vierve!'
-    var html = '<h1>Welcome to Vierve @'+data.user_name+'!</h1> <p>Click the link below to activate your account.</p><a href="https://server.vierve.com/verifyEmail?user_name='+data.user_name+'&hash='+data.user_verification_key+'">Click Here </a><p></p>'
+    var html = '<h1>Welcome to Vierve @'+data.user_name+'!</h1> <p>Click the link below to activate your account.</p><a href="http://localhost:3000/verify?user_name='+data.user_name+'&hash='+data.user_verification_key+'">Click Here </a><p></p>'
     module.exports.sendMail(email,subject, html, callback)
   },
   sendForgotUsernameEmail:function(data, email, callback){
