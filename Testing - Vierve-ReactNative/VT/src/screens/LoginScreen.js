@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, Image } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
-// import Db_Helper_User from '../utils/Db_Helper_User';
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 class LoginScreen extends Component{
 	static navigatorStyle = {
@@ -18,6 +18,9 @@ class LoginScreen extends Component{
     	usernameValue: '',
     	rememberUser: false,
   	};
+	}
+
+	componentDidMount() {
 	}
 
 	AttemptSignIn = () => {
