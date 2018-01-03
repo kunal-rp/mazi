@@ -10,6 +10,7 @@ var serverFunctions = require('./serverFunctions.js');
 var db = require('./DBPoolConnection.js')
 var connectionPool = db.getPool();
 var gen = require('./generalFunction.js')
+var action = require('./actionFunctions.js')
 
 //Ensures server continues to run if any exception occurs. Will have to come up with a better system in the future
 process.on('uncaughtException', function (err) {
@@ -69,14 +70,11 @@ app.post('/login',function(req,res){
   //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req, res, function(data){
     //attempts login with the passed username and password values
-    gen.attemptLogin(res,data, function(user_id){
+    gen.attemptLogin(res,data, function(){
       //perform login match Operations
-      gen.loginUser(res,user_id, function(){
-        //updates the user with new auth token
-        gen.updateUserAuth(res,user_id, function(token){
+      gen.loginUser(res,data, function(token){
           //return valid response
           gen.validResponse(res,"Sucsessful Login", {auth_token:token})
-        })
       })
     })
   })
@@ -131,6 +129,12 @@ app.post('/reset',function(req,res){
   })
 })
 
+app.post('/action',function(req, res){
+  gen.checkReqSpecific(req, res, function(data){
+    action.handleAction(res, data)
+  })
+})
+
 app.post('/updateUser',function(req, res){
   gen.checkReqSpecific(req, res, function(data){
     gen.attemptUpdateUser(res, data, function(){
@@ -140,26 +144,9 @@ app.post('/updateUser',function(req, res){
     })
   })
 })
-
-
-app.get('/update',function(req, res){
-  gen.checkReqSpecific(req, res, function(data){
-    var user_id = data.user_id
-    gen.updateUserAuth(user_id,function(error,token){
-      if(error){
-        gen.strucuralError(res, "An Error Occured. We apologize!")
-      }
-      else{
-        console.log(user_id + " Update Auth Token : "+token )
-        gen.validResponse(res,"Auth Code Updated" )
-      }
-    })
-  })
-});
-
+//Change
 app.post('/addSuggestion',function(req,res){
   gen.checkReqSpecific(req,res,function(data){
-    data['user_id'] = data.user_id
     serverFunctions.addSuggestion(data,function(err){
       if(err){
         gen.strucuralError(res, "Sorry! An Error Occured")
@@ -200,19 +187,13 @@ function getPropData(callback){
 
 
 /*
-var wss = new WebSocketServer({server: server})
+var ws = new WebSocketServer({server: server})
 console.log("websocket server created")
 
-wss.on("connection", function(ws) {
-var id = setInterval(function() {
-ws.send(JSON.stringify(new Date()), function() {  })
-}, 1000)
+ws.on("connection", function(ws) {
 
-console.log("websocket connection open")
 
-ws.on("close", function() {
-console.log("websocket connection close")
-clearInterval(id)
-})
+
+
 })
 */

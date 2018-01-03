@@ -1,5 +1,7 @@
 /*
-Googel maps API - AIzaSyAxd3Map2ywV6pBHK1zDSj2CRYVObC6ZVM
+
+This server runs on the viervetesting server
+
 */
 
 var express = require('express');
@@ -27,7 +29,7 @@ app.use(express.static('public'));
 
 var io = socket(server);
 //Connection to SQL DB
-//NEED to create two seperate connections for user_prim and general uses for security 
+//NEED to create two seperate connections for user_prim and general uses for security
 var connectionPool = mysql.createPool({
 	connectionLimit:50,
 	host: 'localhost',
@@ -46,14 +48,17 @@ app.use(express.static('public'));
 
 var io = socket(server);
 
+
+
+
 //Connection to SQL DB
-//NEED to create two seperate connections for user_prim and general uses for security 
+//NEED to create two seperate connections for user_prim and general uses for security
 var connectionPool = mysql.createPool({
     connectionLimit:15,
     host: 'us-cdbr-iron-east-05.cleardb.net',
-    user: 'bec24a7d950033',
-    password: '2daa4275',
-    database: 'heroku_f95ea9c68d995b3'
+    user: 'be2dc1ca221639',
+    password: 'fec19350',
+    database: 'heroku_f8591a71a3ab38e'
 });
 
 
@@ -67,7 +72,7 @@ var table_user_gen = 'user_gen';
 var table_suggestion = 'suggestions'
 var table_events = 'events'
 
-//holds realtime client data 
+//holds realtime client data
 var clients = {};
 
 //var number_college = {};
@@ -75,7 +80,7 @@ var transporter = nodemailer.createTransport( {
     service:  'Mailgun',
     auth: {
         user: 'postmaster@vierve.com',
-        pass: 'El65ZPAjjNcqp2VaTDQ5'   
+        pass: 'El65ZPAjjNcqp2VaTDQ5'
     }
 });
 
@@ -105,6 +110,87 @@ setInterval(function(){
 }, 6000);
 */
 
+app.get('/',function(req,res, next){
+  res.sendFile(path.join(__dirname, '/public', 'index.html'));
+})
+
+app.get('/getPropData',function(req,res){
+  getPropData(function(ids, data){
+    res.send(JSON.stringify({ids:ids , data : data},null,'\n'));
+  });
+});
+
+//testing the mysql concurrent data
+app.get('/data',function(req,res){
+  getCollegeParkingData(function(code, collegeData,parkinglotData){
+    res.send(JSON.stringify({code:code, cd : collegeData,pd:parkinglotData},null,'\n'));
+  });
+});
+
+
+function getCollegeParkingData(callback){
+  var initial_data = {};
+  var college_data;
+  var parkinglot_data;
+  var code;
+  var query_getCollegeData = "Select * From "+ table_college_info;
+  connectionPool.query( query_getCollegeData , function(err,results) {
+      if(err){
+          console.log("ERROR | checkVersion |  sql query |"+err+"|"+query)
+
+      }
+      else{
+          var final = {};
+          var array = [];
+          for(i=0;i < results.length; i++){
+              array.push(results[i]['college_id']);
+              final[results[i]['college_id']] =
+              {
+                  college_name : results[i]['college_name'],
+                  college_version: results[i]['college_version'],
+                  college_coor_lat : results[i]['college_coor_lat'],
+                  college_coor_lng : results[i]['college_coor_lng'],
+                  college_ride_limit : results[i]['ride_limit'],
+                  college_park_limit : results[i]['park_limit']
+              };
+          }
+          final['ids'] = array;
+          initial_data['college_data'] = final;
+          college_data = final
+
+          var query_getParkingdata = "Select * from "+table_parkinglot_info;
+          connectionPool.query(query_getParkingdata, function(err2,results2){
+              if(err2){
+                  console.log("ERROR | checkVersion |  sql query |"+err2+"|"+query2)
+              }
+              else{
+                  var final2 = {};
+                  var array2 = [];
+                  for(i=0;i < results2.length; i++){
+                      array2.push(results2[i]['parkinglot_id']);
+
+                      var ci = results2[i]['college_id'];
+                      var pi = parseInt(results2[i]['parkinglot_id']);
+
+                      var temp2 = {};
+                      temp2 =
+                      {parkinglot_name : results2[i]['parkinglot_name'],
+                      coor_lat : results2[i]['coor_lat'],
+                      coor_lng : results2[i]['coor_lng'],
+                      college_id : results2[i]['college_id']};
+                      final2[pi] = temp2;
+                  }
+                  final2['ids'] = array2;
+                  initial_data['parking_data'] = final2;
+                  parkinglot_data = final2;
+                  initial_data['code'] = 2;
+                  code = 2;
+                  callback(code, college_data,parkinglot_data)
+              }
+          });
+      }
+  });
+}
 
 
 app.get('/getCodes',function(req,res){
@@ -116,9 +202,35 @@ app.get('/getCodes',function(req,res){
         else{
             res.json({token:jwt.sign(codes,'vierve_device_KRP')})
         }
-    }); 
+    });
 });
 
+function getPropData(callback){
+  var final = {}
+  var ids = []
+  var query_get_prop_data = "SELECT * FROM `"+table_connection+"` ORDER BY RAND() LIMIT 10"
+  connectionPool.query(query_get_prop_data, function(error,results){
+      if(error){
+          console.log("ERROR | getPropData | sql query \n "+error+" \n"+query_get_prop_data)
+          callback(null, null)
+      }
+      else{
+        for(i=0;i < results.length; i++){
+          ids.push(results[i]['index_room_name'])
+          final[results[i]['index_room_name']] = {
+            parkinglot_id : results[i]['parkinglot_id'],
+            parker_lat:results[i]['parker_lat'],
+            parker_lng:results[i]['parker_lng'],
+            pu_lat:results[i]['pu_lat'],
+            pu_lng:results[i]['pu_lng'],
+            time_saved:10 + Math.round(Math.random()+1)
+          }
+        }
+        callback(ids, final)
+      }
+    })
+
+}
 
 /*
 used to verify the emailo accoutns; this url would be sent out to the user's email
@@ -178,7 +290,7 @@ app.get('/verifyEmail',function (req,res) {
                                 //in case of invalid salt
                                 else{
                                     console.log("verifyEmail | invalid hash |"+given_user_name + "-"+given_hash)
-                                    res.sendFile(path.join(__dirname, '/public', 'error.html'));  
+                                    res.sendFile(path.join(__dirname, '/public', 'error.html'));
                                 }
                             }
                         }
@@ -187,7 +299,7 @@ app.get('/verifyEmail',function (req,res) {
             }
             connection.release()
         }
-    }); 
+    });
 });
 
 
@@ -204,14 +316,14 @@ app.get('/checkUser',function (req,res) {
     else{
         jwt.verify(req.get("token"), codes[req.get("user_type")], function(err, decoded) {
             if(err){
-                console.log("ERROR | checkUser | verifyToken | "+err)                       
+                console.log("ERROR | checkUser | verifyToken | "+err)
                 res.json({code:0 , message:"Please Restart.\n Error Authenticating Token"})
             }
             else{
 
                 if(decoded.user_name == undefined ||decoded.user_password == undefined ){
                     res.json({code: 0, message: " Parameters not meet"});
-                    console.log("checkUser | tokenData Parameters not met ")                                    
+                    console.log("checkUser | tokenData Parameters not met ")
                 }
                 else{
                     var given_user_name = decoded.user_name;
@@ -220,7 +332,7 @@ app.get('/checkUser',function (req,res) {
 
                     connectionPool.getConnection(function(connection_error,connection){
                         if(connection_error){
-                            console.log("ERROR | checkUser | connectionError | "+connection_error)                      
+                            console.log("ERROR | checkUser | connectionError | "+connection_error)
                             connection.release()
                             res.json({code:0,message:"Cannot Establish DB Connection"});
                         }
@@ -266,7 +378,7 @@ app.get('/checkUser',function (req,res) {
                                                         else{
                                                             res.json({code:0,message:"User email Not Verified.\nPlease Verify Email"});
                                                             console.log("checkUser | email not verified |"+given_user_name )
-                                                        } 
+                                                        }
                                                     }
                                                 }
                                                 else{
@@ -301,13 +413,13 @@ app.get('/addSuggestion',function (req,res) {
     else{
         jwt.verify(req.get("token_user"), codes[req.get("user_type")], function(err_verify_user, decoded_verify_user) {
             if(err_verify_user){
-                console.log("ERROR | addSuggestion | tokenVerifyError general | "+err_verify_user)                          
+                console.log("ERROR | addSuggestion | tokenVerifyError general | "+err_verify_user)
                 res.json({code:0 , message:"Please Restart.\n Error Authenticating Token"})
             }
             else{
                 jwt.verify(req.get("token_data"), clients[decoded_verify_user.user_id].auth_code, function(err, decoded) {
                     if(err){
-                        console.log("ERROR | addSuggestion | tokenVerifyError user | "+err)                         
+                        console.log("ERROR | addSuggestion | tokenVerifyError user | "+err)
                         res.json({code:0 , message:"Please Restart.\n Error Authenticating Token"})
                     }
                     else{
@@ -323,7 +435,7 @@ app.get('/addSuggestion',function (req,res) {
 
                             connectionPool.getConnection(function(connection_error,connection){
                                 if(connection_error){
-                                    console.log("ERROR | addSuggestion | connectionError| "+connection_error)                           
+                                    console.log("ERROR | addSuggestion | connectionError| "+connection_error)
                                     connection.release()
                                     res.json({code:0,message:"Cannot Establish DB Connection"});
                                 }
@@ -333,7 +445,7 @@ app.get('/addSuggestion',function (req,res) {
                                     var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+user_id)+"',"+timestamp+",'"+user_id+"',"+mysql.escape(type)+","+mysql.escape(system_data)+","+mysql.escape(comment)+")";
                                     connection.query(query_insert_suggestion,function(err, results){
                                         if(err){
-                                            console.log("ERROR | addSuggestion | queryError| "+err + "|"+query_insert_suggestion) 
+                                            console.log("ERROR | addSuggestion | queryError| "+err + "|"+query_insert_suggestion)
                                             res.json({code:0,message:"Error with DB Query"});
                                         }
                                         else{
@@ -361,7 +473,7 @@ app.get('/checkUsername',function(req,res){
     else{
         jwt.verify(req.get("token"), codes[req.get("user_type")], function(err, decoded) {
             if(err){
-                console.log("ERROR | checkusername | tokenVerifyError| "+err) 
+                console.log("ERROR | checkusername | tokenVerifyError| "+err)
                 res.json({code:0 , message:"Please Restart.\n Error Authenticating Token"})
             }
             else{
@@ -372,7 +484,7 @@ app.get('/checkUsername',function(req,res){
                 else{
                     connectionPool.getConnection(function(connection_error,connection){
                         if(connection_error){
-                            console.log("ERROR | checkusername | connectionError| "+connection_error) 
+                            console.log("ERROR | checkusername | connectionError| "+connection_error)
                             connection.release()
                             res.json({code:0,message:"Please Restart.\n Error Establiching DB Connection"});
                         }
@@ -382,7 +494,7 @@ app.get('/checkUsername',function(req,res){
                             var query_user_name_prim = "Select * From "+ table_user_prim + " Where `user_name` = '"+given_user_name+"'";
                             connection.query(query_user_name_prim,function(err_query, results){
                                 if(err_query){
-                                    console.log("ERROR | checkusername | queryError| "+err_query + "|"+query_user_name_prim) 
+                                    console.log("ERROR | checkusername | queryError| "+err_query + "|"+query_user_name_prim)
                                     res.json({code:0,message:"Please Restart.\n Error with DB Query"});
                                 }
                                 else{
@@ -399,7 +511,7 @@ app.get('/checkUsername',function(req,res){
                             });
                             connection.release()
                         }
-                    }); 
+                    });
                 }
             }
         });
@@ -417,13 +529,13 @@ app.get('/updateUser',function(req,res){
     else{
         jwt.verify(req.get("token_user"), codes[req.get("user_type")], function(err_verify_user, decoded_verify_user) {
             if(err_verify_user){
-                console.log("ERROR | updateUser | tokenVerifyError data | "+err_verify_user) 
+                console.log("ERROR | updateUser | tokenVerifyError data | "+err_verify_user)
                 res.json({code:0 , message:"Error Authenticating Token"})
             }
             else{
                 jwt.verify(req.get("token_data"), clients[decoded_verify_user.user_id].auth_code, function(err, decoded) {
                     if(err){
-                        console.log("ERROR | updateUser | tokenVerifyError user | "+err) 
+                        console.log("ERROR | updateUser | tokenVerifyError user | "+err)
                         res.json({code:0 , message:"Error Authenticating Token"})
                     }
                     else{
@@ -439,7 +551,7 @@ app.get('/updateUser',function(req,res){
                             var new_user_name = decoded.new_user_name
                             connectionPool.getConnection(function(connection_error,connection){
                                 if(connection_error){
-                                    console.log("ERROR | updateUser | tokenVerifyError user | "+connection_error) 
+                                    console.log("ERROR | updateUser | tokenVerifyError user | "+connection_error)
                                     connection.release()
                                     res.json({code:0,message:"Error Establishing DB Connection"});
                                 }
@@ -447,13 +559,13 @@ app.get('/updateUser',function(req,res){
                                     var query_get_user = "Select * From "+ table_user_prim + " Where `user_id` = '"+user_id+"' && `user_email`='"+user_email+"'"
                                     connection.query(query_get_user,function(err_get_user,result_get_user){
                                         if(err_get_user){
-                                            console.log("ERROR | updateUser |  sql query | "+err_get_user+"|"+query_get_user) 
+                                            console.log("ERROR | updateUser |  sql query | "+err_get_user+"|"+query_get_user)
                                             res.json({code:0,message:"Error with DB Query"});
                                         }
                                         else{
                                             bcrypt.compare(user_id+ ""+user_password, result_get_user[0]['user_password'], function(password_check_error, password_result) {
                                                 if(password_check_error){
-                                                    console.log("ERROR | updateUser |  password check error | "+password_check_error) 
+                                                    console.log("ERROR | updateUser |  password check error | "+password_check_error)
                                                     res.json({code:0,message:"Error with Password Compare"});
                                                 }
                                                 else{
@@ -463,11 +575,11 @@ app.get('/updateUser',function(req,res){
                                                                 var query_update_user = "UPDATE `"+table_user_prim + "` SET `user_name`='"+new_user_name+"',`user_password`= '"+hash+"' WHERE `user_id`='"+user_id+"'";
                                                                 connection.query(query_update_user,function(err,result){
                                                                     if(err){
-                                                                        console.log("ERROR | updateUser |  sql query | "+err+"|"+query_update_user) 
+                                                                        console.log("ERROR | updateUser |  sql query | "+err+"|"+query_update_user)
                                                                         res.json({code:0,message:"Error with DB Query"});
                                                                     }
                                                                     else{
-                                                                        console.log("updateUser |  sucsess") 
+                                                                        console.log("updateUser |  sucsess")
                                                                         res.json({code:1,new_user_name:new_user_name,new_user_password : new_user_password})
                                                                     }
                                                                 })
@@ -475,7 +587,7 @@ app.get('/updateUser',function(req,res){
                                                         });
                                                     }
                                                     else{
-                                                        console.log(" updateUser |  invalid password") 
+                                                        console.log(" updateUser |  invalid password")
                                                         res.json({code:0,message:"Invalid Password"});
                                                     }
                                                 }
@@ -498,18 +610,18 @@ app.get('/resetCredential',function(req,res){
 
     if(req.get("token") == undefined ||req.get("user_type") == undefined || codes[req.get("user_type")] == undefined){
         res.json({code: 0, message: "Parameters not meet"});
-        console.log("resetCredential |  parameters not met") 
+        console.log("resetCredential |  parameters not met")
     }
     else{
         jwt.verify(req.get("token"), codes[req.get("user_type")], function(err, decoded) {
             if(err){
-                console.log("ERROR | resetCredential |  tokenVerifyError | "+err) 
+                console.log("ERROR | resetCredential |  tokenVerifyError | "+err)
                 res.json({code:0 , message:"Error Authenticating Token"})
             }
             else{
 
                 if(decoded.user_email == undefined || decoded.type_forget == undefined ){
-                    console.log("resetCredential | parameters not met") 
+                    console.log("resetCredential | parameters not met")
                     res.json({code: 0, message: "Parameters not meet"});
                 }
                 else{
@@ -517,7 +629,7 @@ app.get('/resetCredential',function(req,res){
                     var type_forget = decoded.type_forget
                     connectionPool.getConnection(function(connection_error,connection){
                         if(connection_error){
-                            console.log("ERROR | resetCredential |  connectionError | "+connection_error) 
+                            console.log("ERROR | resetCredential |  connectionError | "+connection_error)
                             connection.release()
                             res.json({code:0,message:"Error Establishing DB Connection"});
                         }
@@ -525,17 +637,17 @@ app.get('/resetCredential',function(req,res){
                             var query_get_user = "Select * From "+ table_user_prim + " Where `user_email`='"+user_email+"'"
                             connection.query(query_get_user,function(err_get_user,result_get_user){
                                 if(err_get_user){
-                                    console.log("ERROR | resetCredential |  sql query error | "+err_get_user + "|"+query_get_user) 
+                                    console.log("ERROR | resetCredential |  sql query error | "+err_get_user + "|"+query_get_user)
                                     res.json({code:0,message:"Error with DB Query"});
                                 }
                                 else{
                                     if(result_get_user.length == 0){
-                                        console.log(" resetCredential |  no email match") 
+                                        console.log(" resetCredential |  no email match")
                                         res.json({code:0,message:"No Email Matched in our Records"});
                                     }
                                     else{
                                         if(result_get_user[0]['email_verified'] == 0){
-                                            console.log("resetCredential |  email not verified") 
+                                            console.log("resetCredential |  email not verified")
                                             res.json({code:0,message:"This email still needs to be verified.\n Please login into this email and verify"});
                                         }
                                         else{
@@ -550,14 +662,14 @@ app.get('/resetCredential',function(req,res){
                                                 };
                                                 transporter.sendMail(mailOpts, function (err2, response) {
                                                     if (err2) {
-                                                        console.log("ERROR | resetCredential |  sending email | "+err2) 
+                                                        console.log("ERROR | resetCredential |  sending email | "+err2)
 
                                                     } else {
-                                                        console.log(" resetCredential | forgotUsernameEmailSent | "+user_email + " - "+user_name) 
+                                                        console.log(" resetCredential | forgotUsernameEmailSent | "+user_email + " - "+user_name)
                                                     }
                                                 })
                                                 res.json({code:1});
-                                                console.log(" resetCredential |  sucsess") 
+                                                console.log(" resetCredential |  sucsess")
                                             }
                                             else if(type_forget== 'password'){
                                                 generateNewPassword(10,function(newPassword){
@@ -566,7 +678,7 @@ app.get('/resetCredential',function(req,res){
                                                             var query_update_user = "UPDATE `"+table_user_prim + "` SET `user_password`= '"+hash+"' WHERE `user_id`='"+user_id+"'";
                                                             connection.query(query_update_user,function(err,result){
                                                                 if(err){
-                                                                    console.log("ERROR | resetCredential |  sql error | "+err + "|"+query_update_user) 
+                                                                    console.log("ERROR | resetCredential |  sql error | "+err + "|"+query_update_user)
                                                                     res.json({code:0,message:"Error with DB Query"});
                                                                 }
                                                                 else{
@@ -578,14 +690,14 @@ app.get('/resetCredential',function(req,res){
                                                                     };
                                                                     transporter.sendMail(mailOpts, function (err2, response) {
                                                                         if (err2) {
-                                                                            console.log("ERROR | resetCredential |  sending email | "+err2) 
+                                                                            console.log("ERROR | resetCredential |  sending email | "+err2)
 
                                                                         } else {
-                                                                            console.log(" resetCredential | forgotPasswordEmailSent | "+user_email + " - "+user_name) 
+                                                                            console.log(" resetCredential | forgotPasswordEmailSent | "+user_email + " - "+user_name)
                                                                         }
                                                                     })
                                                                     res.json({code:1})
-                                                                    console.log(" resetCredential sucsess") 
+                                                                    console.log(" resetCredential sucsess")
                                                                 }
                                                             })
                                                         });
@@ -618,7 +730,7 @@ function generateNewPassword(size,callback){
         else{
             callback(text)
         }
-    }    
+    }
 }
 
 
@@ -626,30 +738,30 @@ app.get('/createUser',function (req,res) {
 
     if(req.get("token") == undefined ||req.get("user_type") == undefined || codes[req.get("user_type")] == undefined){
         res.json({code: 0, message: "Parameters not met"});
-        console.log(" createuser | parameters not met ") 
+        console.log(" createuser | parameters not met ")
     }
     else{
         jwt.verify(req.get("token"), codes[req.get("user_type")], function(err, decoded) {
             if(err){
-                console.log("ERROR |createUser | tokenVerifyError | "+err ) 
+                console.log("ERROR |createUser | tokenVerifyError | "+err )
                 res.json({code:0 , message:"Error Authenticating Token"})
             }
             else{
                 var data = {}
                 if(decoded.user_name == undefined ||decoded.user_password == undefined ||decoded.user_email == undefined || decoded.promo_user == undefined ){
                     res.json({code: 0, message: "Parameters not met"});
-                    console.log(" createUser | parameters not met") 
+                    console.log(" createUser | parameters not met")
                 }
                 else{
                     validator.check(req.query.user_email , function(valid_email_err, valid) {
                         if (valid_email_err){
-                            console.log("ERROR | createUser | validate email | "+valid_email_err) 
+                            console.log("ERROR | createUser | validate email | "+valid_email_err)
                             res.json({code:0,message:"Validating Email Error"});
                         }
                         else{
                             if(valid == false){
                                 res.json({code:0,message:"Invalid Email"});
-                                console.log("createUser | invalid email") 
+                                console.log("createUser | invalid email")
                             }
                             else{
                                 data.user_name = (decoded.user_name).toLowerCase();
@@ -659,7 +771,7 @@ app.get('/createUser',function (req,res) {
 
                                 connectionPool.getConnection(function(connection_error,connection){
                                     if(connection_error){
-                                        console.log("ERROR | createUser | connection error | "+connection_error) 
+                                        console.log("ERROR | createUser | connection error | "+connection_error)
                                         res.json({code:0,message:"Error with Establishing DB Connection"});
                                         connection.release()
                                     }else{
@@ -677,7 +789,7 @@ app.get('/createUser',function (req,res) {
                                                 else{
                                                     generateUserID(data,connection,function(err){
                                                         if(err){
-                                                            console.log("ERROR | createUser | user creation  | "+err) 
+                                                            console.log("ERROR | createUser | user creation  | "+err)
                                                             res.json({code:0,message:"User could not be created"});
                                                         } else {
                                                             console.log("userCreated |"+data.toString())
@@ -690,10 +802,10 @@ app.get('/createUser',function (req,res) {
                                                             };
                                                             transporter.sendMail(mailOpts, function (err2, response) {
                                                                 if (err2) {
-                                                                    console.log("ERROR | createUser | sending email | "+err2) 
+                                                                    console.log("ERROR | createUser | sending email | "+err2)
                                                                 } else {
                                                                     console.log("Email Verification sent to "+ data.user_email)
-                                                                    console.log("createUser | email verification sent | "+data.user_email) 
+                                                                    console.log("createUser | email verification sent | "+data.user_email)
                                                                 }
                                                             })
 
@@ -754,28 +866,28 @@ function generateUserID(data,connection,callback){
 function addUser(data,connection,callback){
     var user_id = data.user_id;
     var user_name = data.user_name;
-    var user_email = data.user_email; 
+    var user_email = data.user_email;
     var user_password = data.user_password;
     var salt = data.main_salt;
     var query_add_prim = "INSERT INTO "+table_user_prim + "(`user_id`, `user_name`, `user_email`, `user_password`, `email_verified`,`main_salt`,`create_timestamp`) VALUES('"+user_id+"','"+user_name+"','"+user_email+"','"+user_password+"',0,'"+salt+"',"+Math.round((new Date()).getTime() / 1000)+")";
     connection.query( query_add_prim , function(err_prim,results_prim) {
-        if(err_prim){    
+        if(err_prim){
             console.log("ERROR | inserting new user prim |"+err_prim + "|"+query_add_prim)
             callback(err_prim)
         }
         else{
-            
+
             var query_gen = "INSERT INTO "+table_user_gen + "(`user_id`,`rating`,`total_matches`) VALUES('"+user_id+"',5,0)";
             connection.query( query_gen , function(err_gen,results_gen) {
-                if(err_gen){    
+                if(err_gen){
                     console.log("ERROR | inserting new user gen |"+err_gen + "|"+query_gen)
                     callback(err_gen)
-                }  
+                }
                 else{
                     updatePromoUserId(data,connection,callback);
-                }  
+                }
             });
-        }  
+        }
     });
 }
 
@@ -791,13 +903,13 @@ function updatePromoUserId(data,connection,callback){
                 callback(err_update_promo)
             }else{
                 callback(null)
-            }   
+            }
         });
     }
     else{
         var query_prim = "SELECT * FROM "+table_user_prim+" WHERE `user_name`='"+promo_user_name+"'";
         connection.query( query_prim , function(err_prim,results_prim) {
-            if(err_prim){    
+            if(err_prim){
                 console.log("ERROR | getPromoUserId |"+err_prim + "|"+query_prim)
                 callback(err_prim)
             }
@@ -813,12 +925,12 @@ function updatePromoUserId(data,connection,callback){
                             callback(err_update_promo)
                         }else{
                             callback(null)
-                        }   
+                        }
 
                     });
                 }
-                
-            }  
+
+            }
         });
     }
 }
@@ -836,22 +948,22 @@ app.get('/getEvents',function (req,res) {
     else{
         jwt.verify(req.get("token"), codes[req.get("user_type")], function(err, decoded) {
             if(err){
-                console.log("ERROR | checkUser | verifyToken | "+err)                       
+                console.log("ERROR | checkUser | verifyToken | "+err)
                 res.json({code:0 , message:"Please Restart.\n Error Authenticating Token"})
             }
             else{
-                
+
                 var query_events = "SELECT * FROM `"+table_events+"`";
 
                 connectionPool.getConnection(function(connection_error,connection){
                     if(connection_error){
-                        console.log("ERROR | getEvents |  connectionError |"+connection_error) 
+                        console.log("ERROR | getEvents |  connectionError |"+connection_error)
                         res.json({code:0,message:"Error with Esatblishing DB Connection"});
                         connection.release()
                     }else{
                         connection.query(query_events,function(err, results){
                             if(err){
-                                console.log("ERROR | getEvents |  sql query |"+err+"|"+query) 
+                                console.log("ERROR | getEvents |  sql query |"+err+"|"+query)
                                 res.json({code:0,message:"Error with DB Query"});
                                 connection.release();
                             }
@@ -865,7 +977,7 @@ app.get('/getEvents',function (req,res) {
                                     }
                                 }
                                 res.json(end)
-                                
+
                             }
                         });
                         connection.release()
@@ -885,24 +997,24 @@ app.get('/checkVersion',function (req,res) {
 
     if(req.get("token_user") == undefined ||req.get("token_data") == undefined ||req.get("user_type") == undefined || codes[req.get("user_type")] == undefined){
         res.json({code: 0, message: "Parameters not meet"});
-        console.log(" checkVersion | parameters not met ") 
+        console.log(" checkVersion | parameters not met ")
     }
     else{
         jwt.verify(req.get("token_user"), codes[req.get("user_type")], function(err_verify_user, decoded_verify_user) {
             if(err_verify_user){
-                console.log("ERROR | checkVersion |  tokenVerifyError data |"+err_verify_user) 
+                console.log("ERROR | checkVersion |  tokenVerifyError data |"+err_verify_user)
                 res.json({code:0 , message:"Error Authenticating Token"})
             }
             else{
                 jwt.verify(req.get("token_data"), clients[decoded_verify_user.user_id].auth_code, function(err, decoded) {
                     if(err){
-                        console.log("ERROR | checkVersion |  tokenVerifyError user |"+err) 
+                        console.log("ERROR | checkVersion |  tokenVerifyError user |"+err)
                         res.json({code:0 , message:"Error Authenticating Token"})
                     }
                     else{
 
                         if(decoded.ver == undefined){
-                            console.log("checkVersion |  parameters not met") 
+                            console.log("checkVersion |  parameters not met")
                             res.json({code: 0, message: "Parameters not met"});
                         }
                         else{
@@ -911,14 +1023,14 @@ app.get('/checkVersion',function (req,res) {
 
                             connectionPool.getConnection(function(connection_error,connection){
                                 if(connection_error){
-                                    console.log("ERROR | checkVersion |  connectionError |"+connection_error) 
+                                    console.log("ERROR | checkVersion |  connectionError |"+connection_error)
                                     res.json({code:0,message:"Error with Esatblishing DB Connection"});
                                     connection.release()
                                 }else{
 
                                     connection.query(query,function(err, results){
                                         if(err){
-                                            console.log("ERROR | checkVersion |  sql query |"+err+"|"+query) 
+                                            console.log("ERROR | checkVersion |  sql query |"+err+"|"+query)
                                             res.json({code:0,message:"Error with DB Query"});
                                             connection.release();
                                         }
@@ -931,7 +1043,7 @@ app.get('/checkVersion',function (req,res) {
                                             }
 
                                             if(version_number == req.query.ver){
-                                                console.log(" checkVersion |  sucsess") 
+                                                console.log(" checkVersion |  sucsess")
                                                 res.json({code:1});
                                                 connection.release();
                                             }
@@ -940,15 +1052,15 @@ app.get('/checkVersion',function (req,res) {
                                                 var query = "Select * From "+ table_college_info;
                                                 connection.query( query , function(err,results) {
                                                     if(err){
-                                                        console.log("ERROR | checkVersion |  sql query |"+err+"|"+query) 
+                                                        console.log("ERROR | checkVersion |  sql query |"+err+"|"+query)
                                                         connection.release();
                                                     }
-                                                    else{ 
+                                                    else{
                                                         var final = {};
                                                         var array = [];
                                                         for(i=0;i < results.length; i++){
                                                             array.push(results[i]['college_id']);
-                                                            final[results[i]['college_id']] = 
+                                                            final[results[i]['college_id']] =
                                                             {
                                                                 college_name : results[i]['college_name'],
                                                                 college_version: results[i]['college_version'],
@@ -964,7 +1076,7 @@ app.get('/checkVersion',function (req,res) {
                                                         var query2 = "Select * from "+table_parkinglot_info;
                                                         connection.query(query2, function(err2,results2){
                                                             if(err2){
-                                                                console.log("ERROR | checkVersion |  sql query |"+err2+"|"+query2) 
+                                                                console.log("ERROR | checkVersion |  sql query |"+err2+"|"+query2)
                                                             }
                                                             else{
                                                                 var final2 = {};
@@ -976,7 +1088,7 @@ app.get('/checkVersion',function (req,res) {
                                                                     var pi = parseInt(results2[i]['parkinglot_id']);
 
                                                                     var temp2 = {};
-                                                                    temp2 = 
+                                                                    temp2 =
                                                                     {parkinglot_name : results2[i]['parkinglot_name'],
                                                                     coor_lat : results2[i]['coor_lat'],
                                                                     coor_lng : results2[i]['coor_lng'],
@@ -1048,7 +1160,7 @@ function newConnection(socket){
 
     socket.on('getUserStatus',function(){
         getUserStatus(socket.user_id);
-    });    
+    });
 
     function getUserStatus(user_id){
         console.log("Get Status : \n"+ JSON.stringify(clients[socket.user_id]))
@@ -1079,7 +1191,7 @@ function newConnection(socket){
                     rider_user_id:  clients[socket.user_id].rider_user_id,
                     rider_user_name: clients[socket.user_id].rider_user_name,
                     parker_user_id: clients[socket.user_id].parker_user_id,
-                    parker_user_name: clients[socket.user_id].parker_user_name  
+                    parker_user_name: clients[socket.user_id].parker_user_name
                 });
             }
         }
@@ -1090,8 +1202,8 @@ function newConnection(socket){
             }
             else if(status == 'waiting_match'){
                 socket.broadcast.to(clients[user_id].socket_id).emit('updateStatus',{status: status,
-                    selected_college:clients[user_id].selected_college , 
-                    selected_parkinglot:clients[user_id].selected_parkinglot, 
+                    selected_college:clients[user_id].selected_college ,
+                    selected_parkinglot:clients[user_id].selected_parkinglot,
                     client_type:clients[user_id].client_type});
             }
             else if(status == 'matched'){
@@ -1113,7 +1225,7 @@ function newConnection(socket){
                     rider_user_id:  clients[user_id].rider_user_id,
                     rider_user_name: clients[user_id].rider_user_name,
                     parker_user_id: clients[user_id].parker_user_id,
-                    parker_user_name: clients[user_id].parker_user_name  
+                    parker_user_name: clients[user_id].parker_user_name
                 });
             }
         }
@@ -1233,7 +1345,7 @@ function newConnection(socket){
                 console.log(user_id + " request canceled ")
                 callback()
             }
-        }); 
+        });
     }
 
     function matchOperations(user_id,mirror_user_id){
@@ -1313,7 +1425,7 @@ function newConnection(socket){
 
 socket.on('joinRoom',function(data){
     joinRoom();
-    var mirror_user_id = clients[socket.user_id].parker_user_id 
+    var mirror_user_id = clients[socket.user_id].parker_user_id
     if(clients[socket.user_id].rider_user_id != socket.user_id ){
         mirror_user_id = clients[socket.user_id].rider_user_id
     }
@@ -1370,8 +1482,8 @@ function userAtPickup(){
     if( clients[rider_user_id] != undefined && clients[parker_user_id] != undefined &&clients[rider_user_id].closeToPickup == true && clients[parker_user_id].closeToPickup == true && (clients[rider_user_id].confirmed == undefined && clients[parker_user_id].confirmed == undefined)){
         clients[rider_user_id].confirmed = false;
         clients[parker_user_id].confirmed = false;
-        io.to(clients[socket.user_id]["room_name"]).emit('issueConfirmation',{confirmationNumber : Math.floor(Math.random() * (999)) + 100}); 
-        console.log(clients[socket.user_id].room_name + " match issueConfirmation | "+socket.user_id )                               
+        io.to(clients[socket.user_id]["room_name"]).emit('issueConfirmation',{confirmationNumber : Math.floor(Math.random() * (999)) + 100});
+        console.log(clients[socket.user_id].room_name + " match issueConfirmation | "+socket.user_id )
     }
 }
 
@@ -1417,7 +1529,7 @@ function endMatch(type,callback){
         user_2 = clients[socket.user_id]['rider_user_id'] ;
     }
     clients[user_1]["confirmed"] = false
-    clients[user_2]["confirmed"] = false 
+    clients[user_2]["confirmed"] = false
 
     clients[user_1]["match_end_type"] = type
     clients[user_2]["match_end_type"] = type
@@ -1429,13 +1541,13 @@ function endMatch(type,callback){
         }else{
             var query = "INSERT INTO `"+table_connection + "`(`index_room_name`, `college_id`, `parkinglot_id`, `rider_user_id`, `parker_user_id`, `start_timestamp`, `pu_lat`, `pu_lng`,`match_status`) VALUES('" + clients[user_1].room_name + "'," + clients[user_1].selected_college +"," + clients[user_1].selected_parkinglot +",'"+clients[user_1].rider_user_id +"','"+clients[user_1].parker_user_id +"','" +clients[user_1].start_timestamp+"',"+clients[user_1].pu_lat+","+clients[user_1].pu_lng+",'"+clients[user_1]["match_end_type"]+"')";
             connection.query( query , function(err2,results2) {
-                if(err2){    
+                if(err2){
                     console.log("query : " + query);
                     console.log("error  :" + err2);
                 }else{
                     console.log(clients[user_1].room_name + " endMatch | "+clients[user_1].selected_college + " | "+ clients[user_1].selected_parkinglot )
                 }
-            }); 
+            });
             connection.release()
         }
     });
@@ -1456,7 +1568,7 @@ function endMatch(type,callback){
     else{
         rateUser(user_1,5);
         resetUser(user_2)
-    } 
+    }
 
     callback();
 }
@@ -1464,7 +1576,7 @@ function endMatch(type,callback){
 socket.on('finish',function(data){
     resetUser(socket.user_id);
     var rated_user = data.user_id;
-    var given_rating = data.rating;   
+    var given_rating = data.rating;
     rateUser(rated_user,given_rating);
 
 });
@@ -1479,7 +1591,7 @@ socket.on('disconnect',function(){
         if(clients[user_id].status == 'initial_connected'){
             delete clients[user_id]
         }
-        else if(clients[user_id].status == 'waiting_match'){  
+        else if(clients[user_id].status == 'waiting_match'){
             clients[user_id]['timer'] = setTimeout(function(){
                 connectionPool.getConnection(function(connection_error,connection){
                     if(connection_error){
@@ -1508,7 +1620,7 @@ socket.on('disconnect',function(){
     }
     else{
         console.log("INVALID disconnected "+socket.id)
-    }       
+    }
 });
 
 socket.on('cancelRequest',function(){
@@ -1532,9 +1644,9 @@ function matchEndedByDisconnect(user_id){
         endMatch(1+"|"+user_id,function(){
             delete clients[user_id];
             console.log("Match Ended by Disconnect")
-        })            
+        })
     }, 60000);
-    io.to(clients[user_id].room_name).emit('disconnected',{user_id:user_id});  
+    io.to(clients[user_id].room_name).emit('disconnected',{user_id:user_id});
 }
 
 function rateUser(rated_user,given_rating){
@@ -1547,7 +1659,7 @@ function rateUser(rated_user,given_rating){
         }else{
             var query = "SELECT * FROM "+table_user_gen + " WHERE `user_id`='"+rated_user+"'";
             connection.query( query , function(err,results) {
-                if(err){    
+                if(err){
                     console.log("query : " + query);
                     console.log("error  :" + err);
                 }else{
@@ -1557,17 +1669,17 @@ function rateUser(rated_user,given_rating){
                     total_matches +=1;
                     var query = "UPDATE `"+table_user_gen + "` SET `rating`="+new_rating+",`total_matches`= "+total_matches+",`status`='initial_connected' WHERE `user_id`='"+rated_user+"'";
                     connection.query( query , function(err,results) {
-                        if(err){    
+                        if(err){
                             console.log("query : " + query);
                             console.log("error  :" + err);
 
                         }else{
-                            console.log(rated_user + " rating | "+ new_rating)         
+                            console.log(rated_user + " rating | "+ new_rating)
                         }
-                    }); 
+                    });
 
                 }
-            }); 
+            });
             connection.release()
         }
     });
