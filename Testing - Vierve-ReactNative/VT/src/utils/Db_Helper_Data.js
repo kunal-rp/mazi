@@ -1,7 +1,8 @@
 import {AsyncStorage} from 'react-native';
 
 class Db_Helper_Data{
-	static async clearAllData(){
+
+	async clearAllData(){
 		try{
 			await AsyncStorage.removeItem('college_info');
 			await AsyncStorage.removeItem('parkinglot_info');
@@ -10,20 +11,32 @@ class Db_Helper_Data{
 		}
 	}
 
-	static async addCollege(college){
+	async addCollege(college){
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || []; // get list of colleges from storage
 		collegeList.push(college); // add college to list
 		await AsyncStorage.setItem('college_info', JSON.stringify(collegeList));
 	}
 
-	static async getAllCollegesInformation() {
+	async getAllCollegesInformation() {
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || [];
 		return collegeList;
 	}
 
-	static async checkCollege(id) {
+	async getAllCollegeVersion() {
+		let response = await AsyncStorage.getItem('college_info');
+		let collegeList = await JSON.parse(response) || [];
+		var version = 0;
+		for (var i = 0; i < collegeList.length; i++) {
+			if(collegeList[i].college_version > version){
+				version = collegeList[i].college_version;
+			}
+		}
+		return version;
+	}
+
+	async checkCollege(id) {
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || [];
 		for (var i = 0; i < collegeList.length; i++) {
@@ -34,7 +47,7 @@ class Db_Helper_Data{
 		return false;
 	}
 
-	static async getCollegeName(id) {
+	async getCollegeName(id) {
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || [];
 		for (i=0; i< collegeList.length; i++){
@@ -45,7 +58,7 @@ class Db_Helper_Data{
 		return "";
 	}
 
-	static async getParkinglotName(id) {
+	async getParkinglotName(id) {
 		let response = await AsyncStorage.getItem('parkinglot_info');
 		let parkingList = await JSON.parse(response) || [];
 		for (i=0; i< parkingList.length; i++){
@@ -56,14 +69,14 @@ class Db_Helper_Data{
 		return "";
 	}
 
-	static async addParkingLot(parkingLot) {
+	async addParkingLot(parkingLot) {
 		let response = await AsyncStorage.getItem('parkinglot_info');
 		let parkingList = await JSON.parse(response) || [];
 		parkingList.push(parkingLot);
 		await AsyncStorage.setItem('parkinglot_info', JSON.stringify(parkingList));
 	}
 
-	static async getAllParkingLotsFromCollege(id) {
+	async getAllParkingLotsFromCollege(id) {
 		let response = await AsyncStorage.getItem('parkinglot_info');
 		let parkingList = await JSON.parse(response) || [];
 		var allParkingLots = [];
@@ -75,7 +88,7 @@ class Db_Helper_Data{
 		return allParkingLots;
 	}
 
-	static async checkParkingLot(id) {
+	async checkParkingLot(id) {
 		let response = await AsyncStorage.getItem('parkinglot_info');
 		let parkingList = await JSON.parse(response) || [];
 		for (var i = 0; i < parkingList.length; i++) {

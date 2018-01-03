@@ -2,13 +2,13 @@ import {AsyncStorage} from 'react-native';
 
 class Db_Helper_User{
 
-	static async getRemember() {
+	async getRemember() {
 		let response = await AsyncStorage.getItem('user_info');
 		let userInfo = await JSON.parse(response);
 		return userInfo.remember==1 ? true : false; // return true if remembered
 	}
 
-	static async setRemember(value) {
+	async setRemember(value) {
 		// get data object
 		let response = await AsyncStorage.getItem('user_info');
 		let userInfo = await JSON.parse(response);
@@ -16,13 +16,16 @@ class Db_Helper_User{
 		await AsyncStorage.setItem('user_info', JSON.stringify(userInfo)); //store back in storage
 	}
 
-	static async getInfo() {
+	async getInfo() {
 		let response = await AsyncStorage.getItem('user_info');
-		let userInfo = await JSON.parse(response);
-		return userInfo //return entire json object
+		if (response != null){
+			let userInfo = await JSON.parse(response);
+			return userInfo //return entire json object
+		}
+		return null;
 	}
 
-	static async clearAllData() {
+	async clearAllData() {
 		try{
 			await AsyncStorage.removeItem('user_info');
 		} catch(error){
@@ -30,7 +33,7 @@ class Db_Helper_User{
 		}
 	}
 
-	static async setUserInfo(userInfo) {
+	async setUserInfo(userInfo) {
 		this.clearAllData();
 		await AsyncStorage.setItem('user_info', JSON.stringify(userInfo));
 	}	

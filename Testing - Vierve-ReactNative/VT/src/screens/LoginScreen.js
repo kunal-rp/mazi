@@ -16,16 +16,26 @@ class LoginScreen extends Component{
     this.state = {
     	text: '',
     	usernameValue: '',
+    	password: '',
     	rememberUser: false,
   	};
 	}
 
+	async loadInfo() {
+		var userInfo = await Db_Helper_User.getInfo();
+		console.log(userInfo);
+		this.setState({
+			usernameValue: userInfo.user_name,
+			password: userInfo.user_password,
+			rememberUser: userInfo.remember
+		});
+	}
+
 	componentDidMount() {
+		this.loadInfo();
 	}
 
 	AttemptSignIn = () => {
-		//Example
-		// Db_Helper_User.getInfo();
 		this.props.navigator.push({
 			screen: 'vt.MainScreen',
 			backButtonHidden: true,
@@ -83,6 +93,7 @@ class LoginScreen extends Component{
 	        <TextField
 	        	label="Password"
 	        	fontSize={18}
+	        	value={this.state.password}
 	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
@@ -102,6 +113,7 @@ class LoginScreen extends Component{
 	        		checkboxStyle={{tintColor:'white'}}
 	        		labelStyle={{color:'white'}}
 	        		label='Remember Me'
+	        		checked={this.state.rememberUser}
 	        		onChange={(v) => this.setState({rememberUser: v})}
 	        	/>
 	        </View>
