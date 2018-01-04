@@ -1,3 +1,5 @@
+var serverFunctions = require('./serverFunctions.js');
+
 var status = {
   not:'-',
   idle:'idle',
@@ -33,9 +35,11 @@ var tables ={
 
 var action_type = {
   getUserStatus:"getUserStatus",
+  updateLocation:"updateLocation",
   request:"request",
   cancelRequest:"cancelRequest",
-  cancelMatch:"cancelMatch"
+  cancelMatch:"cancelMatch",
+  rateMatch:"rateMatch"
 }
 
 var request_type = {
@@ -43,9 +47,28 @@ var request_type = {
   parking_spot : "spot"
 }
 
+var timer_type = {
+  too_far : {dur : 10000},
+  disconnect_request : {dur : 10000},
+  disconnect_match : {dur : 10000}
+}
+
+var match_status = {
+  too_far : "Too Far"
+}
+
+var pickup_radius =
+
 module.exports = {
+
+  getTimerTypes:function(callback){
+    callback(timer_type)
+  },
   getStatus:function(callback){
     callback(status)
+  },
+  getMatchStatus:function(callback){
+    callback(match_status)
   },
   getTypeForget:function(callback){
     callback(type_forget)

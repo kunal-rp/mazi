@@ -164,6 +164,8 @@ module.exports = {
     }
   },
   loginUser(res, data, callback){
+    //TO-DO
+    //change user status in the 'gen' table
     serverFunctions.login(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
       module.exports.handleErrors(res,structural_error,simple_error,function(){
         serverFunctions.updateUserStatus(user_id, status.idle, function(st, si){

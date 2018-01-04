@@ -466,8 +466,8 @@ module.exports = {
   Action Server Functions
   --------------
   */
-  updateUserMatchData:function(user_id, match_id, callback){
-    var query = "Update `"+tables.table_gen +"` Set `match_id`='"+ match_id +"' Where `user_id` = '"+user_id+"'";
+  updateUserMatchData:function(user_id, type,match_id, callback){
+    var query = "Update `"+tables.table_gen +"` Set `match_id`='"+ match_id +"', `type`='"+type+"' Where `user_id` = '"+user_id+"'";
     connectionPool.query(query, function(err, results){
       if(err ){
         module.exports.printError("updateUserMatchData","SQL Query Error: error updating user match id",err,null,true)
@@ -522,16 +522,16 @@ module.exports = {
       }
     })
   },
-  getMatchData:function(user_id, callback){
-    var query = "Select * FROM  `"+tables.table_matches + "` WHERE `parker_id` = '"+user_id+"' || `rider_id` = '"+user_id+"'";
+  getMatchData:function(match_id, callback){
+    var query = "Select * FROM  `"+tables.table_matches + "` WHERE `match_id` = '"+match_id+"'";
     connectionPool.query(query, function(err, results){
       if(err ){
-        module.exports.printError("getMatchData","SQL Query Error: error getting requests from user_id",err,user_id,true)
+        module.exports.printError("getMatchData","SQL Query Error: error getting requests from match-id",err,null,true)
         callback(err)
       }
       else{
         if(results.length  != 1){
-          module.exports.printError("getMatchData","Parameter Error: no ongoing matches from user ",false,{user_id},true)
+          module.exports.printError("getMatchData","Parameter Error: no ongoing matches from user ",false,null,true)
           callback(false, "No ongoing matched for user")
         }
         else{
@@ -542,7 +542,7 @@ module.exports = {
   },
   recordMatch:function(data, callback){
     module.exports.getTime(function(time){
-      var query = "INSERT INTO `"+tables.table_matches + "` (`match_id`, `start_timestamp`, `rider_id`, `parker_id`, `college_id`, `parkinglot_id`, `rider_lat`, `rider_lng`, `parker_lat`, `parker_lng`, `pu_lat`, `pu_lng`, `rider_near`, `parker_near`, `rider_confirm`, `parker_confirm`) VALUES ('"+data.match_id+"',"+time+",'"+data.rider_id+"','"+data.parker_id+"',"+data.college_id+","+data.parkinglot_id+",0,0,0,0,"+data.pu_lat+","+data.pu_lng+",0,0,0,0)";
+      var query = "INSERT INTO `"+tables.table_matches + "` (`match_id`, `start_timestamp`, `rider_id`, `parker_id`, `college_id`, `parkinglot_id`, `rider_lat`, `rider_lng`, `parker_lat`, `parker_lng`, `pu_lat`, `pu_lng`) VALUES ('"+data.match_id+"',"+time+",'"+data.rider_id+"','"+data.parker_id+"',"+data.college_id+","+data.parkinglot_id+",0,0,0,0,"+data.pu_lat+","+data.pu_lng+")";
       connectionPool.query(query, function(err, results){
         if(err){
           module.exports.printError("recordMatch","SQL Query Error: error recording match",err,data,true)
@@ -567,8 +567,20 @@ module.exports = {
       }
     })
   },
-  getPastMatchData:function(user_id, callback){
-    var query = "Select * FROM  `"+tables.table_past_matches + "` WHERE `parker_id` = '"+user_id+"' || `rider_id` = '"+user_id+"' ORDER BY `time` LIMIT 1";
+  recordPastMatch:function(data, callback){
+      var query = "INSERT INTO `"+tables.table_past_matches + "`(`match_id`, `time`,`rider_id`, `parker_id`, `college_id`, `parkinglot_id`,`pu_lat`, `pu_lng`, `cancel`, `rider_rate`, `parker_rate`) VALUES ('"+data.match_id+"',"+data.time+",'"+data.rider_id+"','"+data.parker_id+"',"+data.college_id+","+data.parkinglot_id+","+data.pu_lat+","+data.pu_lng+",'"+data.cancel+"',0,0)";
+      connectionPool.query(query, function(err, results){
+        if(err){
+          module.exports.printError("recordPastMatch","SQL Query Error: error recording past match",err,data,true)
+          callback(err)
+        }
+        else{
+          callback(false, false)
+        }
+      })
+  },
+  getPastMatchData:function(match_id, callback){
+    var query = "Select * FROM  `"+tables.table_past_matches + "` WHERE  `match_id` = '"+match_id+"'";
     connectionPool.query(query, function(err, results){
       if(err ){
         module.exports.printError("getMatchData","SQL Query Error: error getting requests from user_id",err,user_id,true)
@@ -576,7 +588,7 @@ module.exports = {
       }
       else{
         if(results.length != 1){
-          module.exports.printError("getMatchData","Parameter Error: no past matches from user ",false,user_id,true)
+          module.exports.printError("getMatchData","Parameter Error: no past matches from user ",false,null,true)
           callback(false, "No past matched for user")
         }
         else{
@@ -595,8 +607,61 @@ module.exports = {
       else{
         callback(false, false, results)
       }
-
     })
-  }
+  },
+  //addPastMatches
+  updateUserLocation:function(data,callback){
+    var query = "Update `"+tables.table_gen + "` set `lat` = "+data.lat+",`lng` = "+data.lng+" where `user_id`='"+data.user_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("updateUserLocationGen","SQL Query Error: error updating user lat and lng",err,data,true)
+        callback(err)
+      }
+      else{
+        callback(false, false)
+      }
+    })
+  },
+  updateUserLocationMatch:function(match_id, type,lat,lng,callback){
+    var query = "Update `"+tables.table_matches + "` set `"+type+"_lat` = "+lat+",`"+type+"_lng` = "+lng+" where `match_id`='"+match_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("updateUserLocationMatch","SQL Query Error: error updating user lat and lng MATCH",err,null,true)
+        callback(err)
+      }
+      else{
+        callback(false, false)
+      }
+    })
+  },
+  updateMatchUserStatus:function(match_id, type,status){
+    var query = "Update `"+tables.table_matches + "` set `"+type+"_status` = '"+status+"' where `match_id`='"+match_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("updateMatchUserStatus","SQL Query Error: error updating user status",err,null,true)
+      }
+    })
+  },
+  rateUserGen:function(user_id, ov, tm){
+    var query = "Update `"+tables.table_gen + "` set `rating` = "+ov+",`total_matches` = "+tm+" where `user_id`='"+user_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("rateUserGen","SQL Query Error: error updating user rating and total matches",err,null,true)
+      }
+    })
+  },
+  rateUserPastMatch:function(match_id, type, rating){
+    var query = "Update `"+tables.table_past_matches + "` set `"+type+"_rate` = "+rating+" where `match_id`='"+match_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("rateUserPastMatch","SQL Query Error: error updating user rating in past matches",err,null,true)
+      }
+      else{
+        console.log("RPM Finished")
+        console.log(query)
+      }
+    })
+  },
+
 
 }
