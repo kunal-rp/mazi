@@ -2,33 +2,51 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 class RegisterScreen extends Component{
 	static navigatorStyle = {
-		navBarHidden: true,
+		navBarTextFontSize: 28,
   	screenBackgroundColor: '#2f4858',
-		statusBarColor: '#2f4858'
+		statusBarColor: '#2f4858',
+		navBarBackgroundColor: '#2f4858',
+		navBarTextColor: 'white',
+	  navBarButtonColor: 'white',
 	};
 	
 	constructor(props) {
 		super(props);
 		this.state = {
-			agreebox: false
+			agreebox: false,
+			username: '',
+			email: '',
+			password: '',
+			cpassword: '',
+			referral: ''
 		};
 	}
 
+	async setUser() {
+		var userInfo = {"user_id": 0, "user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true};
+		Db_Helper_User.setUserInfo(userInfo);
+	}
+
 	AttemptRegister = () => {
-		this.props.navigator.pop({
-			animated: true,
-			animationType: 'fade',
-		});
+		if (this.state.agreebox){
+			if(this.state.password == this.state.cpassword){
+				this.setUser();
+				this.props.navigator.pop({
+					animated: true,
+					animationType: 'fade',
+				});
+			}
+		}
 	}
 
 	render() {
 		return (
 			<View style={styles.container}>
 				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Register Account</Text>
 					<Text style={styles.promptDescriptionText}>Enter the required credentials below.</Text>
 				</View>
 				<View style={{margin: 15}}>
@@ -42,6 +60,8 @@ class RegisterScreen extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='next'
             autoCapitalize='none'
+            value={this.state.username}
+	        	onChangeText={(v) => this.setState({username: v})}
             animationDuration={150}
 	        />
 	        <TextField
@@ -53,6 +73,8 @@ class RegisterScreen extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='next'
             autoCapitalize='none'
+            value={this.state.email}
+	        	onChangeText={(v) => this.setState({email: v})}
             animationDuration={150}
 	        />
 	        <TextField
@@ -65,6 +87,8 @@ class RegisterScreen extends Component{
 	        	returnKeyType='next'
             autoCapitalize='none'
             secureTextEntry={true}
+            value={this.state.password}
+	        	onChangeText={(v) => this.setState({password: v})}
             animationDuration={150}
 	        />
 	        <TextField
@@ -77,6 +101,8 @@ class RegisterScreen extends Component{
 	        	returnKeyType='next'
             autoCapitalize='none'
             secureTextEntry={true}
+            value={this.state.cpassword}
+	        	onChangeText={(v) => this.setState({cpassword: v})}
             animationDuration={150}
 	        />
 	        <TextField
@@ -89,6 +115,8 @@ class RegisterScreen extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='next'
             autoCapitalize='none'
+            value={this.state.referral}
+	        	onChangeText={(v) => this.setState({referral: v})}
             animationDuration={150}
 	        />
 				</View>
@@ -114,8 +142,7 @@ class RegisterScreen extends Component{
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
-    backgroundColor: '#2f4858',
+    // backgroundColor: '#2f4858',
 	},
 	prompt: {
 		flex: 0,
@@ -128,7 +155,7 @@ const styles = StyleSheet.create({
 		fontSize: 28
 	},
 	promptDescriptionText: {
-		color: 'white',
+		// color: 'white',
 		fontSize: 20,
 		color: '#2196F3'
 	},

@@ -5,9 +5,12 @@ import ModalDropdown from 'react-native-modal-dropdown';
 
 class BugReportScreen extends Component{
 	static navigatorStyle = {
-		navBarHidden: true,
-	  screenBackgroundColor: '#2f4858',
-	 	statusBarColor: '#2f4858'
+	  navBarTextFontSize: 28,
+  	screenBackgroundColor: '#2f4858',
+		statusBarColor: '#2f4858',
+		navBarBackgroundColor: '#2f4858',
+		navBarTextColor: 'white',
+	  navBarButtonColor: 'white',
 	};
 	constructor(props) {
 		super(props);
@@ -27,8 +30,6 @@ class BugReportScreen extends Component{
 		return (
 			<View style={styles.container}>
 				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Suggestions / Reporting a</Text>
-					<Text style={styles.promptTitleText}>Bug</Text>
 					<Text style={styles.promptDescriptionText}>Users can give suggestions about changes</Text>
 					<Text style={styles.promptDescriptionText}>to the app, or report bugs they may have</Text>
 					<Text style={styles.promptDescriptionText}>encountered while using Vierve! Be as</Text>
@@ -80,8 +81,7 @@ class BugReportScreen extends Component{
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
-    backgroundColor: '#2f4858',
+		paddingTop: 10
 	},
 	prompt: {
 		flex: 0,

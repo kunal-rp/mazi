@@ -4,9 +4,12 @@ import { TextField } from 'react-native-material-textfield';
 
 class ForgotUsername extends Component{
 	static navigatorStyle = {
-		navBarHidden: true,
+  	navBarTextFontSize: 28,
   	screenBackgroundColor: '#2f4858',
-		statusBarColor: '#2f4858'
+		statusBarColor: '#2f4858',
+		navBarBackgroundColor: '#2f4858',
+		navBarTextColor: 'white',
+	  navBarButtonColor: 'white',
 	};
 
 	constructor(props) {
@@ -24,7 +27,6 @@ class ForgotUsername extends Component{
 		return (
 			<View style={styles.container}>
 				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Forgot Your Username</Text>
 					<Text style={styles.promptDescriptionText}>Enter the email registered for your account:</Text>
 				</View>
 				<View style={{margin: 15}}>
@@ -52,8 +54,7 @@ class ForgotUsername extends Component{
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
-    backgroundColor: '#2f4858',
+    // backgroundColor: '#2f4858',
 	},
 	prompt: {
 		flex: 0,

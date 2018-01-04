@@ -17,22 +17,25 @@ class LoginScreen extends Component{
     	text: '',
     	usernameValue: '',
     	password: '',
-    	rememberUser: false,
+    	rememberUser: true,
   	};
 	}
 
 	async loadInfo() {
 		var userInfo = await Db_Helper_User.getInfo();
 		console.log(userInfo);
-		this.setState({
-			usernameValue: userInfo.user_name,
-			password: userInfo.user_password,
-			rememberUser: userInfo.remember
-		});
+		if (userInfo != null){
+			this.setState({
+				usernameValue: userInfo.user_name,
+				password: userInfo.user_password,
+				rememberUser: userInfo.remember
+			});
+		}
 	}
 
 	componentDidMount() {
 		this.loadInfo();
+		this.setState({rememberUser: true});
 	}
 
 	AttemptSignIn = () => {
@@ -44,19 +47,22 @@ class LoginScreen extends Component{
 	pushRegisterScreen = () => {
 		this.props.navigator.push({
 			screen: 'vt.RegisterScreen',
-			title: 'Register'
+			title: 'Register Account',
+			backButtonTitle: '',
 		});
 	};
 	pushForgotUsername = () => {
 		this.props.navigator.push({
 			screen: 'vt.ForgotUsername',
-			title: 'Forgot Username'
+			title: 'Forgot Your Username',
+			backButtonTitle: '',
 		});
 	}
 	pushForgotPassword = () => {
 		this.props.navigator.push({
 			screen: 'vt.ForgotPassword',
-			title: 'Forgot Password'
+			title: 'Reset Your Password',
+			backButtonTitle: '',
 		});
 	}
 
@@ -75,14 +81,14 @@ class LoginScreen extends Component{
 	        <TextField
 	        	label='Username'
 	        	fontSize={18}
-	        	value={this.state.usernameValue}
 	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='next'
 	        	autoCapitalize='none'
-	        	onChangeText={(usernameValue) => this.setState({usernameValue})}
+	        	value={this.state.usernameValue}
+	        	onChangeText={(v) => this.setState({usernameValue: v})}
 	        	animationDuration={150}
 	        />
 	        <TouchableOpacity onPress={this.pushForgotUsername}>
@@ -114,7 +120,7 @@ class LoginScreen extends Component{
 	        		labelStyle={{color:'white'}}
 	        		label='Remember Me'
 	        		checked={this.state.rememberUser}
-	        		onChange={(v) => this.setState({rememberUser: v})}
+	        		// onChange={(v) => this.setState({rememberUser: v})}
 	        	/>
 	        </View>
         </View>

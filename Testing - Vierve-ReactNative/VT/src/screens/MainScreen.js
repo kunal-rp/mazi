@@ -92,8 +92,9 @@ class MainScreen extends Component{
 		this.showMenu(false);
 		this.props.navigator.push({
 			screen: 'vt.BugReportScreen',
-			title: 'BugReport',
+			title: 'Give us Feedback',
 			animationType: 'fade',
+			backButtonTitle: '',
 		});
 	}
 
@@ -118,7 +119,9 @@ class MainScreen extends Component{
 			if(event.id == 'profile'){
 				this.props.navigator.push({
 					screen: 'vt.ProfileScreen',
-					backButtonHidden: true,
+					title: 'Profile',
+					backButtonHidden: false,
+					backButtonTitle: '',
 					animated: true
 				});
 			}

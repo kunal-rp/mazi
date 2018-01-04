@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, Image} from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 
 class ProfileScreen extends Component{
 	static navigatorStyle = {
-  	navBarHidden: true,
+    navBarTextFontSize: 28,
   	screenBackgroundColor: '#2f4858',
 		statusBarColor: '#2f4858'
 	};
@@ -23,9 +23,6 @@ class ProfileScreen extends Component{
 	render() {
 		return (
 			<View style={styles.container}>
-				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Profile</Text>
-				</View>
 				<TextField
         	label="Username"
         	fontSize={20}
@@ -106,12 +103,12 @@ class ProfileScreen extends Component{
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
+		paddingTop: 10,
     backgroundColor: '#2f4858',
 	},
 	prompt: {
 		flex: 0,
-		alignItems: 'center'
+		alignItems: 'center',
 	},
 	promptTitleText: {
 		color: 'white',
@@ -144,7 +141,7 @@ const styles = StyleSheet.create({
   buttonText: {
 		padding: 15,
     color: 'white'
-  }
+  },
 });
 
 export default ProfileScreen
