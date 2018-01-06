@@ -55,10 +55,11 @@ module.exports = {
   generateCodes:function(callback){
     module.exports.generateCustomKey(20, function(gk){
       var codes =
-      {general_key:gk};
-      serverFunctions.updateServerinfo(codes,function(){
+      {general_key:'971Qq4uCyoUYYjeetrrv'};
+      callback(codes)
+      /*serverFunctions.updateServerinfo(codes,function(){
         callback(codes)
-      })
+      })*/
     })
   },
   /* Checks tokens at basic level

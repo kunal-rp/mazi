@@ -93,7 +93,7 @@ module.exports = {
     });
   },
   updateUserAuth:function(user_id, token, callback){
-    var update_user_auth_token = "Update `"+tables['table_gen'] + "` set `auth_token` = '"+token+"' where `user_id`='"+user_id+"'"
+    var update_user_auth_token = "Update `"+tables.table_gen + "` set `auth_token` = '"+token+"' where `user_id`='"+user_id+"'"
     connectionPool.query(update_user_auth_token,function(update_uat_error){
       if(update_uat_error){
         module.exports.printError("updateUserAuth","SQL Query Error: updating user auth token",update_uat_error,{user_id:user_id, token:token})
@@ -138,7 +138,7 @@ module.exports = {
   addSuggestion:function(data,callback){
     module.exports.getTime(function(time){
       var timestamp = time;
-      var query_insert_suggestion = "INSERT INTO "+table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
+      var query_insert_suggestion = "INSERT INTO "+tables.table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
       connectionPool.query(query_insert_suggestion,function(err, results){
         if(err){
           module.exports.printError("addSuggestion","SQL Query Error: inserting new suggestion",err,{timestamp:timestamp,data:data})
@@ -634,11 +634,23 @@ module.exports = {
       }
     })
   },
-  updateMatchUserStatus:function(match_id, type,status){
+  updateMatchUserStatus:function(match_id, type,status,confirm = false){
     var query = "Update `"+tables.table_matches + "` set `"+type+"_status` = '"+status+"' where `match_id`='"+match_id+"'"
     connectionPool.query(query, function(err, results){
       if(err){
         module.exports.printError("updateMatchUserStatus","SQL Query Error: error updating user status",err,null,true)
+      }
+    })
+  },
+  updateMatchUserConfirm:function(match_id, type, confirm,callback){
+    console.log("updateMatchUserConfirm")
+    var query = "Update `"+tables.table_matches + "` set `"+type+"_confirm` = "+confirm+"  where `match_id`='"+match_id+"'"
+    connectionPool.query(query, function(err, results){
+      if(err){
+        module.exports.printError("updateMatchUserConfirm","SQL Query Error: error updating user confirm",err,null,true)
+      }
+      else{
+        callback()
       }
     })
   },

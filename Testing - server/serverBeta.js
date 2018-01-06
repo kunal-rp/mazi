@@ -69,16 +69,15 @@ app.get('/codes',function(req,res){
 app.post('/login',function(req,res){
   //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req, res, function(data){
-    //attempts login with the passed username and password values
-    gen.attemptLogin(res,data, function(){
-      //perform login match Operations
-      gen.loginUser(res,data, function(token){
-          //return valid response
-          gen.validResponse(res,"Sucsessful Login", {auth_token:token})
-      })
-    })
+    action.loginUser(res, data)
   })
 });
+
+app.post('/logoff',function(req, res){
+  gen.checkReqSpecific(req, res, function(data){
+    action.logoffUser(res, data)
+  })
+})
 
 app.post('/createUser',function(req, res){
   gen.checkReqGeneral(req, res, function(data){
@@ -183,17 +182,3 @@ function getPropData(callback){
     }
   })
 }
-
-
-
-/*
-var ws = new WebSocketServer({server: server})
-console.log("websocket server created")
-
-ws.on("connection", function(ws) {
-
-
-
-
-})
-*/

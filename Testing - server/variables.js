@@ -19,6 +19,7 @@ var update_type = {
 }
 
 var tables ={
+  table_suggestion : "suggestions",
   table_server:"server",
   table_gen:"user_gen",
   table_prim:"user_prim",
@@ -39,7 +40,8 @@ var action_type = {
   request:"request",
   cancelRequest:"cancelRequest",
   cancelMatch:"cancelMatch",
-  rateMatch:"rateMatch"
+  rateMatch:"rateMatch",
+  confirm:"confirm"
 }
 
 var request_type = {
@@ -49,20 +51,27 @@ var request_type = {
 
 var timer_type = {
   too_far : {dur : 10000},
-  disconnect_request : {dur : 10000},
-  disconnect_match : {dur : 10000}
+  disconnect_request : {dur : 20000},
+  disconnect_match : {dur : 20000}
 }
 
 var match_status = {
-  too_far : "Too Far"
+  too_far : "Too Far",
+  near : "Near",
+  disconnected:"Disconnected"
 }
 
-var pickup_radius =
+//pickup radius in ft
+var pickup_radius = 200;
+
 
 module.exports = {
 
   getTimerTypes:function(callback){
     callback(timer_type)
+  },
+  getPickupRadius:function(callback){
+    callback(pickup_radius)
   },
   getStatus:function(callback){
     callback(status)
