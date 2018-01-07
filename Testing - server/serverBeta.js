@@ -14,12 +14,13 @@ var action = require('./actionFunctions.js')
 
 //Ensures server continues to run if any exception occurs. Will have to come up with a better system in the future
 process.on('uncaughtException', function (err) {
-  console.log(err);
+  serverFunctions.printError("Error Occured",null,err,null)
+  console.log("An undefined error occured in runtime");
+  console.log()
 });
+
 var port = 3000
 app = express();
-
-
 
 var server = app.listen(port,'0.0.0.0');
 
@@ -32,17 +33,102 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 var codes;
+
 gen.generateCodes(function(data){
   codes = data;
-  gen.setCodes(codes)
-  console.log("Local Codes:")
-  console.log(codes)
 });
-
-
 
 app.get('/',function(req,res, next){
   res.sendFile(path.join(__dirname, '/public', 'index.html'));
+})
+
+/*
+User will recieve the general token that they will use for verification
+*/
+app.get('/codes',function(req,res){
+  gen.checkReqBasic(req, res, function(){
+    res.json(codes)
+  })
+});
+
+/*
+The following calls are all GENERAL CALLS
+These calls handle all operations not related to the parking ; mainly handling user events
+Types of Verification Type:
+  GENERAL : reqires the general token in 'codes' as 'token_gen' in post variable
+  Specific : reqires user specific token recieved during log in
+*/
+
+/*
+GENERAL
+checks if username is avalible to use
+
+params :
+  user_name : the username that we would like to check if avalible
+
+responses:
+  -1 : invalid structural
+   0 : username taken
+   1 : username avalible
+*/
+app.post('/checkusername',function(req,res){
+  gen.checkReqGeneral(req, res, function(data){
+    gen.checkUsername(res, user_name, function(){
+      gen.validResponse(res, "Username is avalible")
+    })
+  })
+});
+
+/*
+GENERAL
+in cases where the username or password is forgotten
+
+params :
+  user_email : email of user
+  type_forget : the type of forget event
+    -username
+    -password
+
+responses:
+  -1 : invalid structural
+   0 : simple error
+    -user'e email is not verified
+   1 : an email was sent with necessary credentials
+*/
+
+app.post('/forgot',function(req,res){
+  gen.checkReqGeneral(req,res,function(data){
+    gen.forgot(res, data, function(){
+      gen.validResponse(res, "Forgot Credential Operations Completed")
+    })
+  })
+})
+
+app.post('/createUser',function(req, res){
+  gen.checkReqGeneral(req, res, function(data){
+    gen.createUser(res, data, function(){
+      gen.validResponse(res, "User Account created!\nPlease check your email to verify your account!")
+    })
+  })
+})
+
+app.get('/verify',function(req, res){
+  gen.verify(res,req, function(struct, simple){
+    if(struct || simple){
+      res.sendFile(path.join(__dirname, '/public', 'error.html'));
+    }
+    else{
+      res.sendFile(path.join(__dirname, '/public', 'verifyEmail.html'));
+    }
+  })
+})
+
+app.post('/updateUser',function(req, res){
+  gen.checkReqSpecific(req, res, function(data){
+    gen.updateUser(res, data, function(){
+      gen.validResponse(res, "User Profile Updated")
+    })
+  })
 })
 
 //testing the mysql concurrent data
@@ -60,14 +146,13 @@ app.get('/getPropData',function(req,res){
   })
 });
 
-app.get('/codes',function(req,res){
-  gen.checkReqBasic(req, res, function(){
-    res.json(codes)
+app.post('/action',function(req, res){
+  gen.checkReqSpecific(req, res, function(data){
+    action.handleAction(res, data)
   })
-});
+})
 
 app.post('/login',function(req,res){
-  //checks if data is encrypted with general codes and user specific token
   gen.checkReqGeneral(req, res, function(data){
     action.loginUser(res, data)
   })
@@ -79,71 +164,6 @@ app.post('/logoff',function(req, res){
   })
 })
 
-app.post('/createUser',function(req, res){
-  gen.checkReqGeneral(req, res, function(data){
-    gen.attemptCreateUser(res, data, function(){
-      gen.createUser(res, data, function(){
-        gen.validResponse(res, "User Account created!\nPlease check your email to verify your account!")
-      })
-    })
-  })
-})
-
-app.get('/verify',function(req, res){
-  gen.attemptVerify(req, res, function(data){
-    gen.verify(res, data, function(struct, simple){
-      if(struct || simple){
-        res.sendFile(path.join(__dirname, '/public', 'error.html'));
-      }
-      else{
-        res.sendFile(path.join(__dirname, '/public', 'verifyEmail.html'));
-      }
-    })
-  })
-})
-
-app.post('/checkusername',function(req,res){
-  //checks if data is encrypted with general codes and user specific token
-  gen.checkReqGeneral(req, res, function(data){
-    //checks if request / user has correct permissions
-    gen.attemptCheckUsername(res, data, function(user_name){
-      //checks if username is in use
-      gen.checkUsername(res, user_name, function(){
-        gen.validResponse(res, "Username is avalible")
-      })
-    })
-  })
-})
-
-app.post('/reset',function(req,res){
-  //checks if data is encrypted with general codes and user specific token
-  gen.checkReqGeneral(req,res,function(data){
-    //checks for data strucutre and parameters
-    gen.attemptReset(res, data, function(){
-      //resets the user
-      gen.resetUser(res, data, function(){
-        gen.validResponse(res, "User Reset Confirmed")
-      })
-    })
-  })
-})
-
-app.post('/action',function(req, res){
-  gen.checkReqSpecific(req, res, function(data){
-    action.handleAction(res, data)
-  })
-})
-
-app.post('/updateUser',function(req, res){
-  gen.checkReqSpecific(req, res, function(data){
-    gen.attemptUpdateUser(res, data, function(){
-      gen.updateUser(res, data, function(){
-        gen.validResponse(res, "User Profile Updated")
-      })
-    })
-  })
-})
-//Change
 app.post('/addSuggestion',function(req,res){
   gen.checkReqSpecific(req,res,function(data){
     serverFunctions.addSuggestion(data,function(err){

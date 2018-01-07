@@ -305,7 +305,6 @@ attemptConfirm:function(res, user_id, callback){
 
 confirm:function(res,data){
   module.exports.attemptConfirm(res,data.user_id,  function(user){
-    console.log("confirm ac")
     var mi = user.data.match_id
     var type = ""
     if(data.user_id == user.data.rider_id){
@@ -316,19 +315,19 @@ confirm:function(res,data){
     }
     if(user.data[type+"_confirm"]!= 1){
       serverFunctions.updateMatchUserConfirm(mi, type,1,function(){
-        console.log("umc")
         gen.validResponse(res, "User Confirmed")
         user.data[type+"_confirm"] = 1
         module.exports.confirmOperations(user.data)
       })
     }
     else{
+      module.exports.confirmOperations(user.data)
       gen.validResponse(res, "User Confirmed")
     }
   })
 },
 confirmOperations:function(matchData){
-  if(matchData.rider_confirm == 1 && matchData.parker_confirm == 1){
+  if(matchData.rider_status == match_status.near && matchData.parker_status == match_status.near && matchData.rider_confirm == 1 && matchData.parker_confirm == 1){
     module.exports.forceCancelMatch(matchData.rider_id, false, "Fair Match")
   }
 },
@@ -578,9 +577,6 @@ updateLocationMatch:function(res,user_id,matchData, mi, type, la, ln,callback){
   var pickup_loc = new geo(matchData.pu_lat,matchData.pu_lng)
   var current_loc = new geo(la, ln)
   var college_loc = new geo(collegeData[matchData.college_id].college_coor_lat,collegeData[matchData.college_id].college_coor_lng)
-  console.log(matchData.pu_lat+","+matchData.pu_lng)
-  console.log(la+","+ln)
-  console.log("Distance : "+ current_loc.distanceTo(pickup_loc, false)*5280)
   serverFunctions.updateUserLocationMatch(mi, type, la, ln,function(st2, si2){
     callback()
   })
@@ -667,42 +663,36 @@ rateUser:function(user_id, rating,ov, total_matches,match_id,type){
   serverFunctions.rateUserPastMatch( match_id, type, rating)
 },
 startTimerTooFar:function(user_id){
-  console.log("Too Far Timer Start")
   if(timers[user_id] == undefined ||timers[user_id].too_far == undefined ){
     module.exports.clearTimers(user_id, function(){
       timers[user_id] =
       {
         too_far : setTimeout(function(){
           module.exports.forceCancelMatch(user_id)
-          console.log("Too Far Timer STOP")
         }, timer_types.too_far.dur)
       }
     })
   }
 },
 startTimerRequestDisconnect:function(user_id){
-  console.log("Request Timer Start")
   if(timers[user_id] == undefined ||timers[user_id].request == undefined ){
     module.exports.clearTimers(user_id, function(){
       timers[user_id] =
       {
         request : setTimeout(function(){
           module.exports.forceCancelRequest(user_id)
-          console.log("Request Timer STOP")
         }, timer_types.disconnect_request.dur)
       }
     })
   }
 },
 startTimerMatchDisconnect:function(user_id){
-  console.log("Match Timer Start")
   if(timers[user_id] == undefined ||timers[user_id].match == undefined ){
     module.exports.clearTimers(user_id, function(){
       timers[user_id] =
       {
         match : setTimeout(function(){
           module.exports.forceCancelMatch(user_id)
-          console.log("Match Timer STOP")
         }, timer_types.disconnect_match.dur)
       }
     })
