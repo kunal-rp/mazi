@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, Image } f
 import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
+import ServerTools from '../utils/ServerTools';
 
 class LoginScreen extends Component{
 	static navigatorStyle = {
@@ -18,17 +19,21 @@ class LoginScreen extends Component{
     	usernameValue: '',
     	password: '',
     	rememberUser: true,
+    	code: ''
   	};
+  	this.AttemptSignIn = this.AttemptSignIn.bind(this);
 	}
 
 	async loadInfo() {
 		var userInfo = await Db_Helper_User.getInfo();
-		console.log(userInfo);
+		var code = await ServerTools.getCode();
+		// console.log(userInfo);
 		if (userInfo != null){
 			this.setState({
 				usernameValue: userInfo.user_name,
 				password: userInfo.user_password,
-				rememberUser: userInfo.remember
+				rememberUser: userInfo.remember,
+				code: code
 			});
 		}
 	}
@@ -38,12 +43,16 @@ class LoginScreen extends Component{
 		this.setState({rememberUser: true});
 	}
 
-	AttemptSignIn = () => {
-		this.props.navigator.push({
-			screen: 'vt.MainScreen',
-			backButtonHidden: true,
-		});
+	async AttemptSignIn() {
+		var data = {'token_gen': this.state.code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
+		let response = await ServerTools.login(data);
+		console.log(response);
+		// this.props.navigator.push({
+		// 	screen: 'vt.MainScreen',
+		// 	backButtonHidden: true,
+		// });
 	}
+
 	pushRegisterScreen = () => {
 		this.props.navigator.push({
 			screen: 'vt.RegisterScreen',

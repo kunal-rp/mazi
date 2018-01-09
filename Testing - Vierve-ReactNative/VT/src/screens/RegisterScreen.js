@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
+import ServerTools from '../utils/ServerTools';
 
 class RegisterScreen extends Component{
 	static navigatorStyle = {
@@ -22,8 +23,10 @@ class RegisterScreen extends Component{
 			email: '',
 			password: '',
 			cpassword: '',
-			referral: ''
+			referral: '',
+			code: ''
 		};
+		this.AttemptRegister = this.AttemptRegister.bind(this);
 	}
 
 	async setUser() {
@@ -31,14 +34,18 @@ class RegisterScreen extends Component{
 		Db_Helper_User.setUserInfo(userInfo);
 	}
 
-	AttemptRegister = () => {
+	async AttemptRegister() {
 		if (this.state.agreebox){
 			if(this.state.password == this.state.cpassword){
-				this.setUser();
-				this.props.navigator.pop({
-					animated: true,
-					animationType: 'fade',
-				});
+				var code = await ServerTools.getCode();
+				var data = {'token_gen':code, 'user_name': this.state.username, 'user_password': this.state.password, 'user_email': this.state.email};
+				console.log(data);
+				ServerTools.createUser(data);
+				// this.setUser();
+				// this.props.navigator.pop({
+				// 	animated: true,
+				// 	animationType: 'fade',
+				// });
 			}
 		}
 	}
