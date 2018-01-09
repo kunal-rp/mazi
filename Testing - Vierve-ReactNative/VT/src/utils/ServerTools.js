@@ -1,8 +1,4 @@
 class ServerTools{
-	// constructor() {
-	// 	this.url = "https://viervetesting.herokuapp.com/";
-	// }
-
 	async getCode() {
 		try{
 			let response = await fetch('https://viervetesting.herokuapp.com/codes');
@@ -17,6 +13,23 @@ class ServerTools{
 	async login(data) {
 		try{
 			let response = await fetch('https://viervetesting.herokuapp.com/login', {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			let responseJson = await response.json();
+			return responseJson;
+		} catch(error){
+			console.log(error);
+		}
+	}
+
+	async logoff(data) {
+		try{
+			let response = await fetch('https://viervetesting.herokuapp.com/logoff', {
 				method: 'POST',
 				headers: {
 					Accept: 'application/json',
@@ -53,6 +66,7 @@ class ServerTools{
 		try{
 			let response = await fetch('https://viervetesting.herokuapp.com/data');
 			let responseJson = await response.json();
+			console.log(responseJson);
 			return responseJson;
 		} catch(error){
 			console.log(error);

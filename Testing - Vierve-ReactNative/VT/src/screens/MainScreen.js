@@ -5,6 +5,7 @@ import Dimensions from 'Dimensions';
 const {width, height} = Dimensions.get('window');
 import MainOverlayControl from './components/MainOverlayControl';
 import ServerTools from '../utils/ServerTools';
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 const LATITUDE_DELTA = 0.0122;
 const LONGITUDE_DELTA = 0.0121;
@@ -50,12 +51,13 @@ class MainScreen extends Component{
 	 	},
 	 	ready: true
 	 };
+	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
 	}
 
 	componentDidMount() {
 		console.log("mounting worked")
 		this.getCurrentPosition();
-		ServerTools.getData();
+		// ServerTools.getData();
 	}
 
 	setRegion(region) {
@@ -100,13 +102,21 @@ class MainScreen extends Component{
 		});
 	}
 
-	AttemptLogOff = () => {
+	async AttemptLogOff() {
 		this.showMenu(false);
-		this.props.navigator.resetTo({
-			screen: 'vt.LoginScreen',
-			animated: true,
-			animationType: 'fade',
-		});
+		let sessionData = await Db_Helper_User.getSessionData();
+		// let code = await ServerTools.getCode();
+		// var data = {'token_gen': code, 'token_user': sessionData.token, 'user_id': sessionData.user_id};
+		let response = await ServerTools.logoff(sessionData);
+		if(response != null){
+			if (response.code==1){
+				this.props.navigator.resetTo({
+					screen: 'vt.LoginScreen',
+					animated: true,
+					animationType: 'fade',
+				});
+			}
+		}
 	}
 
 	AttemptMatch = () => {

@@ -19,21 +19,18 @@ class LoginScreen extends Component{
     	usernameValue: '',
     	password: '',
     	rememberUser: true,
-    	code: ''
   	};
   	this.AttemptSignIn = this.AttemptSignIn.bind(this);
 	}
 
 	async loadInfo() {
 		var userInfo = await Db_Helper_User.getInfo();
-		var code = await ServerTools.getCode();
 		// console.log(userInfo);
 		if (userInfo != null){
 			this.setState({
 				usernameValue: userInfo.user_name,
 				password: userInfo.user_password,
 				rememberUser: userInfo.remember,
-				code: code
 			});
 		}
 	}
@@ -44,13 +41,22 @@ class LoginScreen extends Component{
 	}
 
 	async AttemptSignIn() {
-		// var data = {'token_gen': this.state.code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
-		// let response = await ServerTools.login(data);
+		var code = await ServerTools.getCode();
+		var data = {'token_gen': code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
+		// console.log(data);
+		let response = await ServerTools.login(data);
+		// console.log('hey im here');
 		// console.log(response);
-		this.props.navigator.push({
-			screen: 'vt.MainScreen',
-			backButtonHidden: true,
-		});
+		if(response != null){
+			if(response.code==1){
+				var sessionData = {'token_gen': code, 'token_user':response.data.token, 'user_id': response.data.user_id};
+				Db_Helper_User.saveSessionData(sessionData);
+				this.props.navigator.push({
+					screen: 'vt.MainScreen',
+					backButtonHidden: true,
+				});
+			}
+		}
 	}
 
 	pushRegisterScreen = () => {
@@ -109,6 +115,7 @@ class LoginScreen extends Component{
 	        	label="Password"
 	        	fontSize={18}
 	        	value={this.state.password}
+	        	onChangeText={(v) => this.setState({password: v})}
 	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"

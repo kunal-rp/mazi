@@ -33,10 +33,36 @@ class Db_Helper_User{
 		}
 	}
 
+	//var userInfo = {"user_id": 0, "user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true};
+
+	// async updateCredentials(username, password) {
+	// 	let data = await this.getInfo();
+	// 	data.user_name = username;
+	// 	data.user_password = password;
+	// }
+
 	async setUserInfo(userInfo) {
 		this.clearAllData();
 		await AsyncStorage.setItem('user_info', JSON.stringify(userInfo));
 	}	
+
+	//Method to save session credentials for logging off later
+	async saveSessionData(data){
+		await AsyncStorage.setItem('sessionData', JSON.stringify(data));
+	}
+
+	//Method to get credentials from app storage to log off with
+	async getSessionData() {
+		try{
+			let response = await AsyncStorage.getItem('sessionData');
+			if(response != null){
+				let responseJson = await JSON.parse(response);
+				return responseJson;
+			}
+		} catch(error){
+			console.log(error);
+		}
+	}
 }
 
 export default new Db_Helper_User;
