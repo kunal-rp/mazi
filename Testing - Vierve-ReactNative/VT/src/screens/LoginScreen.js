@@ -44,13 +44,13 @@ class LoginScreen extends Component{
 	}
 
 	async AttemptSignIn() {
-		var data = {'token_gen': this.state.code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
-		let response = await ServerTools.login(data);
-		console.log(response);
-		// this.props.navigator.push({
-		// 	screen: 'vt.MainScreen',
-		// 	backButtonHidden: true,
-		// });
+		// var data = {'token_gen': this.state.code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
+		// let response = await ServerTools.login(data);
+		// console.log(response);
+		this.props.navigator.push({
+			screen: 'vt.MainScreen',
+			backButtonHidden: true,
+		});
 	}
 
 	pushRegisterScreen = () => {

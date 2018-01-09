@@ -48,6 +48,16 @@ class ServerTools{
 			console.log(error);
 		}
 	}
+
+	async getData() {
+		try{
+			let response = await fetch('https://viervetesting.herokuapp.com/data');
+			let responseJson = await response.json();
+			return responseJson;
+		} catch(error){
+			console.log(error);
+		}
+	}
 }
 
 export default new ServerTools;

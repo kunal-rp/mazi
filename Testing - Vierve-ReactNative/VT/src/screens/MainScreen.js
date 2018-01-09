@@ -4,6 +4,7 @@ import MapView from 'react-native-maps';
 import Dimensions from 'Dimensions';
 const {width, height} = Dimensions.get('window');
 import MainOverlayControl from './components/MainOverlayControl';
+import ServerTools from '../utils/ServerTools';
 
 const LATITUDE_DELTA = 0.0122;
 const LONGITUDE_DELTA = 0.0121;
@@ -54,6 +55,7 @@ class MainScreen extends Component{
 	componentDidMount() {
 		console.log("mounting worked")
 		this.getCurrentPosition();
+		ServerTools.getData();
 	}
 
 	setRegion(region) {

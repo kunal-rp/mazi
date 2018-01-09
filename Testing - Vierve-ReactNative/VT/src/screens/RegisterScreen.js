@@ -38,7 +38,7 @@ class RegisterScreen extends Component{
 		if (this.state.agreebox){
 			if(this.state.password == this.state.cpassword){
 				var code = await ServerTools.getCode();
-				var data = {'token_gen':code, 'user_name': this.state.username, 'user_password': this.state.password, 'user_email': this.state.email};
+				var data = {'token_gen': code, 'user_name': this.state.username, 'user_password': this.state.password, 'user_email': this.state.email};
 				console.log(data);
 				ServerTools.createUser(data);
 				// this.setUser();
