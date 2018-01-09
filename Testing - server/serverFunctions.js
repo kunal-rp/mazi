@@ -151,7 +151,7 @@ module.exports = {
 
   },
   login:function(username, password, callback){
-    var localData = {username : username,password : password; callback:callback}
+    var localData = {username : username,password : password, callback:callback}
     var query = "Select * From "+ tables.table_prim  + " Where `user_name` = '"+username+"'";
     connectionPool.query(query,function(err, results){
       /*

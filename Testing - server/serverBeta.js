@@ -73,7 +73,7 @@ responses:
 */
 app.post('/checkusername',function(req,res){
   gen.checkReqGeneral(req, res, function(data){
-    gen.checkUsername(res, user_name, function(){
+    gen.checkUsername(res, data, function(){
       gen.validResponse(res, "Username is avalible")
     })
   })
