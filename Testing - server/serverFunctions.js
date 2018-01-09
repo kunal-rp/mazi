@@ -134,8 +134,7 @@ module.exports = {
   },
   //change to callback(struct, simple, data)
   addSuggestion:function(data,callback){
-    module.exports.getTime(function(time){
-      var timestamp = time;
+    module.exports.getTime(function(timestamp){
       var query_insert_suggestion = "INSERT INTO "+tables.table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
       connectionPool.query(query_insert_suggestion,function(err, results){
         if(err){

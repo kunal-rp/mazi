@@ -259,7 +259,7 @@ module.exports = {
     })
   },
   attemptCreateUser:function(res, data, callback){
-    if(data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined || data.promo_user == undefined ){
+    if(data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined  ){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
     }
     else{
@@ -273,7 +273,7 @@ module.exports = {
           module.exports.structuralError(res, "An Error occured")
         }
         else if(simple){
-          serverFunctions.checkUsername(data.user_name,function(cu_st, cu_si){
+          module.exports.checkUsername(res,{user_name: data.user_name},function(){
             module.exports.handleErrors(res, cu_st, cu_si, function(){
               module.exports.generateUserID(res, function(user_id){
                 bcrypt.genSalt(10, function(salt_err, salt) {
@@ -333,20 +333,15 @@ module.exports = {
   },
   verify:function(res, req, callback){
     module.exports.attemptVerify(req,res, function(data){
-      serverFunctions.checkUsername(data.user_name, function(struct, simple){
-        if(struct){
-          callback(struct,false)
-        }
-        else{
-          serverFunctions.verify(data, function(st2, si2){
-            if(st2 || si2){
-              callback(st2,si2)
-            }
-            else{
-              callback(false, false)
-            }
-          })
-        }
+      module.exports.checkUsername(res,{user_name: data.user_name},function(){
+        serverFunctions.verify(data, function(st2, si2){
+          if(st2 || si2){
+            callback(st2,si2)
+          }
+          else{
+            callback(false, false)
+          }
+        })
       })
     })
   },
