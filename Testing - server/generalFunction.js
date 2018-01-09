@@ -1,36 +1,30 @@
 var serverFunctions = require('./serverFunctions.js');
-var jwt = require('jsonwebtoken')
+var vars = require('./variables.js');
 var mail = require('./mailFunction.js')
+
+var jwt = require('jsonwebtoken')
 var rs = require('randomstring')
-const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
+const bcrypt = require('bcrypt');
 
-var codes = null
-var public_key = "Vierve"
+var codes = {}
 
-var status = {
-  verify_email:'verify_email',
-  not:'-',
-  idle:'idle',
-  waiting:'waiting',
-  inmatch:'match',
-  rate:'rate',
-}
+var status = {}
+var type_forget = {}
+var update_type = {}
 
-var type_forget = {
-  username:"username",
-  password:"password"
-}
+vars.getStatus(function(s){
+  status =s
+})
 
-var update_type = {
-  username:"username",
-  password:"password"
-}
+vars.getTypeForget(function(t){
+  type_forget =t
+})
+
+vars.getUpdateType(function(u){
+  update_type =u
+})
 
 module.exports = {
-  setCodes:function(c){
-    codes = c
-  },
-
   /* Generates a random sring
   primarly used as tokens for general and specific user
   @param {Function} callback - function to call after generating the key
@@ -54,11 +48,15 @@ module.exports = {
   */
   generateCodes:function(callback){
     module.exports.generateCustomKey(20, function(gk){
-      var codes =
-      {general_key:gk};
-      serverFunctions.updateServerinfo(codes,function(){
+      codes =
+      {general_key:'971Qq4uCyoUYYjeetrrv'};
+      console.log("Local Codes Set : ")
+      console.log(codes)
+      callback(codes)
+      /*serverFunctions.updateServerinfo(codes,function(){
         callback(codes)
-      })
+      })*/
+
     })
   },
   /* Checks tokens at basic level
@@ -69,20 +67,7 @@ module.exports = {
   @param {Function} callback - function to call IN CASE where then request is encrypted with the basic codes
   */
   checkReqBasic:function(req,res,callback){
-    if(req.get("token_gen") == undefined ){
-      module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
-    }
-    else{
-      jwt.verify(req.get("token_gen"),public_key , function(err, result) {
-        if(err){
-          module.exports.simpleError(res,"Error: Session Invalid.")
-          serverFunctions.printError("checkReqBasic","Error: Error: Session Token Invalid.",err,null)
-        }
-        else{
-          callback(result)
-        }
-      })
-    }
+    callback()
   },
   /* Checks tokens for general layer
   ensures the http call is encrypting the data with token from the server Codes
@@ -155,27 +140,7 @@ module.exports = {
       })
     });
   },
-  attemptLogin:function(res,data, callback){
-    if(data.user_name == undefined ||data.user_password == undefined ){
-      module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
-    }
-    else{
-      callback()
-    }
-  },
-  loginUser(res, data, callback){
-    serverFunctions.login(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
-      module.exports.handleErrors(res,structural_error,simple_error,function(){
-        serverFunctions.updateUserStatus(user_id, status.idle, function(st, si){
-          module.exports.handleErrors(res,st,si,function(){
-            module.exports.updateUserAuth(res, user_id,function(token){
-              callback(token)
-            })
-          })
-        })
-      })
-    })
-  },
+
   attemptCheckUsername:function(res, data, callback){
     if(data.user_name == undefined){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
@@ -184,62 +149,65 @@ module.exports = {
       callback(data.user_name)
     }
   },
-  checkUsername:function(res, user_name,callback){
-    serverFunctions.checkUsername(user_name, function(struc_err, simple_err){
-      if(struc_err){
-        module.exports.structuralError(res,struc_err)
-      }
-      else if(simple_err){
-        module.exports.simpleError(res,simple_err)
-      }
-      else{
-        callback(user_name)
-      }
+  checkUsername:function(res, data,callback){
+    module.exports.attemptCheckUsername(res,data,function(user_name){
+      serverFunctions.checkUsername(user_name, function(struc_err, simple_err){
+        if(struc_err){
+          module.exports.structuralError(res,struc_err)
+        }
+        else if(simple_err){
+          module.exports.simpleError(res,simple_err)
+        }
+        else{
+          callback(user_name)
+        }
+      })
     })
   },
-  attemptReset:function(res, data, callback){
-    if(data.user_email == undefined || data.type_forget == undefined ){
+  attemptForgot:function(res, data, callback){
+    if(data.user_email == undefined || data.type_forget == undefined || type_forget[data.type_forget] == undefined){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
     }
     else{
       callback()
     }
   },
-  resetUser:function(res, data, callback){
-    serverFunctions.getUserIDWithEmail(true, data.user_email, function(struct_err, simple_err, user_id){
-      module.exports.handleErrors(res, struct_err, simple_err, function(){
-
-        serverFunctions.getUserData(true, user_id, function(struct_err_2, simple_err_2,user){
-          module.exports.handleErrors(res, struct_err_2, simple_err_2, function(){
-            if(user.status == status.verify){
-              module.exports.simpleError(res,"This email has not been verified yet!\nCheck for an email form us to this address.")
-            }
-            else{
-              //forgot username
-              if(data.type_forget === type_forget.username){
-                serverFunctions.getUsernameWithUserID(user_id, function(struct_err_3, simple_err_3, user_name){
-                  module.exports.handleErrors(res, struct_err_3, simple_err_3, function(){
-                    mail.sendForgotUsernameEmail({user_name: user_name},data.user_email,function(struct_err_4, simple_err_4){
-                      module.exports.handleErrors(res, struct_err_4, simple_err_4, function(){
-                        callback()
-                      })
-                    })
-                  })
-                })
+  forgot:function(res, data, callback){
+    module.exports.attemptForgot(res, data, function(){
+      serverFunctions.getUserIDWithEmail(true, data.user_email, function(struct_err, simple_err, user_id){
+        module.exports.handleErrors(res, struct_err, simple_err, function(){
+          serverFunctions.getUserData(true, user_id, function(struct_err_2, simple_err_2,user){
+            module.exports.handleErrors(res, struct_err_2, simple_err_2, function(){
+              if(user.status == status.verify){
+                module.exports.simpleError(res,"This email has not been verified yet!\nCheck your inbox.")
               }
-              //forgot password
               else{
-                module.exports.generateCustomKey(20, function(newPassword){
-                  module.exports.updatePassword(res,user_id,newPassword, function(){
-                    mail.sendForgotPasswordEmail({newPassword:newPassword},data.user_email, function(sm_struct, sm_simple){
-                      module.exports.handleErrors(res, sm_struct, sm_simple, function(){
-                        callback()
+                //forgot username
+                if(data.type_forget === type_forget.username){
+                  serverFunctions.getUsernameWithUserID(user_id, function(struct_err_3, simple_err_3, user_name){
+                    module.exports.handleErrors(res, struct_err_3, simple_err_3, function(){
+                      mail.sendForgotUsernameEmail({user_name: user_name},data.user_email,function(struct_err_4, simple_err_4){
+                        module.exports.handleErrors(res, struct_err_4, simple_err_4, function(){
+                          callback()
+                        })
                       })
                     })
                   })
-                })
+                }
+                //forgot password
+                else{
+                  module.exports.generateCustomKey(20, function(newPassword){
+                    module.exports.updatePassword(res,user_id,newPassword, function(){
+                      mail.sendForgotPasswordEmail({newPassword:newPassword},data.user_email, function(sm_struct, sm_simple){
+                        module.exports.handleErrors(res, sm_struct, sm_simple, function(){
+                          callback()
+                        })
+                      })
+                    })
+                  })
+                }
               }
-            }
+            })
           })
         })
       })
@@ -254,25 +222,27 @@ module.exports = {
     }
   },
   updateUser:function(res, data, callback){
-    serverFunctions.getUserIDWithEmail(true, data.user_email, function(struct_err, simple_err, user_id){
-      module.exports.handleErrors(res, struct_err, simple_err, function(){
-        if(data.update_type === update_type.username){
-          serverFunctions.updateUsername(user_id, data.user_name, function(uu_struct, uu_simple){
-            module.exports.handleErrors(res, uu_struct, uu_simple, function(){
+    module.exports.attemptUpdateUser(res, data, function(){
+      serverFunctions.getUserIDWithEmail(true, data.user_email, function(struct_err, simple_err, user_id){
+        module.exports.handleErrors(res, struct_err, simple_err, function(){
+          if(data.update_type === update_type.username){
+            module.exports.checkUsername(res,{user_name: data.user_name},function(){
+              serverFunctions.updateUsername(user_id, data.user_name, function(uu_struct, uu_simple){
+                module.exports.handleErrors(res, uu_struct, uu_simple, function(){
+                  callback()
+                })
+              })
+            })
+          }
+          else if(data.update_type === update_type.password){
+            module.exports.updatePassword(res,user_id,data.user_password, function(){
               callback()
             })
-          })
-        }
-        else if(data.update_type === update_type.password){
-
-          module.exports.updatePassword(res,user_id,data.user_password, function(){
-            callback()
-          })
-        }
+          }
+        })
       })
     })
   },
-
   updatePassword:function(res,user_id, newPassword,callback){
     bcrypt.genSalt(10, function(salt_err, salt){
       module.exports.handleErrors(res, salt_err, false, function(){
@@ -288,18 +258,6 @@ module.exports = {
       })
     })
   },
-  checkEmail:function(res, email,callback){
-    mail.validateEmail(email, function(err){
-      if(err){
-        module.exports.handleErrors(res, err, false, function(){})
-      }
-      else{
-        callback()
-      }
-
-    })
-  },
-
   attemptCreateUser:function(res, data, callback){
     if(data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined || data.promo_user == undefined ){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
@@ -309,30 +267,31 @@ module.exports = {
     }
   },
   createUser:function(res, data, callback){
-    serverFunctions.getUserIDWithEmail(false, data.user_email,function(struct, simple){
-      if(struct){
-        module.exports.structuralError(res, "An Error occured")
-      }
-      else if(simple){
-
-        serverFunctions.checkUsername(data.user_name,function(cu_st, cu_si){
-          module.exports.handleErrors(res, cu_st, cu_si, function(){
-            module.exports.generateUserID(res, function(user_id){
-              bcrypt.genSalt(10, function(salt_err, salt) {
-                bcrypt.hash(user_id+""+data.user_password, salt, function(has_err, hash) {
-                  module.exports.generateCustomKey(20, function(verification_key){
-                    var new_user_data = {
-                      user_id:user_id,
-                      user_name:data.user_name,
-                      user_password:hash,
-                      user_email:data.user_email,
-                      user_verification_key:verification_key
-                    }
-                    serverFunctions.createUser(new_user_data,function(struct_err, simple_err){
-                      module.exports.handleErrors(res, struct_err, simple_err, function(){
-                        mail.sendWelcomeemail(new_user_data,new_user_data.user_email, function(sm_struct, sm_simple){
-                          module.exports.handleErrors(res, sm_struct, sm_simple, function(){
-                            callback()
+    module.exports.attemptCreateUser(res, data, function(){
+      serverFunctions.getUserIDWithEmail(false, data.user_email,function(struct, simple){
+        if(struct){
+          module.exports.structuralError(res, "An Error occured")
+        }
+        else if(simple){
+          serverFunctions.checkUsername(data.user_name,function(cu_st, cu_si){
+            module.exports.handleErrors(res, cu_st, cu_si, function(){
+              module.exports.generateUserID(res, function(user_id){
+                bcrypt.genSalt(10, function(salt_err, salt) {
+                  bcrypt.hash(user_id+""+data.user_password, salt, function(has_err, hash) {
+                    module.exports.generateCustomKey(20, function(verification_key){
+                      var new_user_data = {
+                        user_id:user_id,
+                        user_name:data.user_name,
+                        user_password:hash,
+                        user_email:data.user_email,
+                        user_verification_key:verification_key
+                      }
+                      serverFunctions.createUser(new_user_data,function(struct_err, simple_err){
+                        module.exports.handleErrors(res, struct_err, simple_err, function(){
+                          mail.sendWelcomeemail(new_user_data,new_user_data.user_email, function(sm_struct, sm_simple){
+                            module.exports.handleErrors(res, sm_struct, sm_simple, function(){
+                              callback()
+                            })
                           })
                         })
                       })
@@ -342,12 +301,11 @@ module.exports = {
               })
             })
           })
-        })
-
-      }
-      else{
-        module.exports.simpleError(res, "An account with that email is already registered.")
-      }
+        }
+        else{
+          module.exports.simpleError(res, "An account with that email is already registered.")
+        }
+      })
     })
   },
   generateUserID:function(res,callback){
@@ -373,27 +331,22 @@ module.exports = {
       callback({user_name:req.query.user_name, code:req.query.code})
     }
   },
-  verify:function(res, data, callback){
-    serverFunctions.checkUsername(data.user_name, function(struct, simple){
-      if(struct){
-        callback(struct,false)
-      }
-      else{
-        serverFunctions.verify(data, function(st2, si2){
-          if(st2 || si2){
-            callback(st2,si2)
-          }
-          else{
-            callback(false, false)
-          }
-        })
-      }
-    })
-  },
-  logOff:function(user_id, callback){
-    serverFunctions.updateUserStatus(user_id,status.not, function(st, si){
-      module.exports.handleErrors(res, st, si, function(){
-        callback()
+  verify:function(res, req, callback){
+    module.exports.attemptVerify(req,res, function(data){
+      serverFunctions.checkUsername(data.user_name, function(struct, simple){
+        if(struct){
+          callback(struct,false)
+        }
+        else{
+          serverFunctions.verify(data, function(st2, si2){
+            if(st2 || si2){
+              callback(st2,si2)
+            }
+            else{
+              callback(false, false)
+            }
+          })
+        }
       })
     })
   },
