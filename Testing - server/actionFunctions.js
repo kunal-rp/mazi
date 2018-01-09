@@ -443,18 +443,12 @@ loginUser(res, data){
     serverFunctions.login(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
       serverFunctions.getUserData(true, user_id, function(st,si,user){
         gen.handleErrors(res,st,si, function(){
-
-          if(user.auth_token != ""){
-            gen.simpleError(res, "User cannot login at this time")
-          }
-          else{
-            module.exports.clearTimers(user_id,function(){})
-            gen.handleErrors(res,structural_error,simple_error,function(){
-              gen.updateUserAuth(res, user_id,function(token){
-                gen.validResponse(res, "User Logged In", {token : token})
-              })
+          module.exports.clearTimers(user_id,function(){})
+          gen.handleErrors(res,structural_error,simple_error,function(){
+            gen.updateUserAuth(res, user_id,function(token){
+              gen.validResponse(res, "User Logged In", {User_token : token, user_id : user_id})
             })
-          }
+          })
         })
       })
     })
