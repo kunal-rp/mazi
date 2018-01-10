@@ -26,7 +26,6 @@ class LoginScreen extends Component{
 
 	async loadInfo() {
 		var userInfo = await Db_Helper_User.getInfo();
-		// console.log(userInfo);
 		if (userInfo != null){
 			this.setState({
 				username: userInfo.user_name,
@@ -56,10 +55,6 @@ class LoginScreen extends Component{
 				});
 			}
 			if(response.code==0 || response.code==-1){	//show error notification if invalid
-				// this.props.navigator.showInAppNotification({
-				// 	screen: 'vt.Notification',
-				// 	passProps: {type: 0, message: response.message}
-				// });
 				showNotification(this.props.navigator, 0, response.message);
 			}
 		}

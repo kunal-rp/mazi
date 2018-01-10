@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, Image} from 'react-native';
 import { TextField } from 'react-native-material-textfield';
+import Db_Helper_User from '../utils/Db_Helper_User';
+import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
 
 class ProfileScreen extends Component{
 	static navigatorStyle = {
@@ -11,14 +14,55 @@ class ProfileScreen extends Component{
 
 	constructor(props) {
 		super(props);
+    this.state = {
+      email: '',
+      username: '',
+      password: '',
+      npassword: '',
+      cpassword: ''
+    };
+    this.updateUsername = this.updateUsername.bind(this);
+    this.updatePassword = this.updatePassword.bind(this);
 	}
 
-	AttemptRegister = () => {
-		this.props.navigator.pop({
-			animated: true,
-			animationType: 'fade',
-		});
-	}
+  async loadEmail(){
+    var userInfo = await Db_Helper_User.getInfo();
+    if(userInfo){
+      this.setState({email: userInfo.user_email});
+    }
+  }
+
+  componentDidMount() {
+    this.loadEmail();
+  }
+
+  async updateUsername() {
+    if(this.state.username){ // 1. check username filled in
+      let code = await ServerTools.getCode();
+      let sessionData = await Db_Helper_User.getSessionData();
+      let response = await ServerTools.updateUser({'token_gen': code, 'user_name': this.state.username, 'user_password': '', 'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'update_type': 'username'});
+      if(response != null){
+        showNotification(this.props.navigator, response.code, response.message);
+      }
+    }
+  }
+
+  async updatePassword() {
+    if(this.state.password != '' && this.state.npassword != '' && this.state.cpassword != ''){ // 1. check that password fields filled in
+      var userInfo = await Db_Helper_User.getInfo();
+      if(userInfo.user_password == this.state.password){ // 2. check that correct current password entered
+        if(this.state.npassword != null && this.state.cpassword != null && this.state.npassword==this.state.cpassword){ // 3. verify new password
+          let code = await ServerTools.getCode();
+          let sessionData = await Db_Helper_User.getSessionData();
+          console.log(sessionData);
+          let response = await ServerTools.updateUser({'token_gen': code, 'user_name': '', 'user_password': this.state.cpassword, 'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'update_type': 'password'});
+          if(response != null){
+            showNotification(this.props.navigator, response.code, response.message);
+          }
+        } else showNotification(this.props.navigator, 0, 'New Password does not match');
+      } else showNotification(this.props.navigator,0,'Incorrect current password');
+    }
+  }
 
 	render() {
 		return (
@@ -34,10 +78,12 @@ class ProfileScreen extends Component{
         	returnKeyType='next'
           autoCapitalize='none'
           animationDuration={150}
+          value={this.state.username}
+          onChangeText={(v) => this.setState({username: v})}
           containerStyle={{marginLeft:15, marginRight: 15}}
         />
         <View style={styles.buttonContainer}>
-					<TouchableHighlight onPress={this.AttemptRegister} underlayColor="#2f4858">
+					<TouchableHighlight onPress={this.updateUsername} underlayColor="#2f4858">
 		    		<View style={styles.updateButton}>
 		    			<Text style={styles.buttonText}>UPDATE USERNAME</Text>
 		    		</View>
@@ -45,7 +91,7 @@ class ProfileScreen extends Component{
 	    	</View>
         <Text style={styles.titleLabel}>Email:</Text>
         <View style={styles.emailValueContainer}>
-        	<Text style={styles.emailValue}>12bpalomino@gmail.com</Text>
+        	<Text style={styles.emailValue}>{this.state.email}</Text>
         </View>
         <Text style={styles.titleLabel}>Update Password:</Text>
 
@@ -60,6 +106,8 @@ class ProfileScreen extends Component{
           autoCapitalize='none'
           secureTextEntry={true}
           animationDuration={150}
+          value={this.state.password}
+          onChangeText={(v) => this.setState({password: v})}
           containerStyle={{marginTop:5,marginLeft:15, marginRight: 15}}
 
         />
@@ -74,6 +122,8 @@ class ProfileScreen extends Component{
           autoCapitalize='none'
           secureTextEntry={true}
           animationDuration={150}
+          value={this.state.npassword}
+          onChangeText={(v) => this.setState({npassword: v})}
           containerStyle={{marginLeft:15, marginRight: 15}}
         />
         <TextField
@@ -87,10 +137,12 @@ class ProfileScreen extends Component{
           autoCapitalize='none'
           secureTextEntry={true}
           animationDuration={150}
+          value={this.state.cpassword}
+          onChangeText={(v) => this.setState({cpassword: v})}
           containerStyle={{marginLeft:15, marginRight: 15}}
         />
 	      <View style={styles.buttonContainer}>
-					<TouchableHighlight onPress={this.AttemptRegister} underlayColor="#2f4858">
+					<TouchableHighlight onPress={this.updatePassword} underlayColor="#2f4858">
 			    	<View style={styles.updateButton}>
 			    		<Text style={styles.buttonText}>UPDATE PASSWORD</Text>
 			    	</View>

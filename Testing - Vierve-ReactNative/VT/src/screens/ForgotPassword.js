@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
+import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
 
 class ForgotPassword extends Component{
 	static navigatorStyle = {
@@ -14,13 +16,23 @@ class ForgotPassword extends Component{
 	
 	constructor(props) {
 	 super(props);
+	 this.state = {
+			email: ''
+		};
+		this.submitEmail = this.submitEmail.bind(this);
 	}
 
-	submitEmail = () => {
-		this.props.navigator.pop({
-			animated: true,
-			animationType: 'fade',
-		});
+	async submitEmail() {
+		if(this.state.email){
+			let code = await ServerTools.getCode();
+			let response = await ServerTools.forgot({'token_gen': code, 'user_email': this.state.email, 'type_forget': 'password'});
+			if(response != null){
+				if(response.code==1){
+					showNotification(this.props.navigator, 1, 'Sent you an email');
+				}
+				else showNotification(this.props.navigator, 0, response.message);
+			}
+		}
 	}
 
 	render() {
@@ -39,6 +51,8 @@ class ForgotPassword extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='done'
             autoCapitalize='none'
+            value={this.state.email}
+	        	onChangeText={(v) => this.setState({email: v})}
             animationDuration={150}
 	        />
 	       </View>
