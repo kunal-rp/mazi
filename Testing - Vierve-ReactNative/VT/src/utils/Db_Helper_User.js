@@ -35,14 +35,19 @@ class Db_Helper_User{
 
 	//var userInfo = {"user_id": 0, "user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true};
 
-	// async updateCredentials(username, password) {
-	// 	let data = await this.getInfo();
-	// 	data.user_name = username;
-	// 	data.user_password = password;
-	// }
+	async updateUserCredentials(data) {
+		let userInfo = await this.getInfo();
+		if(userInfo !=null){
+			userInfo.user_name = data.user_name;
+			userInfo.user_password = data.user_password;
+			userInfo.remember = data.remember;
+			this.setUserInfo(userInfo);
+		}
+
+	}
 
 	async setUserInfo(userInfo) {
-		this.clearAllData();
+		// this.clearAllData();
 		await AsyncStorage.setItem('user_info', JSON.stringify(userInfo));
 	}	
 

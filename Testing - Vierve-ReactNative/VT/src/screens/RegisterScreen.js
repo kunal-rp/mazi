@@ -4,6 +4,8 @@ import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
 import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
+
 
 class RegisterScreen extends Component{
 	static navigatorStyle = {
@@ -24,28 +26,22 @@ class RegisterScreen extends Component{
 			password: '',
 			cpassword: '',
 			referral: '',
-			code: ''
 		};
 		this.AttemptRegister = this.AttemptRegister.bind(this);
 	}
 
-	async setUser() {
-		var userInfo = {"user_id": 0, "user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true};
-		Db_Helper_User.setUserInfo(userInfo);
-	}
-
 	async AttemptRegister() {
 		if (this.state.agreebox){
-			if(this.state.password == this.state.cpassword){
+			if(this.state.password == this.state.cpassword){ //check that password equals cpassword and checkbox marked
 				var code = await ServerTools.getCode();
-				var data = {'token_gen': code, 'user_name': this.state.username, 'user_password': this.state.password, 'user_email': this.state.email};
-				console.log(data);
-				ServerTools.createUser(data);
-				// this.setUser();
-				// this.props.navigator.pop({
-				// 	animated: true,
-				// 	animationType: 'fade',
-				// });
+				let response = await ServerTools.createUser({'token_gen': code, 'user_name': this.state.username, 'user_password': this.state.password, 'user_email': this.state.email}); //try to create user on server with json 
+				if(response != null){
+					if(response.code==1) Db_Helper_User.setUserInfo({"user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true}); //save user data in local storage if account creation successful
+					showNotification(this.props.navigator, response.code, response.message);
+				}
+			}
+			else{
+				showNotification(this.props.navigator, 0,'Passwords do not match');
 			}
 		}
 	}
@@ -132,7 +128,7 @@ class RegisterScreen extends Component{
 	        		checkboxStyle={{tintColor:'white'}}
 	        		labelStyle={{color:'white', fontSize:12}}
 	        		label='I Agree to the Privacy Policy(www.vierve.com/privacy)'
-	        		onChange={(v) => this.setState({agreebox: v})}
+	        		onChange={(v) => this.setState({agreebox: v.checked})}
 	        	/>
 	      </View>
 	      <View style={styles.buttonContainer}>
@@ -185,7 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginBottom: 5,
-    marginLeft: 15
+    marginLeft: 5
   }
 });
 

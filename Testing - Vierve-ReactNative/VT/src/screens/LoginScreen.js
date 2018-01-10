@@ -4,6 +4,7 @@ import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
 import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
 
 class LoginScreen extends Component{
 	static navigatorStyle = {
@@ -16,9 +17,9 @@ class LoginScreen extends Component{
     super(props);
     this.state = {
     	text: '',
-    	usernameValue: '',
+    	username: '',
     	password: '',
-    	rememberUser: true,
+    	remember: true,
   	};
   	this.AttemptSignIn = this.AttemptSignIn.bind(this);
 	}
@@ -28,33 +29,38 @@ class LoginScreen extends Component{
 		// console.log(userInfo);
 		if (userInfo != null){
 			this.setState({
-				usernameValue: userInfo.user_name,
+				username: userInfo.user_name,
 				password: userInfo.user_password,
-				rememberUser: userInfo.remember,
+				remember: userInfo.remember,
 			});
 		}
 	}
 
 	componentDidMount() {
 		this.loadInfo();
-		this.setState({rememberUser: true});
 	}
 
 	async AttemptSignIn() {
-		var code = await ServerTools.getCode();
-		var data = {'token_gen': code,'user_name': this.state.usernameValue, 'user_password': this.state.password};
-		// console.log(data);
-		let response = await ServerTools.login(data);
-		// console.log('hey im here');
-		// console.log(response);
+		var code = await ServerTools.getCode(); //get server general code
+		let response = await ServerTools.login({'token_gen': code, 'user_name': this.state.username, 'user_password': this.state.password}); //login using json object
 		if(response != null){
 			if(response.code==1){
-				var sessionData = {'token_gen': code, 'token_user':response.data.token, 'user_id': response.data.user_id};
-				Db_Helper_User.saveSessionData(sessionData);
+				Db_Helper_User.saveSessionData({'token_gen': code, 'token_user':response.data.token, 'user_id': response.data.user_id});	//store credentials in local storage
+				if(this.state.remember) Db_Helper_User.updateUserCredentials({'user_name': this.state.username, 'user_password': this.state.password, 'remember': this.state.remember});
+				else Db_Helper_User.updateUserCredentials({'user_name': '', 'user_password': '', 'remember': false});
+
+				//push main screen
 				this.props.navigator.push({
 					screen: 'vt.MainScreen',
 					backButtonHidden: true,
 				});
+			}
+			if(response.code==0 || response.code==-1){	//show error notification if invalid
+				// this.props.navigator.showInAppNotification({
+				// 	screen: 'vt.Notification',
+				// 	passProps: {type: 0, message: response.message}
+				// });
+				showNotification(this.props.navigator, 0, response.message);
 			}
 		}
 	}
@@ -102,8 +108,8 @@ class LoginScreen extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='next'
 	        	autoCapitalize='none'
-	        	value={this.state.usernameValue}
-	        	onChangeText={(v) => this.setState({usernameValue: v})}
+	        	value={this.state.username}
+	        	onChangeText={(v) => this.setState({username: v})}
 	        	animationDuration={150}
 	        />
 	        <TouchableOpacity onPress={this.pushForgotUsername}>
@@ -135,8 +141,8 @@ class LoginScreen extends Component{
 	        		checkboxStyle={{tintColor:'white'}}
 	        		labelStyle={{color:'white'}}
 	        		label='Remember Me'
-	        		checked={this.state.rememberUser}
-	        		// onChange={(v) => this.setState({rememberUser: v})}
+	        		checked={this.state.remember}
+	        		onChange={(v) => this.setState({remember: v.checked})}
 	        	/>
 	        </View>
         </View>
