@@ -3,12 +3,27 @@ class ServerTools{
 		this.url='https://viervetesting.herokuapp.com/';
 	}
 
+	async rawPostRequest(call,data) {
+		try{
+			let response = await fetch(this.url+call, {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+			let responseJson = await response.json();
+			return responseJson;
+		} catch(error){
+			console.log(error);
+		}
+	}
+
 	async getCode() {
-		console.log(this.url+'codes');
 		try{
 			let response = await fetch(this.url+'codes');
 			let responseJson = await response.json();
-			// console.log(responseJson.general_key);
 			return responseJson.general_key;
 		} catch(error){
 			console.log(error);
@@ -16,72 +31,80 @@ class ServerTools{
 	}
 
 	async login(data) {
-		try{
-			let response = await fetch('https://viervetesting.herokuapp.com/login', {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			let responseJson = await response.json();
-			return responseJson;
-		} catch(error){
-			console.log(error);
-		}
+		let response = await this.rawPostRequest('login',data);
+		return response;
+		// try{
+		// 	let response = await fetch('https://viervetesting.herokuapp.com/login', {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			Accept: 'application/json',
+		// 			'Content-Type': 'application/json',
+		// 		},
+		// 		body: JSON.stringify(data),
+		// 	});
+		// 	let responseJson = await response.json();
+		// 	return responseJson;
+		// } catch(error){
+		// 	console.log(error);
+		// }
 	}
 
 	async logoff(data) {
-		try{
-			let response = await fetch('https://viervetesting.herokuapp.com/logoff', {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			let responseJson = await response.json();
-			return responseJson;
-		} catch(error){
-			console.log(error);
-		}
+		let response = await this.rawPostRequest('logoff',data);
+		return response;
+		// try{
+		// 	let response = await fetch('https://viervetesting.herokuapp.com/logoff', {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			Accept: 'application/json',
+		// 			'Content-Type': 'application/json',
+		// 		},
+		// 		body: JSON.stringify(data),
+		// 	});
+		// 	let responseJson = await response.json();
+		// 	return responseJson;
+		// } catch(error){
+		// 	console.log(error);
+		// }
 	}
 
 	async createUser(data) {
-		try{
-			let response = await fetch('https://viervetesting.herokuapp.com/createUser', {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			let responseJson = await response.json();
-			// console.log(responseJson);
-			return responseJson;
-		} catch(error){
-			console.log(error);
-		}
+		let response = await this.rawPostRequest('createUser',data);
+		return response;
+		// try{
+		// 	let response = await fetch('https://viervetesting.herokuapp.com/createUser', {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			Accept: 'application/json',
+		// 			'Content-Type': 'application/json',
+		// 		},
+		// 		body: JSON.stringify(data),
+		// 	});
+		// 	let responseJson = await response.json();
+		// 	// console.log(responseJson);
+		// 	return responseJson;
+		// } catch(error){
+		// 	console.log(error);
+		// }
 	}
 
 	async forgot(data){
-		try{
-			let response = await fetch('https://viervetesting.herokuapp.com/forgot', {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data),
-			});
-			let responseJson = await response.json();
-			return responseJson;
-		} catch(error){
-			console.log(error);
-		}
+		let response = await this.rawPostRequest('forgot',data);
+		return response;
+		// try{
+		// 	let response = await fetch('https://viervetesting.herokuapp.com/forgot', {
+		// 		method: 'POST',
+		// 		headers: {
+		// 			Accept: 'application/json',
+		// 			'Content-Type': 'application/json',
+		// 		},
+		// 		body: JSON.stringify(data),
+		// 	});
+		// 	let responseJson = await response.json();
+		// 	return responseJson;
+		// } catch(error){
+		// 	console.log(error);
+		// }
 	}
 
 	async getData() {
