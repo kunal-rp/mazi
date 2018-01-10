@@ -18,7 +18,7 @@ class Db_Helper_Data{
 		await AsyncStorage.setItem('college_info', JSON.stringify(collegeList));
 	}
 
-	async getAllCollegesInformation() {
+	async getColleges() {
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || [];
 		return collegeList;

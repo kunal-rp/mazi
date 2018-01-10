@@ -6,6 +6,7 @@ const {width, height} = Dimensions.get('window');
 import MainOverlayControl from './components/MainOverlayControl';
 import ServerTools from '../utils/ServerTools';
 import Db_Helper_User from '../utils/Db_Helper_User';
+import Db_Helper_Data from '../utils/Db_Helper_Data';
 
 const LATITUDE_DELTA = 0.0122;
 const LONGITUDE_DELTA = 0.0121;
@@ -52,6 +53,12 @@ class MainScreen extends Component{
 	 	ready: true
 	 };
 	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
+	}
+
+	async loadData() {
+		let collegeList = await Db_Helper_Data.getColleges();
+		console.log(collegeList);
+		
 	}
 
 	componentDidMount() {

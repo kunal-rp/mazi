@@ -71,6 +71,7 @@ class RegisterScreen extends Component{
 	        	label="Email"
 	        	fontSize={20}
 	        	enablesReturnKeyAutomatically={true}
+	        	keyboardType='email-address'
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
