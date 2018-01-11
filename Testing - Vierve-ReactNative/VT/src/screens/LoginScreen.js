@@ -5,6 +5,7 @@ import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
 import ServerTools from '../utils/ServerTools';
 import {showNotification} from '../utils/Toolbox';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 class LoginScreen extends Component{
 	static navigatorStyle = {
@@ -22,6 +23,13 @@ class LoginScreen extends Component{
     	remember: true,
   	};
   	this.AttemptSignIn = this.AttemptSignIn.bind(this);
+  	this.onSubmitUsername = this.onSubmitUsername.bind(this);
+  	this.onAccessoryPress = this.onAccessoryPress.bind(this);
+  	this.renderPasswordAccessory = this.renderPasswordAccessory.bind(this);
+
+  	//refs
+  	this.usernameRef = this.updateRef.bind(this, 'username');
+  	this.passwordRef = this.updateRef.bind(this, 'password');
 	}
 
 	async loadInfo() {
@@ -31,6 +39,7 @@ class LoginScreen extends Component{
 				username: userInfo.user_name,
 				password: userInfo.user_password,
 				remember: userInfo.remember,
+				secureTextEntry: true,
 			});
 		}
 	}
@@ -82,6 +91,35 @@ class LoginScreen extends Component{
 		});
 	}
 
+	onAccessoryPress() {
+    this.setState({ secureTextEntry: !this.state.secureTextEntry });
+  }
+
+  renderPasswordAccessory() {
+    let { secureTextEntry } = this.state;
+    let name = secureTextEntry?
+      'visibility':
+      'visibility-off';
+
+    return (
+      <MaterialIcon
+        size={24}
+        name={name}
+        color={'white'}
+        onPress={this.onAccessoryPress}
+        suppressHighlighting
+      />
+    );
+  }
+
+	onSubmitUsername() {
+		this.password.focus();
+	}
+
+	updateRef(name, ref) {
+    this[name] = ref;
+  }
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -95,9 +133,10 @@ class LoginScreen extends Component{
 				</View>
         <View style={{margin: 8}}>
 	        <TextField
+	        	ref={this.usernameRef}
+	        	onSubmitEditing={this.onSubmitUsername}
 	        	label='Username'
 	        	fontSize={18}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
@@ -113,16 +152,17 @@ class LoginScreen extends Component{
 		        </View>
 	        </TouchableOpacity>
 	        <TextField
+	        	ref={this.passwordRef}
 	        	label="Password"
 	        	fontSize={18}
 	        	value={this.state.password}
 	        	onChangeText={(v) => this.setState({password: v})}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='done'
-	        	secureTextEntry={true}
+	        	secureTextEntry={this.state.secureTextEntry}
+	        	renderAccessory={this.renderPasswordAccessory}
             autoCapitalize='none'
             animationDuration={150}
 	        />

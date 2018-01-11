@@ -56,14 +56,25 @@ class MainScreen extends Component{
 	}
 
 	async loadData() {
-		let collegeList = await Db_Helper_Data.getColleges();
-		console.log(collegeList);
-		
+		let colleges = await Db_Helper_Data.getCollegeNameList();
+		if(colleges.length == 0){ //college data empty in phone, update
+			let response = await ServerTools.getData(); //will return json with all data
+			if(response != null){
+				Db_Helper_Data.updateCollegeData(response.cd);
+				// let colleges = await Db_Helper_Data.getCollegeNameList();
+				// console.log(colleges);
+			}
+		}
+		// else{
+		// 	let colleges = await Db_Helper_Data.getCollegeNameList();
+		// 	console.log(colleges);
+		// }
 	}
 
 	componentDidMount() {
 		console.log("mounting worked")
 		this.getCurrentPosition();
+		this.loadData();
 		// ServerTools.getData();
 	}
 

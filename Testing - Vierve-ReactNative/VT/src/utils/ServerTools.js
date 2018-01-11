@@ -65,6 +65,11 @@ class ServerTools{
 		let response = await this.rawPostRequest('updateUser',data);
 		return response;
 	}
+
+	async addSuggestion(data){
+		let response = await this.rawPostRequest('addSuggestion',data);
+		return response;
+	}
 }
 
 export default new ServerTools;

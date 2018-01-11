@@ -5,6 +5,7 @@ import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
 import ServerTools from '../utils/ServerTools';
 import {showNotification} from '../utils/Toolbox';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 
 class RegisterScreen extends Component{
@@ -26,8 +27,17 @@ class RegisterScreen extends Component{
 			password: '',
 			cpassword: '',
 			referral: '',
+			secureTextEntry: true,
+			csecureTextEntry: true
 		};
 		this.AttemptRegister = this.AttemptRegister.bind(this);
+
+		//refs
+		this.usernameRef = this.updateRef.bind(this, 'username');
+		this.emailRef = this.updateRef.bind(this, 'email');
+		this.passwordRef = this.updateRef.bind(this, 'password');
+		this.cpasswordRef = this.updateRef.bind(this, 'cpassword');
+		this.referralRef = this.updateRef.bind(this, 'referral');
 	}
 
 	async AttemptRegister() {
@@ -46,6 +56,44 @@ class RegisterScreen extends Component{
 		}
 	}
 
+	onAccessoryPress(value) {
+    if(value==0) this.setState({ secureTextEntry: !this.state.secureTextEntry });
+    else this.setState({ csecureTextEntry: !this.state.csecureTextEntry });
+  }
+
+  renderPasswordAccessory(value) {
+    let { secureTextEntry, csecureTextEntry } = this.state;
+
+    let entry = null;
+    if(value==0) entry = secureTextEntry;
+    else entry = csecureTextEntry;
+
+    let name = entry?
+      'visibility':
+      'visibility-off';
+
+    return (
+      <MaterialIcon
+        size={24}
+        name={name}
+        color={'white'}
+        onPress={() => this.onAccessoryPress(value)}
+        suppressHighlighting
+      />
+    );
+  }
+
+	onSubmitTextField(fieldNumber) {
+		if(fieldNumber==0) this.email.focus();
+		else if(fieldNumber==1) this.password.focus();
+		else if(fieldNumber==2) this.cpassword.focus();
+		else this.referral.focus();
+	}
+
+	updateRef(name, ref) {
+    this[name] = ref;
+  }
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -54,10 +102,11 @@ class RegisterScreen extends Component{
 				</View>
 				<View style={{margin: 15}}>
 					<TextField
+						ref={this.usernameRef}
+						onSubmitEditing={() => this.onSubmitTextField(0)}
 	        	label="Username"
 	        	title="3-16 character allowed a-z, 0-9,.,_"
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
@@ -68,9 +117,10 @@ class RegisterScreen extends Component{
             animationDuration={150}
 	        />
 	        <TextField
+	        	ref={this.emailRef}
+	        	onSubmitEditing={() => this.onSubmitTextField(1)}
 	        	label="Email"
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	keyboardType='email-address'
 	        	textColor="white"
 	        	baseColor="white"
@@ -82,42 +132,46 @@ class RegisterScreen extends Component{
             animationDuration={150}
 	        />
 	        <TextField
+	        	ref={this.passwordRef}
+	        	onSubmitEditing={() => this.onSubmitTextField(2)}
 	        	label="Password"
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='next'
             autoCapitalize='none'
-            secureTextEntry={true}
+            secureTextEntry={this.state.secureTextEntry}
+            renderAccessory={() => this.renderPasswordAccessory(0)}
             value={this.state.password}
 	        	onChangeText={(v) => this.setState({password: v})}
             animationDuration={150}
 	        />
 	        <TextField
+	        	ref={this.cpasswordRef}
+	        	onSubmitEditing={() => this.onSubmitTextField(3)}
 	        	label="Confirm Password"
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='next'
             autoCapitalize='none'
-            secureTextEntry={true}
+            secureTextEntry={this.state.csecureTextEntry}
+            renderAccessory={() => this.renderPasswordAccessory(1)}
             value={this.state.cpassword}
 	        	onChangeText={(v) => this.setState({cpassword: v})}
             animationDuration={150}
 	        />
 	        <TextField
+	        	ref={this.referralRef}
 	        	label="Referral User"
 	        	title="Leave empty if needed"
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
-	        	returnKeyType='next'
+	        	returnKeyType='done'
             autoCapitalize='none'
             value={this.state.referral}
 	        	onChangeText={(v) => this.setState({referral: v})}

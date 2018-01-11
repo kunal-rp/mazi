@@ -141,11 +141,10 @@ class ProfileScreen extends Component{
           	label="New Username"
           	fontSize={20}
           	title="To update: edit and press below"
-          	enablesReturnKeyAutomatically={false}
           	textColor="white"
           	baseColor="lightgrey"
           	labelHeight={12}
-          	returnKeyType='next'
+          	returnKeyType='done'
             autoCapitalize='none'
             animationDuration={150}
             value={this.state.nusername}
@@ -169,7 +168,6 @@ class ProfileScreen extends Component{
           	label="Current Password"
             onSubmitEditing={this.onSubmitPassword}
           	fontSize={20}
-          	enablesReturnKeyAutomatically={true}
           	textColor="white"
           	baseColor="lightgrey"
           	labelHeight={12}
@@ -188,7 +186,6 @@ class ProfileScreen extends Component{
           	label="New Password"
             onSubmitEditing={this.onSubmitNPassword}
           	fontSize={20}
-          	enablesReturnKeyAutomatically={true}
           	textColor="white"
           	baseColor="lightgrey"
           	labelHeight={12}
@@ -205,7 +202,6 @@ class ProfileScreen extends Component{
             ref={this.cpasswordRef}
           	label="Confirm Password"
           	fontSize={20}
-          	enablesReturnKeyAutomatically={true}
           	textColor="white"
           	baseColor="lightgrey"
           	labelHeight={12}
