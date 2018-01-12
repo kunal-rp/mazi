@@ -1,30 +1,44 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
+import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
 
 class ForgotPassword extends Component{
 	static navigatorStyle = {
-		navBarHidden: true,
+  	navBarTextFontSize: 28,
   	screenBackgroundColor: '#2f4858',
-		statusBarColor: '#2f4858'
+		statusBarColor: '#2f4858',
+		navBarBackgroundColor: '#2f4858',
+		navBarTextColor: 'white',
+	  navBarButtonColor: 'white',
 	};
 	
 	constructor(props) {
 	 super(props);
+	 this.state = {
+			email: ''
+		};
+		this.submitEmail = this.submitEmail.bind(this);
 	}
 
-	submitEmail = () => {
-		this.props.navigator.pop({
-			animated: true,
-			animationType: 'fade',
-		});
+	async submitEmail() {
+		if(this.state.email){
+			let code = await ServerTools.getCode();
+			let response = await ServerTools.forgot({'token_gen': code, 'user_email': this.state.email, 'type_forget': 'password'});
+			if(response != null){
+				if(response.code==1){
+					showNotification(this.props.navigator, 1, 'Sent you an email');
+				}
+				else showNotification(this.props.navigator, 0, response.message);
+			}
+		}
 	}
 
 	render() {
 		return (
 			<View style={styles.container}>
 				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Reset Your Password</Text>
 					<Text style={styles.promptDescriptionText}>Enter the email registered for your account:</Text>
 				</View>
 				<View style={{margin: 15}}>
@@ -37,6 +51,8 @@ class ForgotPassword extends Component{
 	        	labelHeight={12}
 	        	returnKeyType='done'
             autoCapitalize='none'
+            value={this.state.email}
+	        	onChangeText={(v) => this.setState({email: v})}
             animationDuration={150}
 	        />
 	       </View>
@@ -52,8 +68,6 @@ class ForgotPassword extends Component{
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
-    backgroundColor: '#2f4858',
 	},
 	prompt: {
 		flex: 0,

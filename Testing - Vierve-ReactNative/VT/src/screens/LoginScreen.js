@@ -3,6 +3,9 @@ import { View, Text, StyleSheet, TouchableHighlight, TouchableOpacity, Image } f
 import { TextField } from 'react-native-material-textfield';
 import CheckBox from 'react-native-modest-checkbox'
 import Db_Helper_User from '../utils/Db_Helper_User';
+import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 
 class LoginScreen extends Component{
 	static navigatorStyle = {
@@ -15,50 +18,107 @@ class LoginScreen extends Component{
     super(props);
     this.state = {
     	text: '',
-    	usernameValue: '',
+    	username: '',
     	password: '',
-    	rememberUser: false,
+    	remember: true,
   	};
+  	this.AttemptSignIn = this.AttemptSignIn.bind(this);
+  	this.onSubmitUsername = this.onSubmitUsername.bind(this);
+  	this.onAccessoryPress = this.onAccessoryPress.bind(this);
+  	this.renderPasswordAccessory = this.renderPasswordAccessory.bind(this);
+
+  	//refs
+  	this.usernameRef = this.updateRef.bind(this, 'username');
+  	this.passwordRef = this.updateRef.bind(this, 'password');
 	}
 
 	async loadInfo() {
 		var userInfo = await Db_Helper_User.getInfo();
-		console.log(userInfo);
-		this.setState({
-			usernameValue: userInfo.user_name,
-			password: userInfo.user_password,
-			rememberUser: userInfo.remember
-		});
+		if (userInfo != null){
+			this.setState({
+				username: userInfo.user_name,
+				password: userInfo.user_password,
+				remember: userInfo.remember,
+				secureTextEntry: true,
+			});
+		}
 	}
 
 	componentDidMount() {
 		this.loadInfo();
 	}
 
-	AttemptSignIn = () => {
-		this.props.navigator.push({
-			screen: 'vt.MainScreen',
-			backButtonHidden: true,
-		});
+	async AttemptSignIn() {
+		var code = await ServerTools.getCode(); //get server general code
+		let response = await ServerTools.login({'token_gen': code, 'user_name': this.state.username, 'user_password': this.state.password}); //login using json object
+		if(response != null){
+			if(response.code==1){
+				Db_Helper_User.saveSessionData({'token_gen': code, 'token_user':response.data.token, 'user_id': response.data.user_id});	//store credentials in local storage
+				if(this.state.remember) Db_Helper_User.updateUserCredentials({'user_name': this.state.username, 'user_password': this.state.password, 'remember': this.state.remember});
+				else Db_Helper_User.updateUserCredentials({'user_name': '', 'user_password': '', 'remember': false});
+
+				//push main screen
+				this.props.navigator.push({
+					screen: 'vt.MainScreen',
+					backButtonHidden: true,
+				});
+			}
+			if(response.code==0 || response.code==-1){	//show error notification if invalid
+				showNotification(this.props.navigator, 0, response.message);
+			}
+		}
 	}
+
 	pushRegisterScreen = () => {
 		this.props.navigator.push({
 			screen: 'vt.RegisterScreen',
-			title: 'Register'
+			title: 'Register Account',
+			backButtonTitle: '',
 		});
 	};
 	pushForgotUsername = () => {
 		this.props.navigator.push({
 			screen: 'vt.ForgotUsername',
-			title: 'Forgot Username'
+			title: 'Forgot Your Username',
+			backButtonTitle: '',
 		});
 	}
 	pushForgotPassword = () => {
 		this.props.navigator.push({
 			screen: 'vt.ForgotPassword',
-			title: 'Forgot Password'
+			title: 'Reset Your Password',
+			backButtonTitle: '',
 		});
 	}
+
+	onAccessoryPress() {
+    this.setState({ secureTextEntry: !this.state.secureTextEntry });
+  }
+
+  renderPasswordAccessory() {
+    let { secureTextEntry } = this.state;
+    let name = secureTextEntry?
+      'visibility':
+      'visibility-off';
+
+    return (
+      <MaterialIcon
+        size={24}
+        name={name}
+        color={'white'}
+        onPress={this.onAccessoryPress}
+        suppressHighlighting
+      />
+    );
+  }
+
+	onSubmitUsername() {
+		this.password.focus();
+	}
+
+	updateRef(name, ref) {
+    this[name] = ref;
+  }
 
 	render() {
 		return (
@@ -73,16 +133,17 @@ class LoginScreen extends Component{
 				</View>
         <View style={{margin: 8}}>
 	        <TextField
+	        	ref={this.usernameRef}
+	        	onSubmitEditing={this.onSubmitUsername}
 	        	label='Username'
 	        	fontSize={18}
-	        	value={this.state.usernameValue}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='next'
 	        	autoCapitalize='none'
-	        	onChangeText={(usernameValue) => this.setState({usernameValue})}
+	        	value={this.state.username}
+	        	onChangeText={(v) => this.setState({username: v})}
 	        	animationDuration={150}
 	        />
 	        <TouchableOpacity onPress={this.pushForgotUsername}>
@@ -91,15 +152,17 @@ class LoginScreen extends Component{
 		        </View>
 	        </TouchableOpacity>
 	        <TextField
+	        	ref={this.passwordRef}
 	        	label="Password"
 	        	fontSize={18}
 	        	value={this.state.password}
-	        	enablesReturnKeyAutomatically={true}
+	        	onChangeText={(v) => this.setState({password: v})}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
 	        	returnKeyType='done'
-	        	secureTextEntry={true}
+	        	secureTextEntry={this.state.secureTextEntry}
+	        	renderAccessory={this.renderPasswordAccessory}
             autoCapitalize='none'
             animationDuration={150}
 	        />
@@ -113,8 +176,8 @@ class LoginScreen extends Component{
 	        		checkboxStyle={{tintColor:'white'}}
 	        		labelStyle={{color:'white'}}
 	        		label='Remember Me'
-	        		checked={this.state.rememberUser}
-	        		onChange={(v) => this.setState({rememberUser: v})}
+	        		checked={this.state.remember}
+	        		onChange={(v) => this.setState({remember: v.checked})}
 	        	/>
 	        </View>
         </View>

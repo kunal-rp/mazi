@@ -11,6 +11,15 @@ class Db_Helper_Data{
 		}
 	}
 
+	async updateCollegeData(data) {
+		//data coming will by json format
+		let collegeList = [];
+		for (var i = 0; i < data.ids.length; i++) {
+			 collegeList.push(data[data.ids[i]]);
+		}
+		await AsyncStorage.setItem('college_info', JSON.stringify(collegeList));
+	}
+
 	async addCollege(college){
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || []; // get list of colleges from storage
@@ -18,10 +27,32 @@ class Db_Helper_Data{
 		await AsyncStorage.setItem('college_info', JSON.stringify(collegeList));
 	}
 
-	async getAllCollegesInformation() {
+	async getVersion() {
+		let response = await AsyncStorage.getItem('college_info');
+		if(response != null){
+			let responseJson = JSON.parse(response);
+			return responseJson.code;
+		}
+		else return null;
+	}
+
+	async getColleges() {
 		let response = await AsyncStorage.getItem('college_info');
 		let collegeList = await JSON.parse(response) || [];
 		return collegeList;
+	}
+
+	async getCollegeNameList() {
+		let response = await AsyncStorage.getItem('college_info');
+		let collegeList = await JSON.parse(response) || [];
+		if(collegeList.length>0){
+			let colleges = [];
+			for (var i = 0; i < collegeList.length; i++) {
+				colleges.push(collegeList[i].college_name);
+			}
+			return colleges;
+		}
+		else return collegeList;
 	}
 
 	async getAllCollegeVersion() {

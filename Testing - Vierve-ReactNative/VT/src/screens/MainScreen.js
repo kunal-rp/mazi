@@ -4,6 +4,9 @@ import MapView from 'react-native-maps';
 import Dimensions from 'Dimensions';
 const {width, height} = Dimensions.get('window');
 import MainOverlayControl from './components/MainOverlayControl';
+import ServerTools from '../utils/ServerTools';
+import Db_Helper_User from '../utils/Db_Helper_User';
+import Db_Helper_Data from '../utils/Db_Helper_Data';
 
 const LATITUDE_DELTA = 0.0122;
 const LONGITUDE_DELTA = 0.0121;
@@ -49,11 +52,30 @@ class MainScreen extends Component{
 	 	},
 	 	ready: true
 	 };
+	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
+	}
+
+	async loadData() {
+		let colleges = await Db_Helper_Data.getCollegeNameList();
+		if(colleges.length == 0){ //college data empty in phone, update
+			let response = await ServerTools.getData(); //will return json with all data
+			if(response != null){
+				Db_Helper_Data.updateCollegeData(response.cd);
+				// let colleges = await Db_Helper_Data.getCollegeNameList();
+				// console.log(colleges);
+			}
+		}
+		// else{
+		// 	let colleges = await Db_Helper_Data.getCollegeNameList();
+		// 	console.log(colleges);
+		// }
 	}
 
 	componentDidMount() {
 		console.log("mounting worked")
 		this.getCurrentPosition();
+		this.loadData();
+		// ServerTools.getData();
 	}
 
 	setRegion(region) {
@@ -92,18 +114,27 @@ class MainScreen extends Component{
 		this.showMenu(false);
 		this.props.navigator.push({
 			screen: 'vt.BugReportScreen',
-			title: 'BugReport',
+			title: 'Give us Feedback',
 			animationType: 'fade',
+			backButtonTitle: '',
 		});
 	}
 
-	AttemptLogOff = () => {
+	async AttemptLogOff() {
 		this.showMenu(false);
-		this.props.navigator.resetTo({
-			screen: 'vt.LoginScreen',
-			animated: true,
-			animationType: 'fade',
-		});
+		let sessionData = await Db_Helper_User.getSessionData();
+		// let code = await ServerTools.getCode();
+		// var data = {'token_gen': code, 'token_user': sessionData.token, 'user_id': sessionData.user_id};
+		let response = await ServerTools.logoff(sessionData);
+		if(response != null){
+			if (response.code==1){
+				this.props.navigator.resetTo({
+					screen: 'vt.LoginScreen',
+					animated: true,
+					animationType: 'fade',
+				});
+			}
+		}
 	}
 
 	AttemptMatch = () => {
@@ -118,7 +149,9 @@ class MainScreen extends Component{
 			if(event.id == 'profile'){
 				this.props.navigator.push({
 					screen: 'vt.ProfileScreen',
-					backButtonHidden: true,
+					title: 'Profile',
+					backButtonHidden: false,
+					backButtonTitle: '',
 					animated: true
 				});
 			}

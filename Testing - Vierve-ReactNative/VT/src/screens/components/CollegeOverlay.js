@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, Image, Dimensions} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
+import Db_Helper_Data from '../../utils/Db_Helper_Data';
 
 const {width, height} = Dimensions.get('window');
 
@@ -9,7 +10,19 @@ class CollegeOverlay extends Component {
 
 	constructor(props) {
 		super(props);
+    this.state = {
+      colleges : []
+    };
 	}
+
+  async loadCollegeData() {
+    let colleges = await Db_Helper_Data.getCollegeNameList();
+    this.setState({colleges: colleges});
+  }
+
+  componentDidMount() {
+    this.loadCollegeData();
+  }
 
   render() {
     return (
@@ -17,12 +30,12 @@ class CollegeOverlay extends Component {
         <View style={styles.dropdownContainer}>
           <ModalDropdown
             defaultIndex={0}
-            defaultValue={this.collegeOptions[0]}
+            defaultValue={this.state.colleges[0]}
             style={styles.dropdownFrame}
             dropdownStyle={styles.dropdown}
             dropdownTextStyle={{fontSize: 26}}
             textStyle={{fontSize: 26}}
-            options={this.collegeOptions}
+            options={this.state.colleges}
           />
         </View>
         <View style={styles.LocationViewContainer}>

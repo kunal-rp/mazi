@@ -1,34 +1,57 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, TouchableHighlight, ScrollView, KeyboardAvoidingView } from 'react-native';
 import { TextField } from 'react-native-material-textfield';
 import ModalDropdown from 'react-native-modal-dropdown';
+import Db_Helper_User from '../utils/Db_Helper_User';
+import ServerTools from '../utils/ServerTools';
+import {showNotification} from '../utils/Toolbox';
+
 
 class BugReportScreen extends Component{
 	static navigatorStyle = {
-		navBarHidden: true,
-	  screenBackgroundColor: '#2f4858',
-	 	statusBarColor: '#2f4858'
+	  navBarTextFontSize: 28,
+  	screenBackgroundColor: '#2f4858',
+		statusBarColor: '#2f4858',
+		navBarBackgroundColor: '#2f4858',
+		navBarTextColor: 'white',
+	  navBarButtonColor: 'white',
 	};
 	constructor(props) {
 		super(props);
 		this.state = {
 			options: ['Suggestion','Report a Bug'],
+			selected: 0,
+			report: '',
 		};
+
+		this.submitFeedback = this.submitFeedback.bind(this);
+		this.handleSelect = this.handleSelect.bind(this);
 	}
 
-	AttemptRegister = () => {
-		this.props.navigator.pop({
-			animated: true,
-			animationType: 'fade',
-		});
+	handleSelect(index) {
+		this.setState({selected: index});
+	}
+
+	async submitFeedback() {
+		console.log('should be here');
+		if(this.state.report){
+			console.log('made it inside');
+			let type = this.state.selected == 0 ? 'Suggestion' : 'Bug Report';
+			let sessionData = await Db_Helper_User.getSessionData();
+			let response = await ServerTools.addSuggestion({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'type': type, 'system_data': '', 'comment': this.state.report});
+			console.log(response);
+			if(response != null){
+				showNotification(this.props.navigator, response.code, response.message);
+			}
+		}
 	}
 
 	render() {
 		return (
+			<ScrollView>
+			<KeyboardAvoidingView keyboardVerticalOffset={220} behavior="position">
 			<View style={styles.container}>
 				<View style={styles.prompt}>
-					<Text style={styles.promptTitleText}>Suggestions / Reporting a</Text>
-					<Text style={styles.promptTitleText}>Bug</Text>
 					<Text style={styles.promptDescriptionText}>Users can give suggestions about changes</Text>
 					<Text style={styles.promptDescriptionText}>to the app, or report bugs they may have</Text>
 					<Text style={styles.promptDescriptionText}>encountered while using Vierve! Be as</Text>
@@ -37,11 +60,12 @@ class BugReportScreen extends Component{
 					<Text style={styles.promptDescriptionText}>What bug did you run into?</Text>
 				</View>
 				<View style={styles.typeContainer}>
-					<Text style={styles.titleLabel}>Type:</Text>
+					<Text style={styles.titleLabel}>Select Type:</Text>
 					<View style={styles.dropdownContainer}>
 						<ModalDropdown
 							defaultIndex={0}
 							defaultValue={this.state.options[0]}
+							onSelect={this.handleSelect}
 							style={styles.dropdownFrame}
 							dropdownStyle={styles.dropdown}
 							dropdownTextStyle={{fontSize: 20, color: 'white', backgroundColor: '#2F2F2F'}}
@@ -54,34 +78,38 @@ class BugReportScreen extends Component{
 				<View style={{marginTop: 15, marginLeft: 15, marginRight: 15}}>
 					<TextField
 	        	label="Report Description"
-	        	title="300 Characters Max"
+	        	value={this.state.report}
+	        	onChangeText={(v) => this.setState({report: v})}
 	        	fontSize={20}
-	        	enablesReturnKeyAutomatically={true}
 	        	textColor="white"
 	        	baseColor="white"
 	        	labelHeight={12}
-	        	returnKeyType='next'
-            autoCapitalize='none'
+	        	returnKeyType='done'
+	        	blurOnSubmit={true}
+            autoCapitalize='sentences'
             animationDuration={150}
+            characterRestriction={200}
             multiline={true}
+            maxLength={200}
 	        />
 	      </View>
 	      <View style={styles.buttonContainer}>
-					<TouchableHighlight onPress={this.AttemptRegister} underlayColor="#2f4858">
+					<TouchableHighlight onPress={this.submitFeedback} underlayColor="#2f4858">
 			    	<View style={styles.button}>
 			    		<Text style={styles.buttonText}>SUBMIT</Text>
 			    	</View>
 			    </TouchableHighlight>
 		    </View>
 			</View>
+			</KeyboardAvoidingView>
+			</ScrollView>
 		);
 	}
 }
 
 const styles = StyleSheet.create({
 	container: {
-		paddingTop: 20,
-    backgroundColor: '#2f4858',
+		paddingTop: 10
 	},
 	prompt: {
 		flex: 0,
