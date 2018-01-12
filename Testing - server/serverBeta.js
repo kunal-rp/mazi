@@ -1,9 +1,6 @@
 var express = require('express');
-const bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
+var bcrypt = require('bcrypt');//Encrypting passwords and generating hashes for email verification
 var path = require('path');
-var jwt = require('jsonwebtoken')
-var WebSocketServer = require("ws").Server
-var cors = require('cors');
 var bodyParser = require('body-parser')
 
 var serverFunctions = require('./serverFunctions.js');
@@ -22,7 +19,7 @@ process.on('uncaughtException', function (err) {
 var port = 3000
 app = express();
 
-var server = app.listen(port,'0.0.0.0');
+var server = app.listen(process.env.PORT || 3000);
 
 app.use(express.static('public'));
 
@@ -46,6 +43,7 @@ app.get('/',function(req,res, next){
 User will recieve the general token that they will use for verification
 */
 app.get('/codes',function(req,res){
+  console.log("Codes Requested")
   gen.checkReqBasic(req, res, function(){
     res.json(codes)
   })
@@ -154,7 +152,9 @@ app.post('/action',function(req, res){
 
 app.post('/login',function(req,res){
   gen.checkReqGeneral(req, res, function(data){
-    action.loginUser(res, data)
+    action.loginUser(res, data,function(msg, d){
+      gen.validResponse(res, msg, d)
+    })
   })
 });
 

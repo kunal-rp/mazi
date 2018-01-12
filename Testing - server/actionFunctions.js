@@ -157,13 +157,25 @@ attemptRegisterRequest:function(res, data, callback){
       if(user.status != status.idle){
         gen.simpleError(res,"User cannot request at this time")
       }
+      else if(collegeData[data.college_id] == undefined || parkinglotData[data.parkinglot_id] == undefined ||parkinglotData[data.parkinglot_id].college_id != data.college_id ){
+        gen.structuralError(res,"Error.Base Headers/Parameters not met")
+        //invalid college / parking lot data
+      }
       else{
         if(data.type == request_type.ride){
           if(data.pu_lat == undefined || data.pu_lng == undefined){
             gen.structuralError(res,"Error.Base Headers/Parameters not met")
           }
           else{
-            callback()
+            var pu = new geo(data.pu_lat, data.pu_lng)
+            var college_loc = new geo(collegeData[data.college_id].college_coor_lat,collegeData[data.college_id].college_coor_lng)
+            if(current_loc.distanceTo(college_loc, false) >= collegeData[data.college_id].college_park_limit){
+              gen.structuralError(res,"Error.Base Headers/Parameters not met")
+              //invalid pick up location data
+            }
+            else{
+              callback()
+            }
           }
         }
         else{
@@ -432,21 +444,23 @@ Performs user changes for when the user requests
 
 attemptLogin:function(res,data, callback){
   if(data.user_name == undefined ||data.user_password == undefined ){
-    module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
+    gen.structuralError(res,"Error.Base Headers/Parameters not met")
   }
   else{
     callback()
   }
 },
-loginUser(res, data){
+loginUser(res, data,callback){
   module.exports.attemptLogin(res, data, function(){
     serverFunctions.login(data.user_name, data.user_password, function(structural_error,simple_error,user_id){
-      serverFunctions.getUserData(true, user_id, function(st,si,user){
-        gen.handleErrors(res,st,si, function(){
-          module.exports.clearTimers(user_id,function(){})
-          gen.handleErrors(res,structural_error,simple_error,function(){
-            gen.updateUserAuth(res, user_id,function(token){
-              gen.validResponse(res, "User Logged In", {User_token : token, user_id : user_id})
+      gen.handleErrors(res,structural_error,simple_error, function(){
+        serverFunctions.getUserData(true, user_id, function(st,si,user){
+          gen.handleErrors(res,st,si, function(){
+            module.exports.clearTimers(user_id,function(){})
+            gen.handleErrors(res,structural_error,simple_error,function(){
+              gen.updateUserAuth(res, user_id,function(token){
+                callback("User Logged In", {token : token, user_id : user_id})
+              })
             })
           })
         })
@@ -616,7 +630,7 @@ attemptRateMatch:function(res, data, user_id, callback){
     }
     else{
       if(data.rating == undefined || data.rating <0 || data.rating > 5){
-        module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
+        gen.structuralError(res,"Error.Base Headers/Parameters not met")
       }
       else{
         callback(user)

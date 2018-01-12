@@ -123,7 +123,7 @@ module.exports = {
           if(rec){
             module.exports.printError("getUserData","Parameter Error: invalid user_id",null,{user_id:user_id})
           }
-          callback('Invalid User Credential')
+          callback(false, 'Invalid User ID')
         }
         else{
           callback(false,false, result[0])
@@ -134,8 +134,9 @@ module.exports = {
   },
   //change to callback(struct, simple, data)
   addSuggestion:function(data,callback){
-    module.exports.getTime(function(timestamp){
-      var query_insert_suggestion = "INSERT INTO "+tables.table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+mysql.escape(data.type)+","+mysql.escape(data.system_data)+","+mysql.escape(data.comment)+")";
+    module.exports.getTime(function(time){
+      var timestamp = time;
+      var query_insert_suggestion = "INSERT INTO "+tables.table_suggestion + "(`id`,`timestamp`, `user_id`, `type`, `system_data`, `message`) VALUES('"+(timestamp+"|"+data.user_id)+"',"+timestamp+",'"+data.user_id+"',"+data.type+","+data.system_data+","+data.comment+")";
       connectionPool.query(query_insert_suggestion,function(err, results){
         if(err){
           module.exports.printError("addSuggestion","SQL Query Error: inserting new suggestion",err,{timestamp:timestamp,data:data})
@@ -192,9 +193,15 @@ module.exports = {
             No errors; the username and password are both valid!
             */
             else{
-              module.exports.getUserData(true, results[0]['user_id'], function(){
-                callback(false, false,results[0]['user_id'])
-              })
+              if(results[0]['verified'] == 0){
+                callback(false, 'Please Verify Email Before Login')
+              }
+              else{
+                module.exports.getUserData(true, results[0]['user_id'], function(){
+                  callback(false, false,results[0]['user_id'])
+                })
+              }
+
             }
           })
         }
@@ -270,7 +277,7 @@ module.exports = {
   true = record
   */
   getUserIDWithEmail:function(rec,email, callback){
-    var localData = {rec : res, email : email , callback : callback}
+    var localData = {rec : rec, email : email , callback : callback}
     var query = "Select * From "+ tables.table_prim + " Where `user_email`='"+email+"'"
     connectionPool.query(query, function(err, results){
       if(err){
@@ -368,7 +375,7 @@ module.exports = {
   },
   createUserGen:function(data,callback){
     var ld = {data : data, callback : callback}
-    var query = "INSERT INTO "+tables.table_gen + "(`user_id`,`rating`,`total_matches`) VALUES('"+data.user_id+"',5,0)";
+    var query = "INSERT INTO "+tables.table_gen + "(`user_id`,`rating`,`total_matches`,`status`) VALUES('"+data.user_id+"',5,0,'idle')";
     connectionPool.query(query, function(err, results){
       if(err){
         module.exports.printError("createUserGen","SQL Query Error: error creating new user (GEN)",err,ld)
@@ -462,7 +469,8 @@ module.exports = {
   },
   recordError:function(t,fn, d, e, data,c = true){
     var ld = {t : t,fn : fn, d : d, e : e, data : data,c :c}
-    var query = "Insert into `"+tables.table_error + "` (`time`, `function`, `description`, `error`, `data`) VALUES ("+t+",'"+fn+"','"+d+"','"+e+"','')";
+    if(data == null){data = {}}
+    var query = "Insert into `"+tables.table_error + "` (`time`, `function`, `description`, `error`, `data`) VALUES ("+t+",'"+fn+"','"+d+"','"+e+"','"+JSON.stringify(data)+"')";
     connectionPool.query(query, function(err, results){
       if(err && c){
         module.exports.recordError("recordError","SQL Query Error: error recording error",err,ld,false)

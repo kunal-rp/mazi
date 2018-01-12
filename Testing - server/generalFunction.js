@@ -1,10 +1,8 @@
 var serverFunctions = require('./serverFunctions.js');
 var vars = require('./variables.js');
 var mail = require('./mailFunction.js')
-
-var jwt = require('jsonwebtoken')
 var rs = require('randomstring')
-const bcrypt = require('bcrypt');
+var bcrypt = require('bcrypt');
 
 var codes = {}
 
@@ -77,13 +75,14 @@ module.exports = {
   @param {Function} callback - function to call IN CASE where then request is encrypted with a general code
   */
   checkReqGeneral:function(req,res,callback){
+    console.log("Req General Body:")
     if(codes === null){
       serverFunctions.printError("checkReqGeneral","Error: Internal Server codes not generated yet.",null,null)
       module.exports.structuralError(res,"Internal Error occured sorry")
 
     }
-    else if(req.body.token_gen === undefined || req.body.token_gen != codes['general_key']){
-      serverFunctions.printError("checkReqGeneral","Error: Necessary Parameters not passed",null,null)
+    else if(req.body.token_gen == undefined){
+      serverFunctions.printError("checkReqGeneral","Error: Necessary Parameters not passed",null,req.body)
       module.exports.structuralError(res,"Error: Base Headers/Parameters not met")
 
     }
@@ -92,7 +91,7 @@ module.exports = {
         callback(req.body)
       }
       else{
-        serverFunctions.printError("checkReqGeneral","Error: Token General Invalid.",null,null)
+        serverFunctions.printError("checkReqGeneral","Error: Token General Invalid.",null,req.body)
         module.exports.structuralError(res,"Error: Token General Invalid.")
       }
     }
@@ -117,7 +116,7 @@ module.exports = {
             callback(req.body)
           }
           else{
-            serverFunctions.printError("checkReqSpecific","Error: Token User Invalid.",null,null)
+            serverFunctions.printError("checkReqSpecific","Error: Token User Invalid.",null,req.body)
             module.exports.simpleError(res,"Error: Token User Invalid.")
           }
         })
@@ -214,7 +213,7 @@ module.exports = {
     })
   },
   attemptUpdateUser:function(res, data, callback){
-    if(data.update_type == undefined ||  data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined){
+    if(data.update_type == undefined ||  data.user_name == undefined ||data.user_password == undefined ){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
     }
     else{
@@ -223,8 +222,8 @@ module.exports = {
   },
   updateUser:function(res, data, callback){
     module.exports.attemptUpdateUser(res, data, function(){
-      serverFunctions.getUserIDWithEmail(true, data.user_email, function(struct_err, simple_err, user_id){
-        module.exports.handleErrors(res, struct_err, simple_err, function(){
+      var user_id = data.user_id
+      module.exports.handleErrors(res, struct_err, simple_err, function(){
           if(data.update_type === update_type.username){
             module.exports.checkUsername(res,{user_name: data.user_name},function(){
               serverFunctions.updateUsername(user_id, data.user_name, function(uu_struct, uu_simple){
@@ -240,7 +239,7 @@ module.exports = {
             })
           }
         })
-      })
+
     })
   },
   updatePassword:function(res,user_id, newPassword,callback){
@@ -259,7 +258,7 @@ module.exports = {
     })
   },
   attemptCreateUser:function(res, data, callback){
-    if(data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined  ){
+    if(data.user_name == undefined ||data.user_password == undefined ||data.user_email == undefined ){
       module.exports.structuralError(res,"Error.Base Headers/Parameters not met")
     }
     else{
@@ -268,14 +267,18 @@ module.exports = {
   },
   createUser:function(res, data, callback){
     module.exports.attemptCreateUser(res, data, function(){
+      console.log("CU Attempt Good")
       serverFunctions.getUserIDWithEmail(false, data.user_email,function(struct, simple){
         if(struct){
           module.exports.structuralError(res, "An Error occured")
         }
         else if(simple){
-          module.exports.checkUsername(res,{user_name: data.user_name},function(){
+          console.log("CU Unused Email")
+          serverFunctions.checkUsername(data.user_name,function(cu_st, cu_si){
+            console.log("CU Username unused")
             module.exports.handleErrors(res, cu_st, cu_si, function(){
               module.exports.generateUserID(res, function(user_id){
+                console.log("CU Generated Username")
                 bcrypt.genSalt(10, function(salt_err, salt) {
                   bcrypt.hash(user_id+""+data.user_password, salt, function(has_err, hash) {
                     module.exports.generateCustomKey(20, function(verification_key){
@@ -287,9 +290,13 @@ module.exports = {
                         user_verification_key:verification_key
                       }
                       serverFunctions.createUser(new_user_data,function(struct_err, simple_err){
+                        console.log("CU created User")
                         module.exports.handleErrors(res, struct_err, simple_err, function(){
+                          console.log("CU No errors")
                           mail.sendWelcomeemail(new_user_data,new_user_data.user_email, function(sm_struct, sm_simple){
+                            console.log("Send welcome mail")
                             module.exports.handleErrors(res, sm_struct, sm_simple, function(){
+                              console.log("CU no errors")
                               callback()
                             })
                           })
@@ -333,15 +340,20 @@ module.exports = {
   },
   verify:function(res, req, callback){
     module.exports.attemptVerify(req,res, function(data){
-      module.exports.checkUsername(res,{user_name: data.user_name},function(){
-        serverFunctions.verify(data, function(st2, si2){
-          if(st2 || si2){
-            callback(st2,si2)
-          }
-          else{
-            callback(false, false)
-          }
-        })
+      serverFunctions.checkUsername(data.user_name, function(struct, simple){
+        if(struct){
+          callback(struct,false)
+        }
+        else{
+          serverFunctions.verify(data, function(st2, si2){
+            if(st2 || si2){
+              callback(st2,si2)
+            }
+            else{
+              callback(false, false)
+            }
+          })
+        }
       })
     })
   },
