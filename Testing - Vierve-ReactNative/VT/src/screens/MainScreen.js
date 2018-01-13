@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Modal, TouchableWithoutFeedback, TouchableHighlight, Image } from 'react-native';
+import { AppState, View, Text, StyleSheet, TouchableOpacity, Platform, Modal, TouchableWithoutFeedback, TouchableHighlight, Image } from 'react-native';
 import MapView from 'react-native-maps';
 import Dimensions from 'Dimensions';
 const {width, height} = Dimensions.get('window');
@@ -50,7 +50,8 @@ class MainScreen extends Component{
 			latitudeDelta: 0.0122,
 			longitudeDelta: 0.0121,
 	 	},
-	 	ready: true
+	 	ready: true,
+	 	appState: AppState.currentState
 	 };
 	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
 	}
@@ -61,22 +62,34 @@ class MainScreen extends Component{
 			let response = await ServerTools.getData(); //will return json with all data
 			if(response != null){
 				Db_Helper_Data.updateCollegeData(response.cd);
-				// let colleges = await Db_Helper_Data.getCollegeNameList();
-				// console.log(colleges);
 			}
 		}
-		// else{
-		// 	let colleges = await Db_Helper_Data.getCollegeNameList();
-		// 	console.log(colleges);
-		// }
 	}
 
 	componentDidMount() {
 		console.log("mounting worked")
 		this.getCurrentPosition();
 		this.loadData();
-		// ServerTools.getData();
+		AppState.addEventListener('change', this._handleAppStateChange);
 	}
+
+	componentWillUnmount() {
+    AppState.removeEventListener('change', this._handleAppStateChange);
+  }
+
+  _handleAppStateChange = (nextAppState) => {
+  	if(this.state.appState.match(/active/) && nextAppState === 'background'){
+  		console.log('App has been backgrounded');
+  		this.timer = setTimeout(() => this.AttemptLogOff(), 1000*30) // set a timer to auto log off after 30 seconds inactivity
+  	}
+
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground!')
+      console.log('Canceling timer test');
+      clearTimeout(this.timer);
+    }
+    this.setState({appState: nextAppState});
+  }
 
 	setRegion(region) {
 		if(this.state.ready) {

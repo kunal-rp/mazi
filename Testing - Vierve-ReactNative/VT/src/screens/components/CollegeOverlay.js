@@ -10,6 +10,7 @@ class CollegeOverlay extends Component {
 
 	constructor(props) {
 		super(props);
+    menu=null;
     this.state = {
       colleges : []
     };
@@ -18,23 +19,26 @@ class CollegeOverlay extends Component {
   async loadCollegeData() {
     let colleges = await Db_Helper_Data.getCollegeNameList();
     this.setState({colleges: colleges});
+    this.menu.select(0);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.loadCollegeData();
   }
 
   render() {
+
     return (
       <View style={styles.container}>
         <View style={styles.dropdownContainer}>
           <ModalDropdown
+            ref={ref => {this.menu = ref}}
             defaultIndex={0}
             defaultValue={this.state.colleges[0]}
             style={styles.dropdownFrame}
             dropdownStyle={styles.dropdown}
-            dropdownTextStyle={{fontSize: 26}}
-            textStyle={{fontSize: 26}}
+            dropdownTextStyle={{fontSize: 18}}
+            textStyle={{fontSize: 22}}
             options={this.state.colleges}
           />
         </View>
@@ -88,8 +92,9 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     backgroundColor: 'white',
+    width: 300,
     marginTop: 22,
-    marginLeft: -7
+    marginLeft: 0
   },
   buttonParkContainer: {
     position: 'absolute',

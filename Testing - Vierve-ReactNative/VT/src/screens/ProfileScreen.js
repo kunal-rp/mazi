@@ -140,7 +140,6 @@ class ProfileScreen extends Component{
   				<TextField
           	label="New Username"
           	fontSize={20}
-          	title="To update: edit and press below"
           	textColor="white"
           	baseColor="lightgrey"
           	labelHeight={12}
