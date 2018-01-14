@@ -1,28 +1,43 @@
 import React, {Component} from 'react';
 import {StyleSheet, View, Image, Text, TouchableOpacity, Dimensions} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
+import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
 
 class ParkingOverlay extends Component {
-  parkingOptions = ['Parking Lot J', 'Parking Lot M', 'Parking Log L', 'Parking Lot A', 'Parking Lot B', 'Parking Structure 2']
-
 	constructor(props) {
 		super(props);
+    this.state = {
+      parkingLots: []
+    };
 	}
+
+  async loadParkingData() {
+    let parkingLots = await Db_Helper_Data.getParkingLotsFromCollege(this.props.college);
+    this.setState({parkingLots: parkingLots});
+    this.menu.select(0);
+  }
+
+  componentWillMount() {
+    console.log('from parking',this.props.college);
+    this.loadParkingData();
+  }
 
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.dropdownContainer}>
           <ModalDropdown
+            ref={ref => {this.menu = ref}}
             defaultIndex={0}
-            defaultValue={this.parkingOptions[0]}
+            defaultValue={this.state.parkingLots[0]}
             style={styles.dropdownFrame}
             dropdownStyle={styles.dropdown}
-            dropdownTextStyle={{fontSize: 26}}
-            textStyle={{fontSize: 26}}
-            options={this.parkingOptions}
+            dropdownTextStyle={{fontSize: 18}}
+            textStyle={{fontSize: 22}}
+            options={this.state.parkingLots}
           />
         </View> 
         <View style={styles.arrowImageContainer}>

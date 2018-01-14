@@ -17,6 +17,7 @@ class MainOverlayControl extends Component {
 		this.state= {
 			screen : 0,
 			riding: false,
+			college: ''
 		};
 	}
 
@@ -26,14 +27,14 @@ class MainOverlayControl extends Component {
 		});
 	}
 
-	handlePark(){
+	handlePark(college){
 		// this.toggleNavBar('hidden');
-		this.setState({screen:1, riding: false});
+		this.setState({screen:1, riding: false, college: college});
 	}
 
-	handleRide(){
+	handleRide(college){
 		// this.toggleNavBar('hidden');
-		this.setState({screen:1, riding: true});
+		this.setState({screen:1, riding: true, college: college});
 	}
 
 	handleParkingSet(){
@@ -78,7 +79,7 @@ class MainOverlayControl extends Component {
 		if(screen == 0){
 			overlay = <CollegeOverlay onPark={this.handlePark} onRide={this.handleRide} onGetPosition={this.props.getCurrentPosition}/>;
 		} else if(screen==1){
-			overlay = <ParkingOverlay onParkingSet={this.handleParkingSet} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <ParkingOverlay college={this.state.college} onParkingSet={this.handleParkingSet} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
 		} else {
 			overlay = <PickupOverlay onPickupSet={this.handlePickupSet} onBackPress={this.handlePickupBack} onGetPosition={this.props.getCurrentPosition}/>;
 		}

@@ -57,17 +57,28 @@ class MainScreen extends Component{
 	}
 
 	async loadData() {
-		let colleges = await Db_Helper_Data.getCollegeNameList();
-		if(colleges.length == 0){ //college data empty in phone, update
-			let response = await ServerTools.getData(); //will return json with all data
-			if(response != null){
-				Db_Helper_Data.updateCollegeData(response.cd);
-			}
-		}
+		// let response = await ServerTools.getData(); //will return json with all data
+		// if(response != null){
+		// 	// console.log(response.cd);
+		// 	Db_Helper_Data.updateCollegeData(response.cd);
+		// }
+		// let colleges = await Db_Helper_Data.getCollegeNameList();
+		// if(colleges.length == 0){ //college data empty in phone, update
+		// 	let response = await ServerTools.getData(); //will return json with all data
+		// 	if(response != null){
+		// 		Db_Helper_Data.updateCollegeData(response.cd);
+		// 	}
+		// }
+		// let parkingLots = await Db_Helper_Data.getParkingLotsList();
+  //   if(parkingLots.length==0){ //first time case
+  //     let response = await ServerTools.getData(); //will return json with all data
+  //     if(response != null){
+  //       Db_Helper_Data.updateParkingData(response.pd);
+  //     }
+  //   }
 	}
 
 	componentDidMount() {
-		console.log("mounting worked")
 		this.getCurrentPosition();
 		this.loadData();
 		AppState.addEventListener('change', this._handleAppStateChange);
@@ -98,7 +109,7 @@ class MainScreen extends Component{
 	}
 
 	getCurrentPosition() {
-		console.log("trying to get current position")
+		// console.log("trying to get current position")
 		try{
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
@@ -136,8 +147,6 @@ class MainScreen extends Component{
 	async AttemptLogOff() {
 		this.showMenu(false);
 		let sessionData = await Db_Helper_User.getSessionData();
-		// let code = await ServerTools.getCode();
-		// var data = {'token_gen': code, 'token_user': sessionData.token, 'user_id': sessionData.user_id};
 		let response = await ServerTools.logoff(sessionData);
 		if(response != null){
 			if (response.code==1){
@@ -145,6 +154,7 @@ class MainScreen extends Component{
 					screen: 'vt.LoginScreen',
 					animated: true,
 					animationType: 'fade',
+					passProps: {fromMain: true}
 				});
 			}
 		}
@@ -192,7 +202,6 @@ class MainScreen extends Component{
 							}}
 						/>
 					</View>
-				{/*Modal is for showing small menu bar in right corner for settings*/}
 				<Modal 
 					onRequestClose={() => this.showMenu(false)}
 					animationType='fade'

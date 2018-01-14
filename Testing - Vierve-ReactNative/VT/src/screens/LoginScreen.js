@@ -20,7 +20,8 @@ class LoginScreen extends Component{
     	text: '',
     	username: '',
     	password: '',
-    	remember: true,
+    	remember: false,
+    	unmounted: false
   	};
   	this.AttemptSignIn = this.AttemptSignIn.bind(this);
   	this.onSubmitUsername = this.onSubmitUsername.bind(this);
@@ -42,10 +43,18 @@ class LoginScreen extends Component{
 				secureTextEntry: true,
 			});
 		}
+		if(this.state.remember) this.checkbox.handleToggleChecked();
+		this.AttemptAutoLogin();
 	}
 
-	componentDidMount() {
+	componentWillMount() {
 		this.loadInfo();
+	}
+
+	AttemptAutoLogin() {
+		if(this.props.fromMain==null && this.state.remember==true){
+			this.AttemptSignIn();
+		}
 	}
 
 	async AttemptSignIn() {
@@ -173,6 +182,7 @@ class LoginScreen extends Component{
 	        </TouchableOpacity>
 	        <View style={styles.checkboxSection}>
 	        	<CheckBox
+	        		ref={ref => {this.checkbox=ref}}
 	        		checkboxStyle={{tintColor:'white'}}
 	        		labelStyle={{color:'white'}}
 	        		label='Remember Me'

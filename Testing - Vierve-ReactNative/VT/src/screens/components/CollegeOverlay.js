@@ -6,25 +6,39 @@ import Db_Helper_Data from '../../utils/Db_Helper_Data';
 const {width, height} = Dimensions.get('window');
 
 class CollegeOverlay extends Component {
-  collegeOptions = ['Cal Poly Pomona','Mt. Sac','Cal Poly SLO'];
-
 	constructor(props) {
 		super(props);
-    menu=null;
     this.state = {
-      colleges : []
+      colleges : [],
+      selected: ''
     };
+    this.onPark = this.onPark.bind(this);
+    this.onRide = this.onRide.bind(this);
 	}
 
   async loadCollegeData() {
     let colleges = await Db_Helper_Data.getCollegeNameList();
-    this.setState({colleges: colleges});
+    this.setState({colleges: colleges, selected: colleges[0]});
     this.menu.select(0);
   }
 
   componentWillMount() {
     this.loadCollegeData();
   }
+
+  updateSelectedCollege(college) {
+    this.setState({selected: college});
+    // Db_Helper_Data.updateSelectedCollege(college);
+  }
+
+  onPark() {
+    this.props.onPark(this.state.selected);
+  }
+
+  onRide() {
+    this.props.onRide(this.state.selected);
+  }
+
 
   render() {
 
@@ -40,6 +54,7 @@ class CollegeOverlay extends Component {
             dropdownTextStyle={{fontSize: 18}}
             textStyle={{fontSize: 22}}
             options={this.state.colleges}
+            onSelect={(id,college) => this.updateSelectedCollege(college)}
           />
         </View>
         <View style={styles.LocationViewContainer}>
@@ -51,14 +66,14 @@ class CollegeOverlay extends Component {
           </TouchableOpacity>
         </View>
 				<View style={styles.buttonParkContainer}>
-					<TouchableOpacity onPress={this.props.onPark} underlayColor='white'>
+					<TouchableOpacity onPress={this.onPark} underlayColor='white'>
 				    <View style={styles.button}>
 				    	<Text style={styles.buttonText}>PARK</Text>
 				    </View>
 				   </TouchableOpacity>
 			   </View>
 			   <View style={styles.buttonRideContainer}>
-					<TouchableOpacity onPress={this.props.onRide} underlayColor='white'>
+					<TouchableOpacity onPress={this.onRide} underlayColor='white'>
 				    <View style={styles.button}>
 				    	<Text style={styles.buttonText}>RIDE</Text>
 				    </View>

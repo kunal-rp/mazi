@@ -33,15 +33,13 @@ class BugReportScreen extends Component{
 	}
 
 	async submitFeedback() {
-		console.log('should be here');
 		if(this.state.report){
-			console.log('made it inside');
 			let type = this.state.selected == 0 ? 'Suggestion' : 'Bug Report';
 			let sessionData = await Db_Helper_User.getSessionData();
-			let response = await ServerTools.addSuggestion({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'type': type, 'system_data': '', 'comment': this.state.report});
-			console.log(response);
+			let response = await ServerTools.addSuggestion({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'type': type, 'system_data': 'ios', 'comment': this.state.report});
 			if(response != null){
-				showNotification(this.props.navigator, response.code, response.message);
+				if(response.code==1) showNotification(this.props.navigator, response.code, response.message);
+				else showNotification(this.props.navigator, 0, 'Please try again later');
 			}
 		}
 	}
