@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, Image, Dimensions} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import Db_Helper_User from '../../utils/Db_Helper_User';
 import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
@@ -39,6 +40,10 @@ class CollegeOverlay extends Component {
     let colleges = await Db_Helper_Data.getCollegeList();
     this.setState({colleges: colleges, selected: colleges[0]});
     this.menu.select(0);
+
+    //test
+    let sessionData= await Db_Helper_User.getSessionData();
+    console.log(sessionData);
   }
 
   componentWillMount() {

@@ -57,35 +57,8 @@ class MainScreen extends Component{
 	 this.pushBugReportScreen = this.pushBugReportScreen.bind(this);
 	}
 
-	async loadData() { // these pieces should be done in their respective overlays
-		// let response = await ServerTools.getData(); //will return json with all data
-		// if(response != null){
-		// 	console.log(response.code);
-		// }
-		// let colleges = await Db_Helper_Data.getCollegeNameList();
-		// if(colleges.length == 0){ //college data empty in phone, update
-		// 	let response = await ServerTools.getData(); //will return json with all data
-		// 	if(response != null){
-		// 		Db_Helper_Data.updateCollegeData(response.cd);
-		// 	}
-		// }
-		// let parkingLots = await Db_Helper_Data.getParkingLotsList();
-  //   if(parkingLots.length==0){ //first time case
-  //     let response = await ServerTools.getData(); //will return json with all data
-  //     if(response != null){
-  //       Db_Helper_Data.updateParkingData(response.pd);
-  //     }
-  //   }
-	}
-
-	componentWillMount(){
-		// console.log("Main Screen");
-		// this.loadData();
-	}
-
 	componentDidMount() {
 		this.getCurrentPosition();
-		// this.loadData();
 		AppState.addEventListener('change', this._handleAppStateChange);
 	}
 
