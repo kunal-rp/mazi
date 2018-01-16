@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity, Image, Dimensions} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
 
@@ -16,19 +17,37 @@ class CollegeOverlay extends Component {
     this.onRide = this.onRide.bind(this);
 	}
 
+  //checks and updates local data against server data
+  async checkDataVersion() {
+    let response = await ServerTools.getData();
+    if(response != null){
+      let code = await Db_Helper_Data.getCode();
+      if(code){
+        if(code < response.code){ // update local copy with server copy
+          Db_Helper_Data.updateData(response);
+        }
+      }
+      else{ //there is no data in app storage
+        // console.log('college overlay here');
+        Db_Helper_Data.updateData(response);
+      }
+    }
+  }
+
+  //gets list of college names from storage for user access
   async loadCollegeData() {
-    let colleges = await Db_Helper_Data.getCollegeNameList();
+    let colleges = await Db_Helper_Data.getCollegeList();
     this.setState({colleges: colleges, selected: colleges[0]});
     this.menu.select(0);
   }
 
   componentWillMount() {
+    this.checkDataVersion();
     this.loadCollegeData();
   }
 
   updateSelectedCollege(college) {
     this.setState({selected: college});
-    // Db_Helper_Data.updateSelectedCollege(college);
   }
 
   onPark() {

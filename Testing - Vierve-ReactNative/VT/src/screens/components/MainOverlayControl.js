@@ -17,7 +17,8 @@ class MainOverlayControl extends Component {
 		this.state= {
 			screen : 0,
 			riding: false,
-			college: ''
+			college: '',
+			parkingLot: '',
 		};
 	}
 
@@ -37,9 +38,9 @@ class MainOverlayControl extends Component {
 		this.setState({screen:1, riding: true, college: college});
 	}
 
-	handleParkingSet(){
+	handleParkingSet(parkingLot){
 		if (this.state.riding){
-			this.setState({screen:2});
+			this.setState({screen:2, parkingLot: parkingLot});
 		}
 		else{
 			this.props.navigator.push({

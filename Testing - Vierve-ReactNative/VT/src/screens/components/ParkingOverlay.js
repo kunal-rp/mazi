@@ -10,19 +10,28 @@ class ParkingOverlay extends Component {
 	constructor(props) {
 		super(props);
     this.state = {
-      parkingLots: []
+      parkingLots: [],
+      selected: '',
     };
+    this.onParkingSet = this.onParkingSet.bind(this);
 	}
 
   async loadParkingData() {
     let parkingLots = await Db_Helper_Data.getParkingLotsFromCollege(this.props.college);
-    this.setState({parkingLots: parkingLots});
+    this.setState({parkingLots: parkingLots, selected: parkingLots[0]});
     this.menu.select(0);
   }
 
   componentWillMount() {
-    console.log('from parking',this.props.college);
     this.loadParkingData();
+  }
+
+  updateSelected(parkingLot) {
+    this.setState({selected: parkingLot});
+  }
+
+  onParkingSet() {
+    this.props.onParkingSet(this.state.selected);
   }
 
   render() {
@@ -35,9 +44,10 @@ class ParkingOverlay extends Component {
             defaultValue={this.state.parkingLots[0]}
             style={styles.dropdownFrame}
             dropdownStyle={styles.dropdown}
-            dropdownTextStyle={{fontSize: 18}}
+            dropdownTextStyle={{fontSize: 20}}
             textStyle={{fontSize: 22}}
             options={this.state.parkingLots}
+            onSelect={(id,parkingLot) => this.updateSelected(parkingLot)}
           />
         </View> 
         <View style={styles.arrowImageContainer}>
@@ -57,7 +67,7 @@ class ParkingOverlay extends Component {
           </TouchableOpacity>
         </View>
 				<View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={this.props.onParkingSet} underlayColor="white">
+          <TouchableOpacity onPress={this.onParkingSet} underlayColor="white">
             <View style={styles.button}>
               <Text style={styles.buttonText}>SET PARKING LOT</Text>
             </View>
@@ -94,7 +104,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     marginTop: 22,
     marginLeft: -7,
-    height: 300
+    // height: 300,
+    width: 200
   },
   arrowImageContainer: {
     position: 'absolute',

@@ -54,13 +54,13 @@ class MainScreen extends Component{
 	 	appState: AppState.currentState
 	 };
 	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
+	 this.pushBugReportScreen = this.pushBugReportScreen.bind(this);
 	}
 
-	async loadData() {
+	async loadData() { // these pieces should be done in their respective overlays
 		// let response = await ServerTools.getData(); //will return json with all data
 		// if(response != null){
-		// 	// console.log(response.cd);
-		// 	Db_Helper_Data.updateCollegeData(response.cd);
+		// 	console.log(response.code);
 		// }
 		// let colleges = await Db_Helper_Data.getCollegeNameList();
 		// if(colleges.length == 0){ //college data empty in phone, update
@@ -78,9 +78,14 @@ class MainScreen extends Component{
   //   }
 	}
 
+	componentWillMount(){
+		// console.log("Main Screen");
+		// this.loadData();
+	}
+
 	componentDidMount() {
 		this.getCurrentPosition();
-		this.loadData();
+		// this.loadData();
 		AppState.addEventListener('change', this._handleAppStateChange);
 	}
 
@@ -88,6 +93,8 @@ class MainScreen extends Component{
     AppState.removeEventListener('change', this._handleAppStateChange);
   }
 
+	//Handler which deals with setting a timer when app is left from focus to background
+	//will logout after 30 seconds of inactivity
   _handleAppStateChange = (nextAppState) => {
   	if(this.state.appState.match(/active/) && nextAppState === 'background'){
   		console.log('App has been backgrounded');
@@ -134,7 +141,7 @@ class MainScreen extends Component{
 		this.setState({modalVisible: toggle});
 	}
 
-	pushBugReportScreen = () => {
+	pushBugReportScreen() {
 		this.showMenu(false);
 		this.props.navigator.push({
 			screen: 'vt.BugReportScreen',
@@ -259,16 +266,6 @@ const styles = StyleSheet.create({
 		padding: 14,
     color: 'white'
   },
- //  imageViewContainer: {
-	// 	position: 'absolute',
-	// 	right: 20,
-	// 	top: 70
-	// },
-	// image: {
- //    width: 35,
- //    height: 35,
- //    tintColor: '#2f4858'
- //  },
 });
 
 export default MainScreen
