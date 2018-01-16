@@ -70,6 +70,39 @@ class ServerTools{
 		let response = await this.rawPostRequest('addSuggestion',data);
 		return response;
 	}
+
+	async action(data){
+		let response = await this.rawPostRequest('action', data);
+		return response;
+	}
+
+	async getUserStatus(data){
+		this.action(data);
+	}
+
+	async updateLocation(data){
+		this.action(data);
+	}
+
+	async request(data){
+		this.action(data);
+	}
+
+	async cancelRequest(data){
+		this.action(data);
+	}
+
+	async cancelMatch(data){
+		this.action(data);
+	}
+
+	async rateMatch(data){
+		this.action(data);
+	}
+
+	async confirm(data){
+		this.action(data);
+	}
 }
 
 export default new ServerTools;
