@@ -36,14 +36,14 @@ class Db_Helper_User{
 	//var userInfo = {"user_id": 0, "user_name": this.state.username, "user_email": this.state.email, "user_password": this.state.password, "remember": true};
 
 	async updateUserCredentials(data) {
-		let userInfo = await this.getInfo();
-		if(userInfo !=null){
-			userInfo.user_name = data.user_name;
-			userInfo.user_password = data.user_password;
-			userInfo.remember = data.remember;
-			this.setUserInfo(userInfo);
-		}
-
+		// let userInfo = await this.getInfo();
+		// if(userInfo !=null){
+		let userInfo = {};
+		userInfo.user_name = data.user_name;
+		userInfo.user_password = data.user_password;
+		userInfo.remember = data.remember;
+		this.setUserInfo(userInfo);
+		// }
 	}
 
 	async setUserInfo(userInfo) {
