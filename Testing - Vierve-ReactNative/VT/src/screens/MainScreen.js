@@ -50,7 +50,7 @@ class MainScreen extends Component{
 			latitudeDelta: 0.0122,
 			longitudeDelta: 0.0121,
 	 	},
-	 	ready: true,
+	 	ready: false,
 	 	appState: AppState.currentState
 	 };
 	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
@@ -58,6 +58,7 @@ class MainScreen extends Component{
 	}
 
 	componentDidMount() {
+		this.setState({ready: true});
 		this.getCurrentPosition();
 		AppState.addEventListener('change', this._handleAppStateChange);
 	}
@@ -89,7 +90,6 @@ class MainScreen extends Component{
 	}
 
 	getCurrentPosition() {
-		// console.log("trying to get current position")
 		try{
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
@@ -205,7 +205,7 @@ class MainScreen extends Component{
 					</TouchableWithoutFeedback>
 				</Modal>
 				
-				<MainOverlayControl navigator={this.props.navigator} getCurrentPosition={this.getCurrentPosition}/>
+				<MainOverlayControl map={this.map} navigator={this.props.navigator} getCurrentPosition={this.getCurrentPosition}/>
 			</View>
 		);
 	}

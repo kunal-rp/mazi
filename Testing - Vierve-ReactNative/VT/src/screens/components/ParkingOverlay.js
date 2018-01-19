@@ -6,6 +6,9 @@ import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
 
+const LATITUDE_DELTA = 0.0022;
+const LONGITUDE_DELTA = 0.0091;
+
 class ParkingOverlay extends Component {
 	constructor(props) {
 		super(props);
@@ -20,14 +23,29 @@ class ParkingOverlay extends Component {
     let parkingLots = await Db_Helper_Data.getParkingLotsFromCollege(this.props.college);
     this.setState({parkingLots: parkingLots, selected: parkingLots[0]});
     this.menu.select(0);
+    this.scrollMaptoParkingLot(parkingLots[0]);
   }
 
   componentWillMount() {
     this.loadParkingData();
   }
 
+  async scrollMaptoParkingLot(parkingLot){
+    let coords = await Db_Helper_Data.getParkingLotCoordinates(parkingLot);
+    if(coords){
+      const region = {
+        latitude: coords.lat,
+        longitude: coords.lng,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      };
+      this.props.map.animateToRegion(region);
+    }
+  }
+
   updateSelected(parkingLot) {
     this.setState({selected: parkingLot});
+    this.scrollMaptoParkingLot(parkingLot);
   }
 
   onParkingSet() {

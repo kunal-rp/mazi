@@ -78,9 +78,9 @@ class MainOverlayControl extends Component {
 		let overlay = null;
 
 		if(screen == 0){
-			overlay = <CollegeOverlay onPark={this.handlePark} onRide={this.handleRide} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <CollegeOverlay onPark={this.handlePark} onRide={this.handleRide} map={this.props.map} onGetPosition={this.props.getCurrentPosition}/>;
 		} else if(screen==1){
-			overlay = <ParkingOverlay college={this.state.college} onParkingSet={this.handleParkingSet} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <ParkingOverlay college={this.state.college} onParkingSet={this.handleParkingSet} map={this.props.map} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
 		} else {
 			overlay = <PickupOverlay onPickupSet={this.handlePickupSet} onBackPress={this.handlePickupBack} onGetPosition={this.props.getCurrentPosition}/>;
 		}

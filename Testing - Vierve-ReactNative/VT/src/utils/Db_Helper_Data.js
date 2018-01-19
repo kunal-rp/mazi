@@ -29,6 +29,38 @@ class Db_Helper_Data{
 		else return null;
 	}
 
+	async getCollegeCoordinates(college) {
+		let response = await AsyncStorage.getItem('college_info');
+		let data = await JSON.parse(response) || null;
+		var coords={};
+		if(data){
+			for (var i = 0; i < data.ids.length; i++) {	//traverse college data for college input
+				if(data[data.ids[i]].college_name==college){
+					coords.lat = data[data.ids[i]].college_coor_lat;
+					coords.lng = data[data.ids[i]].college_coor_lng;
+					break;
+				}
+			}
+		}
+		return coords;
+	}
+
+	async getParkingLotCoordinates(parkingLot) {
+		let response = await AsyncStorage.getItem('parking_info');
+		let data = await JSON.parse(response) || null;
+		var coords={};
+		if(data){
+			for (var i = 0; i < data.ids.length; i++) {
+				if(data[data.ids[i]].parkinglot_name==parkingLot){
+					coords.lat = data[data.ids[i]].coor_lat;
+					coords.lng = data[data.ids[i]].coor_lng;
+					break;
+				}
+			}
+		}
+		return coords;
+	}
+
 	// async updateSelectedCollege(college){
 	// 	await AsyncStorage.setItem('college_selected', college);
 	// }

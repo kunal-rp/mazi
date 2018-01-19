@@ -7,6 +7,9 @@ import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
 
+const LATITUDE_DELTA = 0.0492;
+const LONGITUDE_DELTA = 0.0001;
+
 class CollegeOverlay extends Component {
 	constructor(props) {
 		super(props);
@@ -40,19 +43,41 @@ class CollegeOverlay extends Component {
     let colleges = await Db_Helper_Data.getCollegeList();
     this.setState({colleges: colleges, selected: colleges[0]});
     this.menu.select(0);
+    this.scrollMaptoCollege(colleges[0]);
 
     //test
-    let sessionData= await Db_Helper_User.getSessionData();
-    console.log(sessionData);
+    // let sessionData= await Db_Helper_User.getSessionData();
+    // console.log(sessionData);
+  }
+
+  async getUserStatus() {
+    let sessionData = await Db_Helper_User.getSessionData();
+    let response = await ServerTools.getUserStatus({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'getUserStatus'});
+    if(response.code==1) console.log(response.data.status);
   }
 
   componentWillMount() {
     this.checkDataVersion();
     this.loadCollegeData();
+    this.getUserStatus();
+  }
+
+  async scrollMaptoCollege(college) {
+    let coords = await Db_Helper_Data.getCollegeCoordinates(college);
+    if(coords){
+      const region = {
+        latitude: coords.lat,
+        longitude: coords.lng,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA,
+      };
+      this.props.map.animateToRegion(region);
+    }
   }
 
   updateSelectedCollege(college) {
     this.setState({selected: college});
+    this.scrollMaptoCollege(college)
   }
 
   onPark() {

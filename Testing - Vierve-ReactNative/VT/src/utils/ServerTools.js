@@ -54,7 +54,7 @@ class ServerTools{
 		try{
 			let response = await fetch('https://viervetesting.herokuapp.com/data');
 			let responseJson = await response.json();
-			console.log(responseJson);
+			// console.log(responseJson);
 			return responseJson;
 		} catch(error){
 			console.log(error);
@@ -77,31 +77,31 @@ class ServerTools{
 	}
 
 	async getUserStatus(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async updateLocation(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async request(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async cancelRequest(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async cancelMatch(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async rateMatch(data){
-		this.action(data);
+		return this.action(data);
 	}
 
 	async confirm(data){
-		this.action(data);
+		return this.action(data);
 	}
 }
 
