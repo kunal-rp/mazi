@@ -40,8 +40,7 @@ class MainScreen extends Component{
 	constructor(props) {
 	 super(props);
 	 map = null;
-	 this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-	 this.getCurrentPosition = this.getCurrentPosition.bind(this);
+	 
 	 this.state = {
 	 	modalVisible: false,
 	 	region: {
@@ -51,15 +50,20 @@ class MainScreen extends Component{
 			longitudeDelta: 0.0121,
 	 	},
 	 	ready: false,
-	 	appState: AppState.currentState
+	 	appState: AppState.currentState,
+	 	markers: [],
 	 };
+
 	 this.AttemptLogOff = this.AttemptLogOff.bind(this);
 	 this.pushBugReportScreen = this.pushBugReportScreen.bind(this);
+	 this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+	 this.getCurrentPosition = this.getCurrentPosition.bind(this);
+	 this.addMarkers = this.addMarkers.bind(this);
 	}
 
 	componentDidMount() {
 		this.setState({ready: true});
-		this.getCurrentPosition();
+		// this.getCurrentPosition();
 		AppState.addEventListener('change', this._handleAppStateChange);
 	}
 
@@ -164,6 +168,10 @@ class MainScreen extends Component{
 		}
 	}
 
+	addMarkers(markers)  {
+		this.setState({markers: markers});
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -180,7 +188,16 @@ class MainScreen extends Component{
 		      			latitudeDelta: 0.0122,
 		      			longitudeDelta: 0.0421,
 							}}
-						/>
+						>
+							{this.state.markers.map(marker => (
+								<MapView.Marker
+									title={marker.title}
+									coordinate={marker}
+									key={marker.key}
+									onPress={e => console.log(e.nativeEvent)}
+								/>
+							))}
+						</MapView>
 					</View>
 				<Modal 
 					onRequestClose={() => this.showMenu(false)}
@@ -205,7 +222,7 @@ class MainScreen extends Component{
 					</TouchableWithoutFeedback>
 				</Modal>
 				
-				<MainOverlayControl map={this.map} navigator={this.props.navigator} getCurrentPosition={this.getCurrentPosition}/>
+				<MainOverlayControl addMarkers={this.addMarkers} map={this.map} navigator={this.props.navigator} getCurrentPosition={this.getCurrentPosition}/>
 			</View>
 		);
 	}

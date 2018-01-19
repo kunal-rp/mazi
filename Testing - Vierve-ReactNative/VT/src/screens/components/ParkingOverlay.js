@@ -6,8 +6,8 @@ import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
 
-const LATITUDE_DELTA = 0.0022;
-const LONGITUDE_DELTA = 0.0091;
+const LATITUDE_DELTA = 0.002;
+const LONGITUDE_DELTA = 0.004;
 
 class ParkingOverlay extends Component {
 	constructor(props) {
@@ -17,6 +17,7 @@ class ParkingOverlay extends Component {
       selected: '',
     };
     this.onParkingSet = this.onParkingSet.bind(this);
+    this.addMarkers = this.addMarkers.bind(this);
 	}
 
   async loadParkingData() {
@@ -28,6 +29,15 @@ class ParkingOverlay extends Component {
 
   componentWillMount() {
     this.loadParkingData();
+  }
+
+  componentDidMount() {
+    this.addMarkers();
+  }
+
+  async addMarkers() {
+    let markers = await Db_Helper_Data.getParkingLotMarkersFromCollege(this.props.college);
+    this.props.addMarkers(markers);
   }
 
   async scrollMaptoParkingLot(parkingLot){

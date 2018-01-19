@@ -61,6 +61,8 @@ class Db_Helper_Data{
 		return coords;
 	}
 
+
+
 	// async updateSelectedCollege(college){
 	// 	await AsyncStorage.setItem('college_selected', college);
 	// }
@@ -120,6 +122,41 @@ class Db_Helper_Data{
 				if(data){
 					for (var i = 0; i < data.ids.length; i++) {	//get all parking lots from college input
 						if(data[data.ids[i]].college_id==id) parkinglots.push(data[data.ids[i]].parkinglot_name);
+					}
+				}
+				return parkinglots;
+			}
+		}
+		else return null;
+	}
+
+	async getParkingLotMarkersFromCollege(college){
+		//input - college name string
+		let response = await AsyncStorage.getItem('college_info'); //get college json data
+		let data = JSON.parse(response) || null;
+		let id=null;
+		if(data){
+			for (var i = 0; i < data.ids.length; i++) {	//traverse college data for college input
+				if(data[data.ids[i]].college_name==college){
+					id = data.ids[i];	//return id
+					break;
+				}
+			}
+
+			if(id){
+				let response = await AsyncStorage.getItem('parking_info'); 	//getting parking data
+				let data = await JSON.parse(response) || null;
+				let parkinglots = [];
+				if(data){
+					for (var i = 0; i < data.ids.length; i++) {	//get all parking lots from college input
+						if(data[data.ids[i]].college_id==id){
+							parkinglots.push({
+								title: data[data.ids[i]].parkinglot_name,
+								latitude: data[data.ids[i]].coor_lat,
+								longitude: data[data.ids[i]].coor_lng,
+								key: data.ids[i]
+							});
+						}
 					}
 				}
 				return parkinglots;

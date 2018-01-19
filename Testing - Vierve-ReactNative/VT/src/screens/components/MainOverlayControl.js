@@ -14,6 +14,7 @@ class MainOverlayControl extends Component {
 		this.handleParkingBack = this.handleParkingBack.bind(this);
 		this.handlePickupSet = this.handlePickupSet.bind(this);
 		this.handlePickupBack = this.handlePickupBack.bind(this);
+		
 		this.state= {
 			screen : 0,
 			riding: false,
@@ -80,7 +81,7 @@ class MainOverlayControl extends Component {
 		if(screen == 0){
 			overlay = <CollegeOverlay onPark={this.handlePark} onRide={this.handleRide} map={this.props.map} onGetPosition={this.props.getCurrentPosition}/>;
 		} else if(screen==1){
-			overlay = <ParkingOverlay college={this.state.college} onParkingSet={this.handleParkingSet} map={this.props.map} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <ParkingOverlay addMarkers={this.props.addMarkers} college={this.state.college} onParkingSet={this.handleParkingSet} map={this.props.map} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
 		} else {
 			overlay = <PickupOverlay onPickupSet={this.handlePickupSet} onBackPress={this.handlePickupBack} onGetPosition={this.props.getCurrentPosition}/>;
 		}
