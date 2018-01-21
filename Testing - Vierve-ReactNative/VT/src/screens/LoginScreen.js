@@ -43,8 +43,10 @@ class LoginScreen extends Component{
 				secureTextEntry: true,
 			});
 		}
-		if(this.state.remember) this.checkbox.handleToggleChecked();
-		this.AttemptAutoLogin();
+		if(this.state.remember){
+			this.checkbox.handleToggleChecked();
+			this.AttemptAutoLogin();
+		}
 	}
 
 	componentWillMount() {
