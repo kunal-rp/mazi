@@ -41,9 +41,16 @@ class CollegeOverlay extends Component {
   //gets list of college names from storage for user access
   async loadCollegeData() {
     let colleges = await Db_Helper_Data.getCollegeList();
-    this.setState({colleges: colleges, selected: colleges[0]});
-    this.menu.select(0);
-    this.scrollMaptoCollege(colleges[0]);
+    if(this.props.college){
+      this.setState({colleges: colleges, selected: this.props.college});
+      this.menu.select(this.state.colleges.indexOf(this.props.college));
+      this.scrollMaptoCollege(this.props.college);
+    }
+    else{
+      this.setState({colleges: colleges, selected: colleges[0]});
+      this.menu.select(0);
+      this.scrollMaptoCollege(colleges[0]);
+    }
 
     //test
     // let sessionData= await Db_Helper_User.getSessionData();

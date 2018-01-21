@@ -185,6 +185,20 @@ class MainScreen extends Component{
 	}
 
 	render() {
+		let markers=null;
+		if(this.state.markers){
+			markers = this.state.markers.map(marker => (
+				<MapView.Marker
+					title={marker.title}
+					coordinate={marker}
+					key={marker.key}
+					identifier={marker.title}
+					onPress={this.onMarkerPress}
+					image={require('../res/other_marker.png')}
+				/>
+			));
+		}
+
 		return (
 			<View style={styles.container}>
 				<View style={styles.mapContainer}>
@@ -201,16 +215,7 @@ class MainScreen extends Component{
 		      			longitudeDelta: 0.0421,
 							}}
 						>
-							{this.state.markers.map(marker => (
-								<MapView.Marker
-									title={marker.title}
-									coordinate={marker}
-									key={marker.key}
-									identifier={marker.title}
-									onPress={this.onMarkerPress}
-									image={require('../res/other_marker.png')}
-								/>
-							))}
+							{markers}
 						</MapView>
 					</View>
 				<Modal 

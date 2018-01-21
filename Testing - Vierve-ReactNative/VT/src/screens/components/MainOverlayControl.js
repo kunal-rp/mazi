@@ -59,7 +59,7 @@ class MainOverlayControl extends Component {
 	}
 
 	handleParkingBack(){
-		this.toggleNavBar('shown');
+		// this.toggleNavBar('shown');
 		this.setState({screen: 0});
 	}
 
@@ -75,7 +75,8 @@ class MainOverlayControl extends Component {
 	}
 
 	setParkingSelectionTo(parkingLot){
-		this.parkingoverlay.setParkingSelectionTo(parkingLot);
+		if(this.parkingoverlay) this.parkingoverlay.setParkingSelectionTo(parkingLot);
+		else this.setState({parkingLot: parkingLot});
 	}
 
 	render(){
@@ -83,9 +84,9 @@ class MainOverlayControl extends Component {
 		let overlay = null;
 
 		if(screen == 0){
-			overlay = <CollegeOverlay onPark={this.handlePark} onRide={this.handleRide} map={this.props.map} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <CollegeOverlay college={this.state.college} addMarkers={this.props.addMarkers} onPark={this.handlePark} onRide={this.handleRide} map={this.props.map} onGetPosition={this.props.getCurrentPosition}/>;
 		} else if(screen==1){
-			overlay = <ParkingOverlay ref={ref => {this.parkingoverlay=ref}} addMarkers={this.props.addMarkers} college={this.state.college} onParkingSet={this.handleParkingSet} map={this.props.map} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
+			overlay = <ParkingOverlay ref={ref => {this.parkingoverlay=ref}} addMarkers={this.props.addMarkers} college={this.state.college} parkingLot={this.state.parkingLot} onParkingSet={this.handleParkingSet} map={this.props.map} onBackPress={this.handleParkingBack} onGetPosition={this.props.getCurrentPosition}/>;
 		} else {
 			overlay = <PickupOverlay onPickupSet={this.handlePickupSet} onBackPress={this.handlePickupBack} onGetPosition={this.props.getCurrentPosition}/>;
 		}

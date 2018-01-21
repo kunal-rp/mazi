@@ -23,9 +23,17 @@ class ParkingOverlay extends Component {
 
   async loadParkingData() {
     let parkingLots = await Db_Helper_Data.getParkingLotsFromCollege(this.props.college);
-    this.setState({parkingLots: parkingLots.names, selected: parkingLots[0], coordinates: parkingLots.coordinates});
-    this.menu.select(0);
-    this.scrollMaptoParkingLot(0);
+    if(this.props.parkingLot && parkingLots.names.indexOf(this.props.parkingLot) >= 0){
+      this.setState({parkingLots: parkingLots.names, selected: this.props.parkingLot, coordinates: parkingLots.coordinates});
+      let i = this.state.parkingLots.indexOf(this.props.parkingLot);
+      this.menu.select(i);
+      this.scrollMaptoParkingLot(i);
+    }
+    else{
+      this.setState({parkingLots: parkingLots.names, selected: parkingLots[0], coordinates: parkingLots.coordinates});
+      this.menu.select(0);
+      this.scrollMaptoParkingLot(0);
+    }
   }
 
   componentWillMount() {
@@ -61,6 +69,7 @@ class ParkingOverlay extends Component {
   }
 
   setParkingSelectionTo(parkingLot){
+    this.setState({selected: parkingLot});
     this.menu.select(this.state.parkingLots.indexOf(parkingLot));
   }
 
