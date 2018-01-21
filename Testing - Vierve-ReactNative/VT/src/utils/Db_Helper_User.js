@@ -46,7 +46,6 @@ class Db_Helper_User{
 	}
 
 	async setUserInfo(userInfo) {
-		// this.clearAllData();
 		await AsyncStorage.setItem('user_info', JSON.stringify(userInfo));
 	}	
 

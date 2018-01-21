@@ -8,8 +8,8 @@ import ServerTools from '../utils/ServerTools';
 import Db_Helper_User from '../utils/Db_Helper_User';
 import Db_Helper_Data from '../utils/Db_Helper_Data';
 
-const LATITUDE_DELTA = 0.0122;
-const LONGITUDE_DELTA = 0.0121;
+const LATITUDE_DELTA = 0.0001;
+const LONGITUDE_DELTA = 0.0001;
 
 class MainScreen extends Component{
 	static navigatorStyle = {
@@ -64,7 +64,7 @@ class MainScreen extends Component{
 
 	componentDidMount() {
 		this.setState({ready: true});
-		// this.getCurrentPosition();
+		this.updateServerPosition();
 		AppState.addEventListener('change', this._handleAppStateChange);
 	}
 
@@ -94,6 +94,19 @@ class MainScreen extends Component{
 		}
 	}
 
+	async updateLocation(position){
+		let sessionData = await Db_Helper_User.getSessionData();
+		let response = await ServerTools.updateLocation({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'updateLocation', 'lat': position.coords.latitude, 'lng': position.coords.longitude});
+		console.log(response);
+	}
+
+	updateServerPosition(){
+		navigator.geolocation.getCurrentPosition(
+			(position) => this.updateLocation(position),
+			(error) => console.log('error getting current position'),
+		);
+	}
+
 	getCurrentPosition() {
 		try{
 			navigator.geolocation.getCurrentPosition(
@@ -106,9 +119,7 @@ class MainScreen extends Component{
 					};
 					this.setRegion(region);
 				},
-				(error) => {
-					console.log("error getting current position")
-				}
+				(error) => console.log("error getting current position"),
 			);
 		} catch(e) {
 			console.log("error trying geolocation")

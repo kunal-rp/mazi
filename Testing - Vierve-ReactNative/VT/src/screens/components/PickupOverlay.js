@@ -6,7 +6,31 @@ const {width, height} = Dimensions.get('window');
 class PickupOverlay extends Component {
 	constructor(props) {
 		super(props);
+    this.onPickupSet = this.onPickupSet.bind(this);
 	}
+
+  componentDidMount(){
+    this.moveNearCurrentLocation();
+    setTimeout(() => this.props.onGetPosition(), 500);
+  }
+
+  moveNearCurrentLocation(){
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const region = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        this.props.map.animateToCoordinate(region);
+      },
+      (error) => console.log("error getting current position"),
+    );
+  }
+
+  onPickupSet(){
+    console.log(width/2-20,height/2-40);
+    // this.props.map.coordinateForPoint({x: width/2-20, y: height/2-40}).then(coord => console.log(coord));
+  }
 
 	render(){
 		return(
@@ -22,8 +46,14 @@ class PickupOverlay extends Component {
             />
           </TouchableOpacity>
         </View>
+        <View style={styles.markerContainer}>
+          <Image
+            style={styles.markerStyle}
+            source={require('../../res/user_marker.png')}
+          />
+        </View>
 				<View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={this.props.onPickupSet} underlayColor="white">
+          <TouchableOpacity onPress={this.onPickupSet} underlayColor="white">
             <View style={styles.button}>
               <Text style={styles.buttonText}>SET PICKUP LOCATION</Text>
             </View>
@@ -64,6 +94,15 @@ const styles = StyleSheet.create({
   	textAlign: 'center',
   	color: '#2f4858',
   	fontSize: 20,
+  },
+  markerContainer: {
+    position: 'absolute',
+    left: width/2-20,
+    top: height/2-40,
+  },
+  markerStyle: {
+    width: 40,
+    height: 40
   },
   arrowImageContainer: {
     position: 'absolute',
