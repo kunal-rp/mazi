@@ -29,7 +29,8 @@ class PickupOverlay extends Component {
 
   onPickupSet(){
     console.log(width/2-20,height/2-40);
-    // this.props.map.coordinateForPoint({x: width/2-20, y: height/2-40}).then(coord => console.log(coord));
+    // this.props.map.coordinateForPoint({x: width/2-20, y: height/2-40})
+    //   .then((coord) => console.log(coord));
   }
 
 	render(){
