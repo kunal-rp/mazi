@@ -59,6 +59,7 @@ class MainScreen extends Component{
 	 this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
 	 this.getCurrentPosition = this.getCurrentPosition.bind(this);
 	 this.addMarkers = this.addMarkers.bind(this);
+	 this.onMarkerPress = this.onMarkerPress.bind(this);
 	}
 
 	componentDidMount() {
@@ -172,6 +173,17 @@ class MainScreen extends Component{
 		this.setState({markers: markers});
 	}
 
+	onMarkerPress(e){
+		const region = {
+			latitude: e.nativeEvent.coordinate.latitude,
+			longitude: e.nativeEvent.coordinate.longitude,
+			latitudeDelta: 0.002,
+			longitudeDelta: 0.004,
+		};
+		this.map.animateToRegion(region);
+		this.mainoverlay.setParkingSelectionTo(e.nativeEvent.id);
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -194,7 +206,9 @@ class MainScreen extends Component{
 									title={marker.title}
 									coordinate={marker}
 									key={marker.key}
-									onPress={e => console.log(e.nativeEvent)}
+									identifier={marker.title}
+									onPress={this.onMarkerPress}
+									image={require('../res/other_marker.png')}
 								/>
 							))}
 						</MapView>
@@ -222,7 +236,13 @@ class MainScreen extends Component{
 					</TouchableWithoutFeedback>
 				</Modal>
 				
-				<MainOverlayControl addMarkers={this.addMarkers} map={this.map} navigator={this.props.navigator} getCurrentPosition={this.getCurrentPosition}/>
+				<MainOverlayControl 
+					ref={ref => {this.mainoverlay = ref}}
+					addMarkers={this.addMarkers}
+					map={this.map}
+					navigator={this.props.navigator}
+					getCurrentPosition={this.getCurrentPosition}
+				/>
 			</View>
 		);
 	}

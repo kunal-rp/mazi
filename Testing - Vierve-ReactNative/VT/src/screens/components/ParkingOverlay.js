@@ -15,6 +15,7 @@ class ParkingOverlay extends Component {
     this.state = {
       parkingLots: [],
       selected: '',
+      coordinates: [],
     };
     this.onParkingSet = this.onParkingSet.bind(this);
     this.addMarkers = this.addMarkers.bind(this);
@@ -22,9 +23,9 @@ class ParkingOverlay extends Component {
 
   async loadParkingData() {
     let parkingLots = await Db_Helper_Data.getParkingLotsFromCollege(this.props.college);
-    this.setState({parkingLots: parkingLots, selected: parkingLots[0]});
+    this.setState({parkingLots: parkingLots.names, selected: parkingLots[0], coordinates: parkingLots.coordinates});
     this.menu.select(0);
-    this.scrollMaptoParkingLot(parkingLots[0]);
+    this.scrollMaptoParkingLot(0);
   }
 
   componentWillMount() {
@@ -40,26 +41,27 @@ class ParkingOverlay extends Component {
     this.props.addMarkers(markers);
   }
 
-  async scrollMaptoParkingLot(parkingLot){
-    let coords = await Db_Helper_Data.getParkingLotCoordinates(parkingLot);
-    if(coords){
-      const region = {
-        latitude: coords.lat,
-        longitude: coords.lng,
-        latitudeDelta: LATITUDE_DELTA,
-        longitudeDelta: LONGITUDE_DELTA,
-      };
-      this.props.map.animateToRegion(region);
-    }
+  async scrollMaptoParkingLot(id){
+    const region = {
+      latitude: this.state.coordinates[id].latitude,
+      longitude: this.state.coordinates[id].longitude,
+      latitudeDelta: LATITUDE_DELTA,
+      longitudeDelta: LONGITUDE_DELTA,
+    };
+    this.props.map.animateToRegion(region);
   }
 
-  updateSelected(parkingLot) {
+  updateSelected(id,parkingLot) {
     this.setState({selected: parkingLot});
-    this.scrollMaptoParkingLot(parkingLot);
+    this.scrollMaptoParkingLot(id);
   }
 
   onParkingSet() {
     this.props.onParkingSet(this.state.selected);
+  }
+
+  setParkingSelectionTo(parkingLot){
+    this.menu.select(this.state.parkingLots.indexOf(parkingLot));
   }
 
   render() {
@@ -75,7 +77,7 @@ class ParkingOverlay extends Component {
             dropdownTextStyle={{fontSize: 20}}
             textStyle={{fontSize: 22}}
             options={this.state.parkingLots}
-            onSelect={(id,parkingLot) => this.updateSelected(parkingLot)}
+            onSelect={(id,parkingLot) => this.updateSelected(id,parkingLot)}
           />
         </View> 
         <View style={styles.arrowImageContainer}>
