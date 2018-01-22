@@ -30,7 +30,7 @@ class ParkingOverlay extends Component {
       this.scrollMaptoParkingLot(i);
     }
     else{
-      this.setState({parkingLots: parkingLots.names, selected: parkingLots[0], coordinates: parkingLots.coordinates});
+      this.setState({parkingLots: parkingLots.names, selected: parkingLots.names[0], coordinates: parkingLots.coordinates});
       this.menu.select(0);
       this.scrollMaptoParkingLot(0);
     }

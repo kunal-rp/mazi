@@ -1,13 +1,28 @@
 import React, {Component} from 'react';
 import {StyleSheet, View, Image, Text, TouchableOpacity, Dimensions} from 'react-native';
-
+import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import Db_Helper_User from '../../utils/Db_Helper_User';
+import ServerTools from '../../utils/ServerTools';
 const {width, height} = Dimensions.get('window');
 
 class PickupOverlay extends Component {
 	constructor(props) {
 		super(props);
+    this.state = {
+      college_id: null,
+      parkinglot_id: null,
+    };
     this.onPickupSet = this.onPickupSet.bind(this);
 	}
+
+  componentWillMount(){
+    this.getRequestIds();
+  }
+
+  async getRequestIds(){
+    let ids = await Db_Helper_Data.getIds(this.props.college, this.props.parkingLot);
+    this.setState({college_id: ids.college_id, parkinglot_id: ids.parkinglot_id});
+  }
 
   componentDidMount(){
     this.moveNearCurrentLocation();
@@ -27,10 +42,12 @@ class PickupOverlay extends Component {
     );
   }
 
-  onPickupSet(){
-    console.log(width/2-20,height/2-40);
-    // this.props.map.coordinateForPoint({x: width/2-20, y: height/2-40})
-    //   .then((coord) => console.log(coord));
+  async onPickupSet(){
+    let sessionData = await Db_Helper_User.getSessionData();
+    // console.log(sessionData);
+    let response = await ServerTools.request({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'request', 'college_id': this.state.college_id, 'parkinglot_id': this.state.parkinglot_id, pu_lat: this.props.lat, pu_lng: this.props.lng, type: 'ride'});
+    console.log(response);
+    this.props.onPickupSet();
   }
 
 	render(){
@@ -99,7 +116,7 @@ const styles = StyleSheet.create({
   markerContainer: {
     position: 'absolute',
     left: width/2-20,
-    top: height/2-40,
+    top: height/2-20,
   },
   markerStyle: {
     width: 40,

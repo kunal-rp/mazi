@@ -36,7 +36,6 @@ class MainScreen extends Component{
 		]
 	};
 
-
 	constructor(props) {
 	 super(props);
 	 map = null;
@@ -195,6 +194,11 @@ class MainScreen extends Component{
 		this.mainoverlay.setParkingSelectionTo(e.nativeEvent.id);
 	}
 
+	onRegionChange(region){
+		// console.log(region);
+		this.setState({region: region});
+	}
+
 	render() {
 		let markers=null;
 		if(this.state.markers){
@@ -219,12 +223,8 @@ class MainScreen extends Component{
 							showsUserLocation={true}
 							showsMyLocationButton={false}
 							loadingEnabled={false}
-							initialRegion={{
-								latitude: 34.057712,
-		      			longitude: -117.820757,
-		      			latitudeDelta: 0.0122,
-		      			longitudeDelta: 0.0421,
-							}}
+							initialRegion={this.state.region}
+							onRegionChange={region => this.onRegionChange(region)}
 						>
 							{markers}
 						</MapView>
@@ -258,6 +258,7 @@ class MainScreen extends Component{
 					map={this.map}
 					navigator={this.props.navigator}
 					getCurrentPosition={this.getCurrentPosition}
+					region={this.state.region}
 				/>
 			</View>
 		);

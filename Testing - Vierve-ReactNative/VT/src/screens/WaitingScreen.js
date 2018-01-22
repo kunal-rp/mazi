@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
+import ServerTools from '../utils/ServerTools';
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 class WaitingScreen extends Component{
 	static navigatorStyle={
@@ -11,6 +13,7 @@ class WaitingScreen extends Component{
 	constructor(props) {
 		super(props);
 		this.AttemptMatch = this.AttemptMatch.bind(this);
+		this.CancelSearch = this.CancelSearch.bind(this);
 	}
 
 	componentDidMount() {
@@ -24,7 +27,10 @@ class WaitingScreen extends Component{
 		});
 	}
 
-	CancelSearch = () => {
+	async CancelSearch() {
+		let sessionData = await Db_Helper_User.getSessionData();
+		let response = await ServerTools.cancelRequest({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'cancelRequest'});
+		console.log(response);
 		this.props.navigator.pop({
 			animated: true,
 			animationType: 'fade',
