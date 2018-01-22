@@ -14,17 +14,40 @@ class WaitingScreen extends Component{
 		super(props);
 		this.AttemptMatch = this.AttemptMatch.bind(this);
 		this.CancelSearch = this.CancelSearch.bind(this);
+		this.getUserStatus = this.getUserStatus.bind(this);
 	}
 
 	componentDidMount() {
-		// setTimeout(this.AttemptMatch,3000)
+		this.startMatchHandler();
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.statusCheck);
+	}
+
+	startMatchHandler() {
+		this.statusCheck = setInterval(this.getUserStatus, 3000);
 	}
 
 	AttemptMatch() {
+		clearInterval(this.statusCheck);
 		this.props.navigator.push({
 			screen: 'vt.MatchScreen',
 			backButtonHidden: true,
 		});
+	}
+
+	async getUserStatus() {
+		let sessionData = await Db_Helper_User.getSessionData();
+    let response = await ServerTools.getUserStatus({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'getUserStatus'});
+    if(response){
+	    if(response.code==1){
+	    	console.log(response.data.status);
+	    	if(response.data.status=='match'){
+	    		this.AttemptMatch();
+	    	}
+	    }
+	  }
 	}
 
 	async CancelSearch() {

@@ -11,7 +11,10 @@ class ProfileScreen extends Component{
 	static navigatorStyle = {
     navBarTextFontSize: 28,
   	screenBackgroundColor: '#2f4858',
-		statusBarColor: '#2f4858'
+		statusBarColor: '#2f4858',
+    navBarBackgroundColor: '#2f4858',
+    navBarTextColor: 'white',
+    navBarButtonColor: 'white',
 	};
 
 	constructor(props) {

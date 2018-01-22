@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import {BackHandler, View} from 'react-native';
 
+import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import Db_Helper_User from '../../utils/Db_Helper_User';
+import ServerTools from '../../utils/ServerTools';
+
 import CollegeOverlay from './CollegeOverlay';
 import ParkingOverlay from './ParkingOverlay';
 import PickupOverlay from './PickupOverlay';
@@ -30,20 +34,23 @@ class MainOverlayControl extends Component {
 	}
 
 	handlePark(college){
-		// this.toggleNavBar('hidden');
 		this.setState({screen:1, riding: false, college: college});
 	}
 
 	handleRide(college){
-		// this.toggleNavBar('hidden');
 		this.setState({screen:1, riding: true, college: college});
 	}
 
-	handleParkingSet(parkingLot){
+	async handleParkingSet(parkingLot){
 		if (this.state.riding){
 			this.setState({screen:2, parkingLot: parkingLot});
 		}
 		else{
+			let sessionData = await Db_Helper_User.getSessionData();
+   		let ids = await Db_Helper_Data.getIds(this.state.college, parkingLot);
+    	let response = await ServerTools.request({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'request', 'college_id': ids.college_id, 'parkinglot_id': ids.parkinglot_id, type: 'park'});
+    	console.log(response);
+
 			this.props.navigator.push({
 				screen: 'vt.WaitingScreen',
 				backButtonHidden: true,

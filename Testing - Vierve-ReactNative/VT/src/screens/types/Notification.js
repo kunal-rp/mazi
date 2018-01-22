@@ -19,7 +19,7 @@ class Notification extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    // height: 70,
+    height: 80,
     backgroundColor: '#ff505c',
     padding: 5,
     paddingLeft: 10,

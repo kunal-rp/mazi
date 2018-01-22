@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, View, Image, Text, TouchableOpacity, Dimensions} from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
 import Db_Helper_Data from '../../utils/Db_Helper_Data';
+import Db_Helper_User from '../../utils/Db_Helper_User';
 import ServerTools from '../../utils/ServerTools';
 
 const {width, height} = Dimensions.get('window');
@@ -17,7 +18,6 @@ class ParkingOverlay extends Component {
       selected: '',
       coordinates: [],
     };
-    this.onParkingSet = this.onParkingSet.bind(this);
     this.addMarkers = this.addMarkers.bind(this);
 	}
 
@@ -64,10 +64,6 @@ class ParkingOverlay extends Component {
     this.scrollMaptoParkingLot(id);
   }
 
-  onParkingSet() {
-    this.props.onParkingSet(this.state.selected);
-  }
-
   setParkingSelectionTo(parkingLot){
     this.setState({selected: parkingLot});
     this.menu.select(this.state.parkingLots.indexOf(parkingLot));
@@ -106,7 +102,7 @@ class ParkingOverlay extends Component {
           </TouchableOpacity>
         </View>
 				<View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={this.onParkingSet} underlayColor="white">
+          <TouchableOpacity onPress={() => this.props.onParkingSet(this.state.selected)} underlayColor="white">
             <View style={styles.button}>
               <Text style={styles.buttonText}>SET PARKING LOT</Text>
             </View>

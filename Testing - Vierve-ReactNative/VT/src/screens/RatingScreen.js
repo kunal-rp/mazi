@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import StarRating from 'react-native-star-rating';
+import ServerTools from '../utils/ServerTools';
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 class RatingScreen extends Component{
 	static navigatorStyle= {
@@ -14,6 +16,8 @@ class RatingScreen extends Component{
 		this.state = {
       starCount: 2.5
     };
+    this.FinishSession = this.FinishSession.bind(this);
+    this.submitRating = this.submitRating.bind(this);
 	}
 
 	onStarRatingPress(rating) {
@@ -22,7 +26,18 @@ class RatingScreen extends Component{
     });
   }
 
-	FinishSession = () => {
+  async submitRating() {
+  	let sessionData = await Db_Helper_User.getSessionData();
+    let response = await ServerTools.rateMatch({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'rateMatch', rating: this.state.starCount});
+    if(response){
+    	if(response.code==1){
+    		console.log(response.message);
+    	}
+    }
+  }
+
+	FinishSession() {
+		this.submitRating();
 		this.props.navigator.resetTo({
 			screen: 'vt.MainScreen',
 			animated: true,

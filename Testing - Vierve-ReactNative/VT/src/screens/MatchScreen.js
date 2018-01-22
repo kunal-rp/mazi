@@ -4,6 +4,8 @@ import MapView from 'react-native-maps';
 import Dimensions from 'Dimensions';
 const {width, height} = Dimensions.get('window');
 import MatchOverlayControl from './components/MatchOverlayControl';
+import ServerTools from '../utils/ServerTools';
+import Db_Helper_User from '../utils/Db_Helper_User';
 
 const LATITUDE_DELTA = 0.0122;
 const LONGITUDE_DELTA = 0.0121;
@@ -29,10 +31,6 @@ class MatchScreen extends Component{
 
 	constructor(props) {
 	 super(props);
-	 map = null;
-	 this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
-	 this.getCurrentPosition = this.getCurrentPosition.bind(this);
-	 this.CancelSession = this.CancelSession.bind(this);
 	 this.state = {
 	 	modalVisible: false,
 	 	region: {
@@ -43,11 +41,46 @@ class MatchScreen extends Component{
 	 	},
 	 	ready: true
 	 };
+	 this.props.navigator.setOnNavigatorEvent(this.onNavigatorEvent.bind(this));
+	 this.getCurrentPosition = this.getCurrentPosition.bind(this);
+	 this.CancelSession = this.CancelSession.bind(this);
+	 this.PushRatingScreen = this.PushRatingScreen.bind(this);
+	 this.getUserStatus = this.getUserStatus.bind(this);
+	 this.cancelMatch = this.cancelMatch.bind(this);
 	}
 
 	componentDidMount() {
-		console.log("mounting worked")
 		this.getCurrentPosition();
+		this.startStatusHandler();
+	}
+
+	componentWillUnmount() {
+		clearInterval(this.statusCheck);
+	}
+
+	async startStatusHandler() {
+		this.statusCheck = setInterval(this.getUserStatus, 3000);
+	}
+
+	async getUserStatus() {
+		let sessionData = await Db_Helper_User.getSessionData();
+    let response = await ServerTools.getUserStatus({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'getUserStatus'});
+    if(response){
+	    if(response.code==1){
+	    	console.log(response.data.status);
+	    	if(response.data.status=='rate'){
+	    		this.PushRatingScreen();
+	    	}
+	    }
+	  }
+	}
+
+	PushRatingScreen() {
+		clearInterval(this.statusCheck);
+		this.props.navigator.push({
+    	screen: 'vt.RatingScreen',
+			backButtonHidden: true,
+    });
 	}
 
 	setRegion(region) {
@@ -57,7 +90,6 @@ class MatchScreen extends Component{
 	}
 
 	getCurrentPosition() {
-		console.log("trying to get current position")
 		try{
 			navigator.geolocation.getCurrentPosition(
 				(position) => {
@@ -69,9 +101,7 @@ class MatchScreen extends Component{
 					};
 					this.setRegion(region);
 				},
-				(error) => {
-					console.log("error getting current position")
-				}
+				(error) => console.log("error getting current position")
 			);
 		} catch(e) {
 			console.log("error trying geolocation")
@@ -94,11 +124,15 @@ class MatchScreen extends Component{
 
   dismissLightBox = () => {
     this.props.navigator.dismissLightBox();
-    this.props.navigator.push({
-    	screen: 'vt.RatingScreen',
-			backButtonHidden: true,
-    });
+    this.cancelMatch();
+    this.PushRatingScreen();
   };
+
+  async cancelMatch() {
+  	let sessionData = await Db_Helper_User.getSessionData();
+    let response = await ServerTools.cancelMatch({'token_user': sessionData.token_user, 'user_id': sessionData.user_id, 'action': 'cancelMatch'});
+    console.log(response);
+  }
 
 
 	onNavigatorEvent(event) {

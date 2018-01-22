@@ -51,10 +51,6 @@ class CollegeOverlay extends Component {
       this.menu.select(0);
       this.scrollMaptoCollege(colleges[0]);
     }
-
-    //test
-    let sessionData= await Db_Helper_User.getSessionData();
-    console.log(sessionData);
   }
 
   async getUserStatus() {
