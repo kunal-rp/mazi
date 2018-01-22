@@ -47,6 +47,7 @@ class MainOverlayControl extends Component {
 			this.props.navigator.push({
 				screen: 'vt.WaitingScreen',
 				backButtonHidden: true,
+				passProps: {type: 'Parking Spot', college: this.state.college, parkingLot: parkingLot},
 			});
 		}
 	}
@@ -55,6 +56,7 @@ class MainOverlayControl extends Component {
 		this.props.navigator.push({
 				screen: 'vt.WaitingScreen',
 				backButtonHidden: true,
+				passProps: {type: 'Ride', college: this.state.college, parkingLot: this.state.parkingLot},
 		});
 	}
 

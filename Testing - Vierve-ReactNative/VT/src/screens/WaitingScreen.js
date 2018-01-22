@@ -17,7 +17,7 @@ class WaitingScreen extends Component{
 	}
 
 	componentDidMount() {
-		setTimeout(this.AttemptMatch,3000)
+		// setTimeout(this.AttemptMatch,3000)
 	}
 
 	AttemptMatch() {
@@ -42,11 +42,11 @@ class WaitingScreen extends Component{
 			<View style={styles.container}>
 				<View style={styles.prompt}>
 					<Text style={styles.promptSizeTwo}>Searching for a</Text>
-					<Text style={styles.promptSizeOne}>Parking Spot</Text>
+					<Text style={styles.promptSizeOne}>{this.props.type}</Text>
 					<Text style={styles.promptSizeTwo}>at</Text>
-					<Text style={styles.promptSizeOne}>Parking Lot J</Text>
+					<Text style={styles.promptSizeOne}>{this.props.parkingLot}</Text>
 					<Text style={styles.promptSizeTwo}>at</Text>
-					<Text style={styles.promptSizeOne}>California Polytechnic State University Pomona</Text>
+					<Text style={styles.promptSizeOne}>{this.props.college}</Text>
 				</View>
 				
 	      <View style={styles.buttonContainer}>
